@@ -19,6 +19,11 @@ type commonItem struct {
 	kindId      string
 }
 
+type CommonItemImpl interface {
+	GetId() string
+	GetKindId() string
+}
+
 func newCommonItem(name, description string, priority, maxOrder, price int, kindId string) (*commonItem, error) {
 	item := commonItem{id: uuid.NewString()}
 	err := item.Set(name, description, priority, maxOrder, price, kindId)

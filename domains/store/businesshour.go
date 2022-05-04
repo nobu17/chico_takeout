@@ -53,7 +53,9 @@ func NewBusinessHours(schedules []BusinessHour) (*BusinessHours, error) {
 // }
 
 func (b *BusinessHours) GetSchedules() []BusinessHour {
-	return b.schedules
+	// copy for immutable
+	tmp := append([]BusinessHour{}, b.schedules...)
+	return tmp
 }
 
 // currently add is not needed.
@@ -110,7 +112,7 @@ func (b *BusinessHours) validateSchedules() error {
 func (b *BusinessHours) validateDuplicate() error {
 	// check duplicate business hour
 	for i, schedule := range b.schedules {
-		for j := i; j < len(b.schedules); j++ {
+		for j := i + 1; j < len(b.schedules); j++ {
 			target := b.schedules[j]
 			if schedule.IsOverlap(target) {
 				return common.NewValidationError("business hour", fmt.Sprintf("%s and %s time is overlap", schedule.name, target.name))

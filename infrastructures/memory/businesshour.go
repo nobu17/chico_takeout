@@ -1,9 +1,13 @@
 package memory
 
 import (
+	"fmt"
+	"sync"
+
 	domains "chico/takeout/domains/store"
 )
 
+var businessMux sync.Mutex
 var businessHoursMemory *domains.BusinessHours
 
 type BusinessHoursMemoryRepository struct {
@@ -11,6 +15,17 @@ type BusinessHoursMemoryRepository struct {
 }
 
 func NewBusinessHoursMemoryRepository() *BusinessHoursMemoryRepository {
+	businessMux.Lock()
+	if businessHoursMemory == nil {
+		fmt.Println("init!!!!")
+		mem, err := domains.NewDefaultBusinessHours()
+		if err != nil {
+			fmt.Println("%w", err)
+			panic("failed to init businessHoursMemory")
+		}
+		businessHoursMemory = mem
+	}
+	businessMux.Unlock()
 	return &BusinessHoursMemoryRepository{inMemory: businessHoursMemory}
 }
 

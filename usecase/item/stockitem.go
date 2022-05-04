@@ -55,29 +55,29 @@ func newStockItemModel(item *domains.StockItem, kind *domains.ItemKind) *StockIt
 }
 
 type StockItemUseCase struct {
-	StockItemRepository domains.StockItemRepository
+	stockItemRepository domains.StockItemRepository
 	itemKindRepository  domains.ItemKindRepository
-	itemService         domains.ItemService
+	commonItemUseCase
 }
 
-func NewStockItemUseCase(StockItemRepository domains.StockItemRepository, itemKindRepository domains.ItemKindRepository) *StockItemUseCase {
+func NewStockItemUseCase(stockItemRepository domains.StockItemRepository, itemKindRepository domains.ItemKindRepository) *StockItemUseCase {
 	return &StockItemUseCase{
-		StockItemRepository: StockItemRepository,
+		stockItemRepository: stockItemRepository,
 		itemKindRepository:  itemKindRepository,
-		itemService:         *domains.NewItemService(StockItemRepository, itemKindRepository),
+		commonItemUseCase:   *newCommonItemUseCase(itemKindRepository),
 	}
 }
 
 func (i *StockItemUseCase) Find(id string) (*StockItemModel, error) {
-	item, err := i.StockItemRepository.Find(id)
+	item, err := i.stockItemRepository.Find(id)
 	if err != nil {
 		return nil, err
 	}
 	if item == nil {
-		return nil, common.NewNotFoundError(fmt.Sprintf("user not found:%s", id))
+		return nil, common.NewNotFoundError(fmt.Sprintf("item not found:%s", id))
 	}
 
-	kind, err := i.itemService.FindKind(*item)
+	kind, err := i.FindKind(item)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (i *StockItemUseCase) Find(id string) (*StockItemModel, error) {
 }
 
 func (i *StockItemUseCase) FindAll() ([]StockItemModel, error) {
-	items, err := i.StockItemRepository.FindAll()
+	items, err := i.stockItemRepository.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +96,7 @@ func (i *StockItemUseCase) FindAll() ([]StockItemModel, error) {
 	}
 	models := []StockItemModel{}
 	for _, item := range items {
-		fmt.Println("item", item.GetKindId())
 		for _, kind := range kinds {
-			fmt.Println("kind", kind.GetId())
 			if item.GetKindId() == kind.GetId() {
 				model := newStockItemModel(&item, &kind)
 				models = append(models, *model)
@@ -115,19 +113,17 @@ func (i *StockItemUseCase) Create(model StockItemCreateModel) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	exists, err := i.itemService.ExistsKind(*item)
+
+	err = i.ExistsKind(item)
 	if err != nil {
 		return "", err
 	}
-	if !exists {
-		return "", common.NewUpdateTargetNotFoundError(fmt.Sprintf("kind id is not exists.kind id:%s", model.KindId))
-	}
 
-	return i.StockItemRepository.Create(*item)
+	return i.stockItemRepository.Create(*item)
 }
 
 func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
-	item, err := i.StockItemRepository.Find(model.Id)
+	item, err := i.stockItemRepository.Find(model.Id)
 	if err != nil {
 		return err
 	}
@@ -136,23 +132,20 @@ func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
-	exists, err := i.itemService.ExistsKind(*item)
+	err = i.ExistsKind(item)
 	if err != nil {
 		return err
-	}
-	if !exists {
-		return common.NewUpdateTargetNotFoundError(fmt.Sprintf("kind id is not exists.kind id:%s", model.KindId))
 	}
 
 	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId)
 	if err != nil {
 		return err
 	}
-	return i.StockItemRepository.Update(*item)
+	return i.stockItemRepository.Update(*item)
 }
 
 func (i *StockItemUseCase) Delete(id string) error {
-	item, err := i.StockItemRepository.Find(id)
+	item, err := i.stockItemRepository.Find(id)
 	if err != nil {
 		return err
 	}
@@ -160,11 +153,11 @@ func (i *StockItemUseCase) Delete(id string) error {
 		return common.NewUpdateTargetNotFoundError(id)
 	}
 
-	return i.StockItemRepository.Delete(id)
+	return i.stockItemRepository.Delete(id)
 }
 
 func (i *StockItemUseCase) UpdateRemain(model StockItemRemainUpdateModel) error {
-	item, err := i.StockItemRepository.Find(model.Id)
+	item, err := i.stockItemRepository.Find(model.Id)
 	if err != nil {
 		return err
 	}
@@ -176,5 +169,5 @@ func (i *StockItemUseCase) UpdateRemain(model StockItemRemainUpdateModel) error 
 	if err != nil {
 		return err
 	}
-	return i.StockItemRepository.Update(*item)
+	return i.stockItemRepository.Update(*item)
 }

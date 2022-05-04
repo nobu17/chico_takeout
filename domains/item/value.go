@@ -130,3 +130,34 @@ func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	}
 	return &StockRemain{remain, p.maxValue}, nil
 }
+
+
+type MaxOrderPerDay struct {
+	value int
+}
+
+const (
+	MaxOrderPerDayMaxValue = 30
+)
+
+func NewMaxOrderPerDay(value int) (*MaxOrderPerDay, error) {
+	if err := validateMaxOrderPerDay(value); err != nil {
+		return nil, err
+	}
+
+	return &MaxOrderPerDay{value: value}, nil
+}
+
+func validateMaxOrderPerDay(maxOrder int) error {
+	if maxOrder < 1 {
+		return common.NewValidationError("MaxOrderPerDay", "Need to be greater than 1")
+	}
+	if maxOrder > MaxOrderMaxValue {
+		return common.NewValidationError("MaxOrderPerDay", fmt.Sprintf("Need to be less than %d", MaxOrderPerDayMaxValue))
+	}
+	return nil
+}
+
+func (m *MaxOrderPerDay) GetValue() int {
+	return m.value
+}

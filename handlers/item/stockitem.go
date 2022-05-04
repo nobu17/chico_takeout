@@ -18,6 +18,20 @@ type StockItemData struct {
 	Remain      int          `json:"remain" binding:"required"`
 }
 
+func newStockItemData(item *usecase.StockItemModel) *StockItemData {
+	kind := newItemKindData(&item.Kind)
+	return &StockItemData{
+		Id:          item.Id,
+		Name:        item.Name,
+		Priority:    item.Priority,
+		MaxOrder:    item.MaxOrder,
+		Price:       item.Price,
+		Description: item.Description,
+		Kind:        *kind,
+		Remain:      item.Remain,
+	}
+}
+
 type StockItemCreateRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Priority    int    `json:"priority" binding:"required"`
@@ -56,20 +70,6 @@ type StockItemRemainUpdateRequest struct {
 
 func (s *StockItemRemainUpdateRequest) toModel() *usecase.StockItemRemainUpdateModel {
 	return &usecase.StockItemRemainUpdateModel{Id: s.Id, Remain: s.Remain}
-}
-
-func newStockItemData(item *usecase.StockItemModel) *StockItemData {
-	kind := newItemKindData(&item.Kind)
-	return &StockItemData{
-		Id:          item.Id,
-		Name:        item.Name,
-		Priority:    item.Priority,
-		MaxOrder:    item.MaxOrder,
-		Price:       item.Price,
-		Description: item.Description,
-		Kind:        *kind,
-		Remain:      item.Remain,
-	}
 }
 
 type stockItemHandler struct {

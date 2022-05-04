@@ -178,5 +178,3 @@ func (i *StockItemUseCase) UpdateRemain(model StockItemRemainUpdateModel) error 
 	}
 	return i.StockItemRepository.Update(*item)
 }
-
-// todo1: kind and itemkind の存在チェックはserv or queryにする

@@ -1,5 +1,6 @@
 {
   "go.formatTool": "gofmt",
   "editor.guides.bracketPairs": true,
-  "editor.bracketPairColorization.enabled": true
+  "editor.bracketPairColorization.enabled": true,
+  "cSpell.words": ["gonic"]
 }

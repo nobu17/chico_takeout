@@ -1,6 +1,16 @@
 package store
 
-import "chico/takeout/common"
+import (
+	"chico/takeout/common"
+	"fmt"
+	"strings"
+
+	"github.com/google/uuid"
+)
+
+const (
+	BusinessHoursMaxSchedules = 5
+)
 
 type BusinessHoursRepository interface {
 	Fetch() (*BusinessHours, error)
@@ -8,122 +18,168 @@ type BusinessHoursRepository interface {
 }
 
 type BusinessHours struct {
-	morning BusinessHour
-	lunch   BusinessHour
-	dinner  BusinessHour
+	schedules []BusinessHour
 }
 
 func NewDefaultBusinessHours() (*BusinessHours, error) {
 	// create default
-	morning, _ := NewBusinessHour("07:00", "10:00", []Weekday{Monday})
-	lunch, _ := NewBusinessHour("11:00", "15:00", []Weekday{Monday})
-	dinner, _ := NewBusinessHour("18:00", "21:00", []Weekday{Friday, Saturday})
-	return NewBusinessHours(*morning, *lunch, *dinner)
+	morning, _ := NewBusinessHour("morning", "07:00", "10:00", []Weekday{Monday})
+	lunch, _ := NewBusinessHour("lunch", "11:00", "15:00", []Weekday{Monday})
+	dinner, _ := NewBusinessHour("diner", "18:00", "21:00", []Weekday{Friday, Saturday})
+
+	schedules := []BusinessHour{}
+	schedules = append(schedules, *morning)
+	schedules = append(schedules, *lunch)
+	schedules = append(schedules, *dinner)
+	return NewBusinessHours(schedules)
 }
 
-func NewBusinessHours(morning, lunch, dinner BusinessHour) (*BusinessHours, error) {
+func NewBusinessHours(schedules []BusinessHour) (*BusinessHours, error) {
 	businessHours := &BusinessHours{
-		morning: morning,
-		lunch:   lunch,
-		dinner:  dinner,
+		schedules: schedules,
 	}
-	if err := businessHours.validateDuplicate(); err != nil {
+	if err := businessHours.validateSchedules(); err != nil {
 		return nil, err
 	}
 	return businessHours, nil
 }
 
-func (b *BusinessHours) GetMorning() BusinessHour {
-	return b.morning
+// func (b *BusinessHours) GetSchedule(id string) (BusinessHour, error) {
+// 	_, item := b.findSchedule(id)
+// 	if item == nil {
+// 		return BusinessHour{}, common.NewNotFoundError("not found item")
+// 	}
+// 	return *item, nil
+// }
+
+func (b *BusinessHours) GetSchedules() []BusinessHour {
+	return b.schedules
 }
 
-func (b *BusinessHours) GetLunch() BusinessHour {
-	return b.lunch
-}
+// currently add is not needed.
+// func (b *BusinessHours) Add(name, start, end string, weekdays []Weekday) error {
+// 	hour, err := NewBusinessHour(name, start, end, weekdays)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	tmp := append([]BusinessHour{}, b.schedules...)
+// 	tmp = append(tmp, *hour)
+// 	// check duplicate
+// 	_, err = NewBusinessHours(tmp)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func (b *BusinessHours) GetDinner() BusinessHour {
-	return b.dinner
-}
+// 	b.schedules = append(b.schedules, *hour)
+// 	return nil
+// }
 
-func (b *BusinessHours) SetMorning(start, end string, weekdays []Weekday) error {
-	morning, err := NewBusinessHour(start, end, weekdays)
-	if err != nil {
-		return err
+func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) error {
+	_, target := b.findSchedule(id)
+	if target == nil {
+		return common.NewValidationError("schedules", fmt.Sprintf("update target not found:%s", id))
 	}
-	before := b.morning
-	b.morning = *morning
-	if err := b.validateDuplicate(); err != nil {
-		b.morning = before
+	err := target.Set(name, start, end, weekdays)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *BusinessHours) SetLunch(start, end string, weekdays []Weekday) error {
-	lunch, err := NewBusinessHour(start, end, weekdays)
-	if err != nil {
-		return err
+func (b *BusinessHours) findSchedule(id string) (int, *BusinessHour) {
+	for index, schedule := range b.schedules {
+		if schedule.id == id {
+			return index, &schedule
+		}
 	}
-	before := b.lunch
-	b.lunch = *lunch
-	if err := b.validateDuplicate(); err != nil {
-		b.lunch = before
-		return err
-	}
-	return nil
+	return -1, nil
 }
 
-func (b *BusinessHours) SetDinner(start, end string, weekdays []Weekday) error {
-	dinner, err := NewBusinessHour(start, end, weekdays)
-	if err != nil {
-		return err
+func (b *BusinessHours) validateSchedules() error {
+	if len(b.schedules) == 0 {
+		return common.NewValidationError("schedules", "is empty or nil.")
 	}
-	before := b.dinner
-	b.dinner = *dinner
-	if err := b.validateDuplicate(); err != nil {
-		b.dinner = before
-		return err
+
+	if len(b.schedules) > BusinessHoursMaxSchedules {
+		return common.NewValidationError("schedules", fmt.Sprintf("MaxLength:%d", BusinessHoursMaxSchedules))
 	}
-	return nil
+	// check duplicate
+	return b.validateDuplicate()
 }
 
 func (b *BusinessHours) validateDuplicate() error {
 	// check duplicate business hour
-	if b.morning.IsOverlap(b.lunch) {
-		return common.NewValidationError("business hour", "morning and lunch time is overlap")
-	}
-	if b.morning.IsOverlap(b.dinner) {
-		return common.NewValidationError("business hour", "morning and dinner time is overlap")
-	}
-	if b.lunch.IsOverlap(b.dinner) {
-		return common.NewValidationError("business hour", "lunch and dinner time is overlap")
+	for i, schedule := range b.schedules {
+		for j := i; j < len(b.schedules); j++ {
+			target := b.schedules[j]
+			if schedule.IsOverlap(target) {
+				return common.NewValidationError("business hour", fmt.Sprintf("%s and %s time is overlap", schedule.name, target.name))
+			}
+		}
 	}
 	return nil
 }
 
+const (
+	BusinessHourNameMaxLength = 10
+)
+
 type BusinessHour struct {
+	id       string
+	name     string
 	shift    TimeRange
 	weekdays []Weekday
 }
 
-func NewBusinessHour(start, end string, weekdays []Weekday) (*BusinessHour, error) {
-	shift, err := NewTimeRange(start, end)
+func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
+	businessHour := &BusinessHour{id: uuid.NewString()}
+
+	err := businessHour.Set(name, start, end, weekdays)
 	if err != nil {
 		return nil, err
+	}
+	return businessHour, nil
+}
+
+func (b *BusinessHour) Equals(other BusinessHour) bool {
+	return b.id == other.id
+}
+
+func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
+	err := validateBusinessHourName(name)
+	if err != nil {
+		return err
+	}
+
+	shift, err := NewTimeRange(start, end)
+	if err != nil {
+		return err
 	}
 
 	// empty is allowed
 	if weekdays == nil {
-		return nil, common.NewValidationError("weekdays", "is nil")
+		return common.NewValidationError("weekdays", "is nil")
 	}
 	if validateDuplicatedWeekdays(weekdays) {
-		return nil, common.NewValidationError("weekdays", "duplicated value exists")
+		return common.NewValidationError("weekdays", "duplicated value exists")
 	}
 
-	return &BusinessHour{
-		shift:    *shift,
-		weekdays: weekdays,
-	}, nil
+	b.name = name
+	b.shift = *shift
+	b.weekdays = weekdays
+
+	return nil
+}
+
+func validateBusinessHourName(name string) error {
+	if strings.TrimSpace(name) == "" {
+		return common.NewValidationError("name", "required")
+	}
+
+	if len(name) > BusinessHourNameMaxLength {
+		return common.NewValidationError("name", fmt.Sprintf("MaxLength:%d", BusinessHourNameMaxLength))
+	}
+	return nil
 }
 
 func validateDuplicatedWeekdays(weekdays []Weekday) bool {
@@ -154,6 +210,14 @@ func (b *BusinessHour) IsOverlap(other BusinessHour) bool {
 		}
 	}
 	return isOverlap
+}
+
+func (b *BusinessHour) GetId() string {
+	return b.id
+}
+
+func (b *BusinessHour) GetName() string {
+	return b.name
 }
 
 func (b *BusinessHour) GetStart() string {

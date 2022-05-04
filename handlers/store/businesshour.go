@@ -8,61 +8,49 @@ import (
 )
 
 type BusinessHoursData struct {
-	Morning BusinessHourData `json:"morning"`
-	Lunch   BusinessHourData `json:"lunch"`
-	Dinner  BusinessHourData `json:"dinner"`
+	Schedules []BusinessHourData `json:"schedules"`
 }
 
 func newBusinessHoursData(model usecases.BusinessHoursModel) *BusinessHoursData {
+	schedules := []BusinessHourData{}
+	for _, schedule := range model.Schedules {
+		schedules = append(schedules, *newBusinessHourData(schedule))
+	}
 	return &BusinessHoursData{
-		Morning: *newBusinessHourData(model.Morning),
-		Lunch:   *newBusinessHourData(model.Lunch),
-		Dinner:  *newBusinessHourData(model.Dinner),
+		Schedules: schedules,
 	}
 }
 
 type BusinessHoursUpdateData struct {
-	Morning *BusinessHourData `json:"morning"`
-	Lunch   *BusinessHourData `json:"lunch"`
-	Dinner  *BusinessHourData `json:"dinner"`
-}
-
-func (b *BusinessHoursUpdateData) toModel() *usecases.BusinessHoursUpdateModel {
-	var morning *usecases.BusinessHourModel
-	var lunch *usecases.BusinessHourModel
-	var dinner *usecases.BusinessHourModel
-	if b.Morning != nil {
-		morning = b.Morning.toModel()
-	}
-	if b.Lunch != nil {
-		lunch = b.Lunch.toModel()
-	}
-	if b.Dinner != nil {
-		dinner = b.Dinner.toModel()
-	}
-	return &usecases.BusinessHoursUpdateModel{
-		Morning: morning,
-		Lunch:   lunch,
-		Dinner:  dinner,
-	}
-}
-
-type BusinessHourData struct {
+	Id       string             `json:"id" binding:"required"`
+	Name     string             `json:"name" binding:"required"`
 	Start    string             `json:"start" binding:"required"`
 	End      string             `json:"end" binding:"required"`
 	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
 }
 
-func (b *BusinessHourData) toModel() *usecases.BusinessHourModel {
-	return &usecases.BusinessHourModel{
+func (b *BusinessHoursUpdateData) toModel() *usecases.BusinessHoursUpdateModel {
+	return &usecases.BusinessHoursUpdateModel{
+		Id:       b.Id,
+		Name:     b.Name,
 		Start:    b.Start,
 		End:      b.End,
 		Weekdays: b.Weekdays,
 	}
 }
 
+type BusinessHourData struct {
+	Id       string             `json:"id" binding:"required"`
+	Name     string             `json:"name" binding:"required"`
+	Start    string             `json:"start" binding:"required"`
+	End      string             `json:"end" binding:"required"`
+	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
+}
+
 func newBusinessHourData(model usecases.BusinessHourModel) *BusinessHourData {
 	return &BusinessHourData{
+		Id:       model.Id,
+		Name:     model.Name,
 		Start:    model.Start,
 		End:      model.End,
 		Weekdays: model.Weekdays,

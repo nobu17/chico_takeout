@@ -1,31 +1,34 @@
 package store
 
 import (
-	"chico/takeout/common"
 	domains "chico/takeout/domains/store"
 )
 
 type BusinessHoursModel struct {
-	Morning BusinessHourModel
-	Lunch   BusinessHourModel
-	Dinner  BusinessHourModel
+	Schedules []BusinessHourModel
 }
 
 func newBusinessHoursModel(item *domains.BusinessHours) *BusinessHoursModel {
+	schedules := []BusinessHourModel{}
+	for _, schedule := range item.GetSchedules() {
+		schedules = append(schedules, *newBusinessHourModel(schedule))
+	}
 	return &BusinessHoursModel{
-		Morning: *newBusinessHourModel(item.GetMorning()),
-		Lunch:   *newBusinessHourModel(item.GetLunch()),
-		Dinner:  *newBusinessHourModel(item.GetDinner()),
+		Schedules: schedules,
 	}
 }
 
 type BusinessHoursUpdateModel struct {
-	Morning *BusinessHourModel
-	Lunch   *BusinessHourModel
-	Dinner  *BusinessHourModel
+	Id       string
+	Name     string
+	Start    string
+	End      string
+	Weekdays []Weekday
 }
 
 type BusinessHourModel struct {
+	Id       string
+	Name     string
 	Start    string
 	End      string
 	Weekdays []Weekday
@@ -38,6 +41,8 @@ func newBusinessHourModel(item domains.BusinessHour) *BusinessHourModel {
 	}
 
 	return &BusinessHourModel{
+		Id:       item.GetId(),
+		Name:     item.GetName(),
 		Start:    item.GetStart(),
 		End:      item.GetEnd(),
 		Weekdays: weekdays,
@@ -123,34 +128,19 @@ func (b *BusinessHoursUseCase) Fetch() (*BusinessHoursModel, error) {
 }
 
 func (b *BusinessHoursUseCase) Update(model BusinessHoursUpdateModel) error {
-	if model.Morning == nil && model.Lunch == nil && model.Dinner == nil {
-		return common.NewValidationError("morning or lunch or dinner", "no update target existed")
-	}
-
 	businessHours, err := b.storeService.FetchBusinessHours()
 	if err != nil {
 		return err
 	}
 
-	if model.Morning != nil {
-		err = businessHours.SetMorning(model.Morning.Start, model.Morning.End, toDomainWeekday(model.Morning.Weekdays))
-		if err != nil {
-			return err
-		}
+	err = businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays))
+	if err != nil {
+		return err
 	}
 
-	if model.Lunch != nil {
-		err = businessHours.SetLunch(model.Lunch.Start, model.Lunch.End, toDomainWeekday(model.Lunch.Weekdays))
-		if err != nil {
-			return err
-		}
-	}
-
-	if model.Dinner != nil {
-		err = businessHours.SetDinner(model.Dinner.Start, model.Dinner.End, toDomainWeekday(model.Dinner.Weekdays))
-		if err != nil {
-			return err
-		}
+	err = b.businessHoursRepository.Update(*businessHours)
+	if err != nil {
+		return err
 	}
 
 	return nil

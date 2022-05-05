@@ -1,16 +1,18 @@
 package common
 
 import (
+	"fmt"
 	"time"
 )
 
 var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
 
+const dateLayout = "2006/01/02"
+
 func ConvertStrToTime(timeStr string) (*time.Time, error) {
-	timeLayout := "2006-01-02T15:04"
-	dateOnlyLayout := "2006-01-02"
+	timeLayout := "2006/01/02T15:04"
 	currentTime := time.Now()
-	currentDate := currentTime.Format(dateOnlyLayout)
+	currentDate := currentTime.Format(dateLayout)
 
 	startDateStr := currentDate + "T" + timeStr
 	actualTime, err := time.ParseInLocation(timeLayout, startDateStr, jst)
@@ -21,9 +23,19 @@ func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	return &actualTime, nil
 }
 
-func CompareTime(start, end time.Time, offsetMinutes float64) bool {
-	diff := start.Sub(end)
-	return diff.Minutes() < offsetMinutes
+func ConvertStrToDate(dateStr string) (*time.Time, error) {
+	actualTime, err := time.ParseInLocation(dateLayout, dateStr, jst)
+	if err != nil {
+		return nil, err
+	}
+
+	return &actualTime, nil
+}
+
+func StartIsBeforeEnd(start, end time.Time, offsetMinutes float64) bool {
+	diff := end.Sub(start)
+	fmt.Println("diff", start, end, diff)
+	return diff.Minutes() > offsetMinutes
 }
 
 func IsOverlap(start1, end1, start2, end2 time.Time) bool {

@@ -25,7 +25,7 @@ func NewTimeRange(start, end string) (*TimeRange, error) {
 	if err != nil {
 		return nil, common.NewValidationError("end", fmt.Sprintf("can not convert time:%s", start))
 	}
-	if !common.CompareTime(*startTime, *endTime, offsetMinutes) {
+	if !common.StartIsBeforeEnd(*startTime, *endTime, offsetMinutes) {
 		return nil, common.NewValidationError("start end time", fmt.Sprintf("start time(%s) should be greater than end time(%s) with offset(%d)", start, end, offsetMinutes))
 	}
 	return &TimeRange{start: start, end: end}, nil
@@ -60,3 +60,43 @@ const (
 	Friday
 	Saturday
 )
+
+// date format is yyyy/MM/dd
+type DateRange struct {
+	start string
+	end   string
+}
+
+func NewDateRange(start, end string) (*DateRange, error) {
+	// check start <= end with duration
+	startDate, err := common.ConvertStrToDate(start)
+	if err != nil {
+		return nil, common.NewValidationError("start", fmt.Sprintf("can not convert date:%s", start))
+	}
+	endDate, err := common.ConvertStrToDate(end)
+	if err != nil {
+		return nil, common.NewValidationError("end", fmt.Sprintf("can not convert date:%s", start))
+	}
+	if !common.StartIsBeforeEnd(*startDate, *endDate, 0) {
+		return nil, common.NewValidationError("start end end", fmt.Sprintf("start date(%s) should be greater than end date(%s)", start, end))
+	}
+	return &DateRange{start: start, end: end}, nil
+}
+
+func (d *DateRange) GetStart() string {
+	return d.start
+}
+
+func (d *DateRange) GetEnd() string {
+	return d.end
+}
+
+func (d *DateRange) IsOverlap(other DateRange) bool {
+	tStart, _ := common.ConvertStrToDate(d.start)
+	tEnd, _ := common.ConvertStrToDate(d.end)
+
+	oStart, _ := common.ConvertStrToDate(other.start)
+	oEnd, _ := common.ConvertStrToDate(other.end)
+
+	return common.IsOverlap(*tStart, *tEnd, *oStart, *oEnd)
+}

@@ -21,3 +21,30 @@ func (s *StoreService) FetchBusinessHours() (*BusinessHours, error) {
 	}
 	return businessHours, nil
 }
+
+type HolidayService struct {
+	specialHolidayRepository SpecialHolidayRepository
+}
+
+func NewHolidayService(specialHolidayRepository SpecialHolidayRepository) *HolidayService {
+	return &HolidayService{
+		specialHolidayRepository: specialHolidayRepository,
+	}
+}
+
+func (h *HolidayService) CheckOverWrap(item SpecialHoliday) (bool, error) {
+	holidays, err := h.specialHolidayRepository.FindAll()
+	if err != nil {
+		return false, err
+	}
+	for _, holiday := range holidays {
+		// skip self
+		if item.Equals(holiday) {
+			continue
+		}
+		if item.IsOverlap(holiday) {
+			return true, nil
+		}
+	}
+	return false, nil
+}

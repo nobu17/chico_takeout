@@ -17,7 +17,6 @@ type BusinessHoursMemoryRepository struct {
 func NewBusinessHoursMemoryRepository() *BusinessHoursMemoryRepository {
 	businessMux.Lock()
 	if businessHoursMemory == nil {
-		fmt.Println("init!!!!")
 		mem, err := domains.NewDefaultBusinessHours()
 		if err != nil {
 			fmt.Println("%w", err)

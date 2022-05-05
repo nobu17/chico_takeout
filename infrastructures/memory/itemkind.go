@@ -18,7 +18,6 @@ func NewItemKindMemoryRepository() *ItemKindMemoryRepository {
 		memory = map[string]*domains.ItemKind{}
 		item1, _ := domains.NewItemKind("item1", 1)
 		memory[item1.GetId()] = item1
-		fmt.Println("kind item1:", item1.GetId())
 		item2, _ := domains.NewItemKind("item2", 2)
 		memory[item2.GetId()] = item2
 	}

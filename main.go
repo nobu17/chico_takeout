@@ -38,7 +38,6 @@ func setupRouter() *gin.Engine {
 		kind.DELETE("/:id", handler.Delete)
 	}
 	kindRepo := memory.NewItemKindMemoryRepository()
-	businessHourRepo := memory.NewBusinessHoursMemoryRepository()
 	// stock
 	stock := r.Group("/item/stock")
 	{
@@ -67,12 +66,26 @@ func setupRouter() *gin.Engine {
 	}
 
 	// hour
+	businessHourRepo := memory.NewBusinessHoursMemoryRepository()
 	hour := r.Group("/store/hour")
 	{
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo)
 		handler := storeHandler.NewbusinessHoursHandler(*useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/", handler.Put)
+	}
+
+	//holiday
+	holidayRepo := memory.NewSpecialHolidayMemoryRepository()
+	holiday := r.Group("/store/holiday")
+	{
+		useCase := storeUseCase.NewSpecialHolidayUseCase(holidayRepo)
+		handler := storeHandler.NewSpecialHolidayHandler(*useCase)
+		holiday.GET("/:id", handler.Get)
+		holiday.GET("/", handler.GetAll)
+		holiday.POST("/", handler.Post)
+		holiday.PUT("/:id", handler.Put)
+		holiday.DELETE("/:id", handler.Delete)
 	}
 
 	// Ping test

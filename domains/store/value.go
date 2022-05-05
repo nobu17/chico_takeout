@@ -100,3 +100,15 @@ func (d *DateRange) IsOverlap(other DateRange) bool {
 
 	return common.IsOverlap(*tStart, *tEnd, *oStart, *oEnd)
 }
+
+type Date struct {
+	value string
+}
+
+func NewDate(value string) (*Date, error) {
+	_, err := common.ConvertStrToDate(value)
+	if err != nil {
+		return nil, common.NewValidationError("date", fmt.Sprintf("can not convert date:%s", value))
+	}
+	return &Date{value: value}, nil
+}

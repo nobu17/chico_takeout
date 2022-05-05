@@ -67,12 +67,23 @@ func setupRouter() *gin.Engine {
 
 	// hour
 	businessHourRepo := memory.NewBusinessHoursMemoryRepository()
+	spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
 	hour := r.Group("/store/hour")
 	{
-		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo)
+		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
 		handler := storeHandler.NewbusinessHoursHandler(*useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/", handler.Put)
+	}
+	specialHour := r.Group("/store/special_hour")
+	{
+		useCase := storeUseCase.NewSpecialBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
+		handler := storeHandler.NewSpecialBusinessHourHandler(*useCase)
+		specialHour.GET("/:id", handler.Get)
+		specialHour.GET("/", handler.GetAll)
+		specialHour.POST("/", handler.Post)
+		specialHour.PUT("/:id", handler.Put)
+		specialHour.DELETE("/:id", handler.Delete)
 	}
 
 	//holiday

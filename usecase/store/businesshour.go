@@ -112,10 +112,10 @@ type BusinessHoursUseCase struct {
 	storeService            domains.StoreService
 }
 
-func NewBusinessHoursUseCase(businessHoursRepository domains.BusinessHoursRepository, ) *BusinessHoursUseCase {
+func NewBusinessHoursUseCase(businessHoursRepository domains.BusinessHoursRepository, specialBusinessHourRepository domains.SpecialBusinessHourRepository) *BusinessHoursUseCase {
 	return &BusinessHoursUseCase{
 		businessHoursRepository: businessHoursRepository,
-		storeService:            *domains.NewStoreService(businessHoursRepository),
+		storeService:            *domains.NewStoreService(businessHoursRepository, specialBusinessHourRepository),
 	}
 }
 

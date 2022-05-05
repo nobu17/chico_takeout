@@ -1,12 +1,14 @@
 package store
 
 type StoreService struct {
-	businessHoursRepository BusinessHoursRepository
+	businessHoursRepository       BusinessHoursRepository
+	specialBusinessHourRepository SpecialBusinessHourRepository
 }
 
-func NewStoreService(businessHoursRepository BusinessHoursRepository) *StoreService {
+func NewStoreService(businessHoursRepository BusinessHoursRepository, specialBusinessHourRepository SpecialBusinessHourRepository) *StoreService {
 	return &StoreService{
-		businessHoursRepository: businessHoursRepository,
+		businessHoursRepository:       businessHoursRepository,
+		specialBusinessHourRepository: specialBusinessHourRepository,
 	}
 }
 
@@ -20,6 +22,18 @@ func (s *StoreService) FetchBusinessHours() (*BusinessHours, error) {
 		return NewDefaultBusinessHours()
 	}
 	return businessHours, nil
+}
+
+func (s *StoreService) ExistsBusinessHour(businessHourId string) (bool, error) {
+	businessHours, err := s.businessHoursRepository.Fetch()
+	if err != nil {
+		return false, err
+	}
+	_, err = businessHours.FindById(businessHourId)
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 type HolidayService struct {

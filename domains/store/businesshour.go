@@ -58,6 +58,16 @@ func (b *BusinessHours) GetSchedules() []BusinessHour {
 	return tmp
 }
 
+
+func (b *BusinessHours) FindById(id string) (*BusinessHour, error) {
+	_, item := b.findSchedule(id)
+	if item == nil {
+		return nil, common.NewNotFoundError(fmt.Sprintf("not found:%s", id))
+	}
+	newItem := item
+	return newItem, nil
+}
+
 // currently add is not needed.
 // func (b *BusinessHours) Add(name, start, end string, weekdays []Weekday) error {
 // 	hour, err := NewBusinessHour(name, start, end, weekdays)

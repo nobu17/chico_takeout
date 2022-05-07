@@ -17,7 +17,6 @@ type SpecialBusinessHourRepository interface {
 	Delete(id string) error
 }
 
-
 type SpecialBusinessHour struct {
 	id             string
 	name           string
@@ -83,13 +82,6 @@ func (s *SpecialBusinessHour) validateBusinessHourId(businessHourId string) erro
 	return nil
 }
 
-func (s *SpecialBusinessHour) validateDate(date string) error {
-	if strings.TrimSpace(date) == "" {
-		return common.NewValidationError("date", "required")
-	}
-	return nil
-}
-
 func (b *SpecialBusinessHour) IsOverlap(other SpecialBusinessHour) bool {
 	if b.HaveSameDate(other) {
 		if b.shift.IsOverlap(other.shift) {
@@ -132,5 +124,5 @@ func (s *SpecialBusinessHour) HaveSameBusinessHourId(other SpecialBusinessHour) 
 }
 
 func (s *SpecialBusinessHour) HaveSameDate(other SpecialBusinessHour) bool {
-	return s.date == other.date 
+	return s.date == other.date
 }

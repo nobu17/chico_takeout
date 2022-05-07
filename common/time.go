@@ -1,13 +1,13 @@
 package common
 
 import (
-	"fmt"
 	"time"
 )
 
 var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
 
 const dateLayout = "2006/01/02"
+const dateTimeLayout = "2006/01/02 15:04"
 
 func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	timeLayout := "2006/01/02T15:04"
@@ -32,9 +32,30 @@ func ConvertStrToDate(dateStr string) (*time.Time, error) {
 	return &actualTime, nil
 }
 
+func ConvertDateTimeStrToDateStr(dateTimeStr string) (string, error) {
+	actualTime, err := ConvertStrToDateTime(dateTimeStr)
+	if err != nil {
+		return "", err
+	}
+
+	return actualTime.Format(dateLayout), nil
+}
+
+func ConvertStrToDateTime(dateTimeStr string) (*time.Time, error) {
+	actualTime, err := time.ParseInLocation(dateTimeLayout, dateTimeStr, jst)
+	if err != nil {
+		return nil, err
+	}
+
+	return &actualTime, nil
+}
+
+func ConvertTimeToDateTimeStr(target time.Time) string {
+	return target.Format(dateTimeLayout)
+}
+
 func StartIsBeforeEnd(start, end time.Time, offsetMinutes float64) bool {
 	diff := end.Sub(start)
-	fmt.Println("diff", start, end, diff)
 	return diff.Minutes() > offsetMinutes
 }
 

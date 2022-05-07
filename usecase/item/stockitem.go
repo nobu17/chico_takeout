@@ -1,9 +1,10 @@
 package item
 
 import (
+	"fmt"
+
 	"chico/takeout/common"
 	domains "chico/takeout/domains/item"
-	"fmt"
 )
 
 type StockItemModel struct {

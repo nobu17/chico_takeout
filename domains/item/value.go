@@ -131,6 +131,15 @@ func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	return &StockRemain{remain, p.maxValue}, nil
 }
 
+func (p *StockRemain) Increment(request int) (*StockRemain, error) {
+	if request < 1 {
+		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
+	}
+	remain := p.value + request
+	return &StockRemain{remain, p.maxValue}, nil
+}
+
+
 
 type MaxOrderPerDay struct {
 	value int

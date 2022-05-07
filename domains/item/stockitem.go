@@ -58,3 +58,13 @@ func (s *StockItem) ConsumeRemain(value int) error {
 	s.remain = *remain
 	return nil
 }
+
+func (s *StockItem) IncrementRemain(value int) error {
+	remain, err := s.remain.Increment(value)
+	if err != nil {
+		return err
+	}
+	s.remain = *remain
+	return nil
+}
+

@@ -101,6 +101,14 @@ func (s *commonItem) validateKindId(kindId string) error {
 	return nil
 }
 
+func (s *commonItem) HasSameId(id string) bool {
+	return s.id == id
+}
+
+func (s *commonItem) WithInMaxOrder(quantity int) error {
+	return s.maxOrder.WithinLimit(quantity)
+}
+
 func (s *commonItem) GetId() string {
 	return s.id
 }

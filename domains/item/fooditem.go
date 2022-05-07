@@ -62,3 +62,7 @@ func (s *FoodItem) GetMaxOrderPerDay() int {
 func (s *FoodItem) GetScheduleIds() []string {
 	return s.scheduleIds
 }
+
+func (s *FoodItem) HasSameId(id string) bool {
+	return s.id == id
+}

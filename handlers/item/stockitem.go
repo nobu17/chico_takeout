@@ -7,38 +7,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type StockItemData struct {
-	Id          string       `json:"id" binding:"required"`
-	Name        string       `json:"name" binding:"required"`
-	Priority    int          `json:"priority" binding:"required"`
-	MaxOrder    int          `json:"maxOrder" binding:"required"`
-	Price       int          `json:"price" binding:"required"`
-	Description string       `json:"description" binding:"required"`
-	Kind        ItemKindData `json:"kind" binding:"required"`
-	Remain      int          `json:"remain" binding:"required"`
+type StockItemResponse struct {
+	CommonItemResponse
+	Remain int `json:"remain" binding:"required"`
 }
 
-func newStockItemData(item *usecase.StockItemModel) *StockItemData {
+func newStockItemData(item *usecase.StockItemModel) *StockItemResponse {
 	kind := newItemKindData(&item.Kind)
-	return &StockItemData{
-		Id:          item.Id,
-		Name:        item.Name,
-		Priority:    item.Priority,
-		MaxOrder:    item.MaxOrder,
-		Price:       item.Price,
-		Description: item.Description,
-		Kind:        *kind,
-		Remain:      item.Remain,
+	return &StockItemResponse{
+		CommonItemResponse: CommonItemResponse{
+			Id:   item.Id,
+			Kind: *kind,
+			CommonItemBaseData: CommonItemBaseData{
+				Name:        item.Name,
+				Priority:    item.Priority,
+				MaxOrder:    item.MaxOrder,
+				Price:       item.Price,
+				Description: item.Description,
+			},
+		},
+		Remain: item.Remain,
 	}
 }
 
 type StockItemCreateRequest struct {
-	Name        string `json:"name" binding:"required"`
-	Priority    int    `json:"priority" binding:"required"`
-	MaxOrder    int    `json:"maxOrder" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	KindId      string `json:"kindId" binding:"required"`
+	CommonItemCreateRequest
 }
 
 type StockItemCreateResponse struct {
@@ -46,21 +39,30 @@ type StockItemCreateResponse struct {
 }
 
 func (s *StockItemCreateRequest) toModel() *usecase.StockItemCreateModel {
-	return &usecase.StockItemCreateModel{Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, KindId: s.KindId}
+	return &usecase.StockItemCreateModel{
+		CommonItemCreateModel: usecase.CommonItemCreateModel{
+			KindId: s.KindId,
+			CommonItemBaseModel: usecase.CommonItemBaseModel{
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+			},
+		},
+	}
 }
 
 type StockItemUpdateRequest struct {
-	Id          string `json:"id" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-	Priority    int    `json:"priority" binding:"required"`
-	MaxOrder    int    `json:"maxOrder" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	KindId      string `json:"kindId" binding:"required"`
+	CommonItemUpdateRequest
 }
 
 func (s *StockItemUpdateRequest) toModel() *usecase.StockItemUpdateModel {
-	return &usecase.StockItemUpdateModel{Id: s.Id, Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, KindId: s.KindId}
+	return &usecase.StockItemUpdateModel{
+		CommonItemUpdateModel: usecase.CommonItemUpdateModel{
+			Id:     s.Id,
+			KindId: s.KindId,
+			CommonItemBaseModel: usecase.CommonItemBaseModel{
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+			},
+		},
+	}
 }
 
 type StockItemRemainUpdateRequest struct {
@@ -88,7 +90,7 @@ func (i *stockItemHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	models := []StockItemData{}
+	models := []StockItemResponse{}
 	for _, item := range items {
 		models = append(models, *newStockItemData(&item))
 	}

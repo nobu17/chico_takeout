@@ -19,8 +19,8 @@ type FoodItem struct {
 	maxOrderPerDay MaxOrderPerDay
 }
 
-func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string) (*FoodItem, error) {
-	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId)
+func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) (*FoodItem, error) {
+	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
 	if err != nil {
 		return nil, err
 	}

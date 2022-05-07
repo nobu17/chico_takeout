@@ -131,7 +131,7 @@ func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	return &StockRemain{remain, p.maxValue}, nil
 }
 
-func (p *StockRemain) Increment(request int) (*StockRemain, error) {
+func (p *StockRemain) Increase(request int) (*StockRemain, error) {
 	if request < 1 {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
 	}

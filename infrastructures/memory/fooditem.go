@@ -24,11 +24,11 @@ func NewFoodItemMemoryRepository() *FoodItemMemoryRepository {
 
 		foodMemory = map[string]*domains.FoodItem{}
 		scheduleIds1 := []string{schedules[0].GetId(), schedules[1].GetId()}
-		item1, _ := domains.NewFoodItem("stock1", "item1", 1, 4, 10, 100, allKinds[0].GetId(), scheduleIds1)
+		item1, _ := domains.NewFoodItem("stock1", "item1", 1, 4, 10, 100, allKinds[0].GetId(), scheduleIds1, true)
 		foodMemory[item1.GetId()] = item1
 
 		scheduleIds2 := []string{schedules[1].GetId(), schedules[2].GetId()}
-		item2, _ := domains.NewFoodItem("stock2", "item2", 2, 5, 18, 200, allKinds[1].GetId(), scheduleIds2)
+		item2, _ := domains.NewFoodItem("stock2", "item2", 2, 5, 18, 200, allKinds[1].GetId(), scheduleIds2, true)
 		foodMemory[item2.GetId()] = item2
 	}
 

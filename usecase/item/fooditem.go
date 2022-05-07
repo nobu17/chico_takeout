@@ -8,50 +8,38 @@ import (
 )
 
 type FoodItemModel struct {
-	Id             string
-	Name           string
-	Priority       int
-	MaxOrder       int
-	Price          int
-	Description    string
-	Kind           ItemKindModel
+	CommonItemModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
 }
 
 func newFoodItemModel(item *domains.FoodItem, kind *domains.ItemKind) *FoodItemModel {
 	return &FoodItemModel{
-		Id:             item.GetId(),
-		Name:           item.GetName(),
-		Priority:       item.GetPriority(),
-		MaxOrder:       item.GetMaxOrder(),
-		Price:          item.GetPrice(),
-		Description:    item.GetDescription(),
-		Kind:           *newItemKindModel(kind),
+		CommonItemModel: CommonItemModel{
+			Id:   item.GetId(),
+			Kind: *newItemKindModel(kind),
+			CommonItemBaseModel: CommonItemBaseModel{
+				Name:        item.GetName(),
+				Priority:    item.GetPriority(),
+				MaxOrder:    item.GetMaxOrder(),
+				Price:       item.GetPrice(),
+				Description: item.GetDescription(),
+				Enabled:     item.GetEnabled(),
+			},
+		},
 		ScheduleIds:    item.GetScheduleIds(),
 		MaxOrderPerDay: item.GetMaxOrderPerDay(),
 	}
 }
 
 type FoodItemCreateModel struct {
-	Name           string
-	Priority       int
-	MaxOrder       int
-	Price          int
-	Description    string
-	KindId         string
+	CommonItemCreateModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
 }
 
 type FoodItemUpdateModel struct {
-	Id             string
-	Name           string
-	Priority       int
-	MaxOrder       int
-	Price          int
-	Description    string
-	KindId         string
+	CommonItemUpdateModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
 }
@@ -111,7 +99,7 @@ func (f *FoodItemUseCase) FindAll() ([]FoodItemModel, error) {
 }
 
 func (f *FoodItemUseCase) Create(model FoodItemCreateModel) (string, error) {
-	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds)
+	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled)
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +126,7 @@ func (i *FoodItemUseCase) Update(model FoodItemUpdateModel) error {
 		return err
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId)
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
 	if err != nil {
 		return err
 	}

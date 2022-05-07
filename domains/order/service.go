@@ -48,7 +48,7 @@ func (s *StockItemRemainCheckAndConsumer) IncrementCanceledRemain(stockOrders []
 	for _, order := range stockOrders {
 		for _, stock := range allStocks {
 			if stock.HasSameId(order.GetItemId()) {
-				err = stock.IncrementRemain(order.GetQuantity())
+				err = stock.IncreseRemain(order.GetQuantity())
 				if err != nil {
 					return err
 				}

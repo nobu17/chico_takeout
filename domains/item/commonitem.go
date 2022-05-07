@@ -17,6 +17,7 @@ type commonItem struct {
 	price       Price
 	description string
 	kindId      string
+	enabled     bool
 }
 
 type CommonItemImpl interface {
@@ -24,9 +25,9 @@ type CommonItemImpl interface {
 	GetKindId() string
 }
 
-func newCommonItem(name, description string, priority, maxOrder, price int, kindId string) (*commonItem, error) {
+func newCommonItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool) (*commonItem, error) {
 	item := commonItem{id: uuid.NewString()}
-	err := item.Set(name, description, priority, maxOrder, price, kindId)
+	err := item.Set(name, description, priority, maxOrder, price, kindId, enabled)
 
 	if err != nil {
 		return nil, err
@@ -35,7 +36,7 @@ func newCommonItem(name, description string, priority, maxOrder, price int, kind
 	return &item, nil
 }
 
-func (s *commonItem) Set(name, description string, priority, maxOrder, price int, kindId string) error {
+func (s *commonItem) Set(name, description string, priority, maxOrder, price int, kindId string, enabled bool) error {
 	if err := s.validateName(name); err != nil {
 		return err
 	}
@@ -69,6 +70,7 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 	s.price = *priceV
 	s.description = description
 	s.kindId = kindId
+	s.enabled = enabled
 	return nil
 }
 
@@ -135,4 +137,8 @@ func (s *commonItem) GetDescription() string {
 
 func (s *commonItem) GetKindId() string {
 	return s.kindId
+}
+
+func (s *commonItem) GetEnabled() bool {
+	return s.enabled
 }

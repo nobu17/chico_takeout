@@ -8,33 +8,16 @@ import (
 )
 
 type StockItemModel struct {
-	Id          string
-	Name        string
-	Priority    int
-	MaxOrder    int
-	Price       int
-	Description string
-	Kind        ItemKindModel
-	Remain      int
+	CommonItemModel
+	Remain int
 }
 
 type StockItemCreateModel struct {
-	Name        string
-	Priority    int
-	MaxOrder    int
-	Price       int
-	Description string
-	KindId      string
+	CommonItemCreateModel
 }
 
 type StockItemUpdateModel struct {
-	Id          string
-	Name        string
-	Priority    int
-	MaxOrder    int
-	Price       int
-	Description string
-	KindId      string
+	CommonItemUpdateModel
 }
 
 type StockItemRemainUpdateModel struct {
@@ -44,14 +27,19 @@ type StockItemRemainUpdateModel struct {
 
 func newStockItemModel(item *domains.StockItem, kind *domains.ItemKind) *StockItemModel {
 	return &StockItemModel{
-		Id:          item.GetId(),
-		Name:        item.GetName(),
-		Priority:    item.GetPriority(),
-		MaxOrder:    item.GetMaxOrder(),
-		Price:       item.GetPrice(),
-		Description: item.GetDescription(),
-		Kind:        *newItemKindModel(kind),
-		Remain:      item.GetRemain(),
+		CommonItemModel: CommonItemModel{
+			Id:   item.GetId(),
+			Kind: *newItemKindModel(kind),
+			CommonItemBaseModel: CommonItemBaseModel{
+				Name:        item.GetName(),
+				Priority:    item.GetPriority(),
+				MaxOrder:    item.GetMaxOrder(),
+				Price:       item.GetPrice(),
+				Description: item.GetDescription(),
+				Enabled:     item.GetEnabled(),
+			},
+		},
+		Remain: item.GetRemain(),
 	}
 }
 
@@ -110,7 +98,7 @@ func (i *StockItemUseCase) FindAll() ([]StockItemModel, error) {
 }
 
 func (i *StockItemUseCase) Create(model StockItemCreateModel) (string, error) {
-	item, err := domains.NewStockItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId)
+	item, err := domains.NewStockItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +126,7 @@ func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
 		return err
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId)
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
 	if err != nil {
 		return err
 	}

@@ -7,6 +7,32 @@ import (
 	domains "chico/takeout/domains/item"
 )
 
+type CommonItemModel struct {
+	Id   string
+	Kind ItemKindModel
+	CommonItemBaseModel
+}
+
+type CommonItemCreateModel struct {
+	KindId string
+	CommonItemBaseModel
+}
+
+type CommonItemUpdateModel struct {
+	Id     string
+	KindId string
+	CommonItemBaseModel
+}
+
+type CommonItemBaseModel struct {
+	Name        string
+	Priority    int
+	MaxOrder    int
+	Price       int
+	Description string
+	Enabled     bool
+}
+
 type commonItemUseCase struct {
 	itemService domains.ItemService
 }

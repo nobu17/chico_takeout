@@ -7,40 +7,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FoodItemData struct {
-	Id             string       `json:"id" binding:"required"`
-	Name           string       `json:"name" binding:"required"`
-	Priority       int          `json:"priority" binding:"required"`
-	MaxOrder       int          `json:"maxOrder" binding:"required"`
-	Price          int          `json:"price" binding:"required"`
-	Description    string       `json:"description" binding:"required"`
-	Kind           ItemKindData `json:"kind" binding:"required"`
-	ScheduleIds    []string     `json:"scheduleIds" binding:"required"`
-	MaxOrderPerDay int          `json:"maxOrderPerDay" binding:"required"`
+type FoodItemResponse struct {
+	CommonItemResponse
+	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
+	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
 }
 
-func newFoodItemData(item *usecase.FoodItemModel) *FoodItemData {
+func newFoodItemData(item *usecase.FoodItemModel) *FoodItemResponse {
 	kind := newItemKindData(&item.Kind)
-	return &FoodItemData{
-		Id:             item.Id,
-		Name:           item.Name,
-		Priority:       item.Priority,
-		MaxOrder:       item.MaxOrder,
-		Price:          item.Price,
-		Description:    item.Description,
-		Kind:           *kind,
+	return &FoodItemResponse{
+		CommonItemResponse: CommonItemResponse{
+			Id:   item.Id,
+			Kind: *kind,
+			CommonItemBaseData: CommonItemBaseData{
+				Name:        item.Name,
+				Priority:    item.Priority,
+				MaxOrder:    item.MaxOrder,
+				Price:       item.Price,
+				Description: item.Description,
+			},
+		},
 		ScheduleIds:    item.ScheduleIds,
 		MaxOrderPerDay: item.MaxOrderPerDay,
 	}
 }
 
 type FoodItemCreateRequest struct {
-	Name           string   `json:"name" binding:"required"`
-	Priority       int      `json:"priority" binding:"required"`
-	MaxOrder       int      `json:"maxOrder" binding:"required"`
-	Price          int      `json:"price" binding:"required"`
-	Description    string   `json:"description" binding:"required"`
-	KindId         string   `json:"kindId" binding:"required"`
+	CommonItemCreateRequest
 	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
 }
@@ -51,29 +44,31 @@ type FoodItemCreateResponse struct {
 
 func (s *FoodItemCreateRequest) toModel() *usecase.FoodItemCreateModel {
 	return &usecase.FoodItemCreateModel{
-		Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder,
-		Price: s.Price, Description: s.Description, KindId: s.KindId,
+		CommonItemCreateModel: usecase.CommonItemCreateModel{
+			KindId: s.KindId,
+			CommonItemBaseModel: usecase.CommonItemBaseModel{
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+			},
+		},
 		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay,
 	}
 }
 
 type FoodItemUpdateRequest struct {
-	Id             string   `json:"id" binding:"required"`
-	Name           string   `json:"name" binding:"required"`
-	Priority       int      `json:"priority" binding:"required"`
-	MaxOrder       int      `json:"maxOrder" binding:"required"`
-	Price          int      `json:"price" binding:"required"`
-	Description    string   `json:"description" binding:"required"`
-	KindId         string   `json:"kindId" binding:"required"`
+	CommonItemUpdateRequest
 	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
 }
 
 func (s *FoodItemUpdateRequest) toModel() *usecase.FoodItemUpdateModel {
 	return &usecase.FoodItemUpdateModel{
-		Id:   s.Id,
-		Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder,
-		Price: s.Price, Description: s.Description, KindId: s.KindId,
+		CommonItemUpdateModel: usecase.CommonItemUpdateModel{
+			Id:     s.Id,
+			KindId: s.KindId,
+			CommonItemBaseModel: usecase.CommonItemBaseModel{
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+			},
+		},
 		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay,
 	}
 }
@@ -94,7 +89,7 @@ func (i *foodItemHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	models := []FoodItemData{}
+	models := []FoodItemResponse{}
 	for _, item := range items {
 		models = append(models, *newFoodItemData(&item))
 	}

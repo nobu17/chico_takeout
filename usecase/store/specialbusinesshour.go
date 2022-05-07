@@ -92,7 +92,7 @@ func (s *SpecialBusinessHoursUseCase) Create(model SpecialBusinessHourCreateMode
 		return "", err
 	}
 
-	return s.repository.Create(*item)
+	return s.repository.Create(item)
 }
 
 func (s *SpecialBusinessHoursUseCase) Update(model SpecialBusinessHourUpdateModel) error {
@@ -114,7 +114,7 @@ func (s *SpecialBusinessHoursUseCase) Update(model SpecialBusinessHourUpdateMode
 		return err
 	}
 
-	return s.repository.Update(*item)
+	return s.repository.Update(item)
 }
 
 func (i *SpecialBusinessHoursUseCase) Delete(id string) error {

@@ -12,8 +12,8 @@ import (
 type SpecialBusinessHourRepository interface {
 	Find(id string) (*SpecialBusinessHour, error)
 	FindAll() ([]SpecialBusinessHour, error)
-	Create(item SpecialBusinessHour) (string, error)
-	Update(item SpecialBusinessHour) error
+	Create(item *SpecialBusinessHour) (string, error)
+	Update(item *SpecialBusinessHour) error
 	Delete(id string) error
 }
 

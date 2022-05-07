@@ -32,7 +32,7 @@ func (b *BusinessHoursMemoryRepository) Fetch() (*domains.BusinessHours, error) 
 	return b.inMemory, nil
 }
 
-func (b *BusinessHoursMemoryRepository) Update(target domains.BusinessHours) error {
-	*b.inMemory = target
+func (b *BusinessHoursMemoryRepository) Update(target *domains.BusinessHours) error {
+	*b.inMemory = *target
 	return nil
 }

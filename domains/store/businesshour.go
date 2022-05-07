@@ -14,7 +14,7 @@ const (
 
 type BusinessHoursRepository interface {
 	Fetch() (*BusinessHours, error)
-	Update(target BusinessHours) error
+	Update(target *BusinessHours) error
 }
 
 type BusinessHours struct {

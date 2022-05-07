@@ -45,14 +45,14 @@ func (i *SpecialHolidayMemoryRepository) FindAll() ([]domains.SpecialHoliday, er
 	return items, nil
 }
 
-func (i *SpecialHolidayMemoryRepository) Create(item domains.SpecialHoliday) (string, error) {
-	i.inMemory[item.GetId()] = &item
+func (i *SpecialHolidayMemoryRepository) Create(item *domains.SpecialHoliday) (string, error) {
+	i.inMemory[item.GetId()] = item
 	return item.GetId(), nil
 }
 
-func (i *SpecialHolidayMemoryRepository) Update(item domains.SpecialHoliday) error {
+func (i *SpecialHolidayMemoryRepository) Update(item *domains.SpecialHoliday) error {
 	if _, ok := i.inMemory[item.GetId()]; ok {
-		i.inMemory[item.GetId()] = &item
+		i.inMemory[item.GetId()] = item
 		return nil
 	}
 	return fmt.Errorf("update target not exists")

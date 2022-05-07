@@ -12,8 +12,8 @@ import (
 type SpecialHolidayRepository interface {
 	Find(id string) (*SpecialHoliday, error)
 	FindAll() ([]SpecialHoliday, error)
-	Create(item SpecialHoliday) (string, error)
-	Update(item SpecialHoliday) error
+	Create(item *SpecialHoliday) (string, error)
+	Update(item *SpecialHoliday) error
 	Delete(id string) error
 }
 

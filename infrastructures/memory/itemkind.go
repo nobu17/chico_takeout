@@ -40,14 +40,14 @@ func (i *ItemKindMemoryRepository) FindAll() ([]domains.ItemKind, error) {
 	return items, nil
 }
 
-func (i *ItemKindMemoryRepository) Create(item domains.ItemKind) (string, error) {
-	i.inMemory[item.GetId()] = &item
+func (i *ItemKindMemoryRepository) Create(item *domains.ItemKind) (string, error) {
+	i.inMemory[item.GetId()] = item
 	return item.GetId(), nil
 }
 
-func (i *ItemKindMemoryRepository) Update(item domains.ItemKind) error {
+func (i *ItemKindMemoryRepository) Update(item *domains.ItemKind) error {
 	if _, ok := i.inMemory[item.GetId()]; ok {
-		i.inMemory[item.GetId()] = &item
+		i.inMemory[item.GetId()] = item
 		return nil
 	}
 	return fmt.Errorf("update target not exists")

@@ -8,8 +8,8 @@ import (
 type FoodItemRepository interface {
 	Find(id string) (*FoodItem, error)
 	FindAll() ([]FoodItem, error)
-	Create(item FoodItem) (string, error)
-	Update(item FoodItem) error
+	Create(item *FoodItem) (string, error)
+	Update(item *FoodItem) error
 	Delete(id string) error
 }
 

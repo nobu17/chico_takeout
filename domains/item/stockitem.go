@@ -3,8 +3,8 @@ package item
 type StockItemRepository interface {
 	Find(id string) (*StockItem, error)
 	FindAll() ([]StockItem, error)
-	Create(item StockItem) (string, error)
-	Update(item StockItem) error
+	Create(item *StockItem) (string, error)
+	Update(item *StockItem) error
 	Delete(id string) error
 }
 

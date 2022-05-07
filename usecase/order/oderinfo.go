@@ -79,7 +79,7 @@ func (o *OrderInfoUseCase) Create(model OrderInfoCreateModel) (string, error) {
 		return "", err
 	}
 	// create order
-	return o.orderInfoRepository.Create(*order)
+	return o.orderInfoRepository.Create(order)
 }
 
 func (o *OrderInfoUseCase) Cancel(id string) error {
@@ -96,5 +96,5 @@ func (o *OrderInfoUseCase) Cancel(id string) error {
 	if err != nil {
 		return err
 	}
-	return o.orderInfoRepository.UpdateOrderStatus(*order)
+	return o.orderInfoRepository.UpdateOrderStatus(order)
 }

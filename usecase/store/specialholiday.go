@@ -80,7 +80,7 @@ func (s *SpecialHolidayUseCase) Create(model SpecialHolidayCreateModel) (string,
 		return "", err
 	}
 
-	return s.repository.Create(*item)
+	return s.repository.Create(item)
 }
 
 func (s *SpecialHolidayUseCase) Update(model SpecialHolidayUpdateModel) error {
@@ -102,7 +102,7 @@ func (s *SpecialHolidayUseCase) Update(model SpecialHolidayUpdateModel) error {
 		return err
 	}
 
-	return s.repository.Update(*item)
+	return s.repository.Update(item)
 }
 
 func (i *SpecialHolidayUseCase) Delete(id string) error {

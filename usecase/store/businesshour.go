@@ -138,7 +138,7 @@ func (b *BusinessHoursUseCase) Update(model BusinessHoursUpdateModel) error {
 		return err
 	}
 
-	err = b.businessHoursRepository.Update(*businessHours)
+	err = b.businessHoursRepository.Update(businessHours)
 	if err != nil {
 		return err
 	}

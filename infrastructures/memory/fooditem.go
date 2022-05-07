@@ -51,14 +51,14 @@ func (s *FoodItemMemoryRepository) FindAll() ([]domains.FoodItem, error) {
 	return items, nil
 }
 
-func (s *FoodItemMemoryRepository) Create(item domains.FoodItem) (string, error) {
-	s.inMemory[item.GetId()] = &item
+func (s *FoodItemMemoryRepository) Create(item *domains.FoodItem) (string, error) {
+	s.inMemory[item.GetId()] = item
 	return item.GetId(), nil
 }
 
-func (s *FoodItemMemoryRepository) Update(item domains.FoodItem) error {
+func (s *FoodItemMemoryRepository) Update(item *domains.FoodItem) error {
 	if _, ok := s.inMemory[item.GetId()]; ok {
-		s.inMemory[item.GetId()] = &item
+		s.inMemory[item.GetId()] = item
 		return nil
 	}
 	return fmt.Errorf("update target not exists")

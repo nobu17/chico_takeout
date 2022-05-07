@@ -45,14 +45,14 @@ func (s *StockItemMemoryRepository) FindAll() ([]domains.StockItem, error) {
 	return items, nil
 }
 
-func (s *StockItemMemoryRepository) Create(item domains.StockItem) (string, error) {
-	s.inMemory[item.GetId()] = &item
+func (s *StockItemMemoryRepository) Create(item *domains.StockItem) (string, error) {
+	s.inMemory[item.GetId()] = item
 	return item.GetId(), nil
 }
 
-func (s *StockItemMemoryRepository) Update(item domains.StockItem) error {
+func (s *StockItemMemoryRepository) Update(item *domains.StockItem) error {
 	if _, ok := s.inMemory[item.GetId()]; ok {
-		s.inMemory[item.GetId()] = &item
+		s.inMemory[item.GetId()] = item
 		return nil
 	}
 	return fmt.Errorf("update target not exists")

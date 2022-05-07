@@ -12,8 +12,8 @@ import (
 type ItemKindRepository interface {
 	Find(id string) (*ItemKind, error)
 	FindAll() ([]ItemKind, error)
-	Create(item ItemKind) (string, error)
-	Update(item ItemKind) error
+	Create(item *ItemKind) (string, error)
+	Update(item *ItemKind) error
 	Delete(id string) error
 }
 

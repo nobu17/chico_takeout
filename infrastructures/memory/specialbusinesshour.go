@@ -42,14 +42,14 @@ func (i *SpecialBusinessHourMemoryRepository) FindAll() ([]domains.SpecialBusine
 	return items, nil
 }
 
-func (i *SpecialBusinessHourMemoryRepository) Create(item domains.SpecialBusinessHour) (string, error) {
-	i.inMemory[item.GetId()] = &item
+func (i *SpecialBusinessHourMemoryRepository) Create(item *domains.SpecialBusinessHour) (string, error) {
+	i.inMemory[item.GetId()] = item
 	return item.GetId(), nil
 }
 
-func (i *SpecialBusinessHourMemoryRepository) Update(item domains.SpecialBusinessHour) error {
+func (i *SpecialBusinessHourMemoryRepository) Update(item *domains.SpecialBusinessHour) error {
 	if _, ok := i.inMemory[item.GetId()]; ok {
-		i.inMemory[item.GetId()] = &item
+		i.inMemory[item.GetId()] = item
 		return nil
 	}
 	return fmt.Errorf("update target not exists")

@@ -29,7 +29,7 @@ func (s *StockItemRemainCheckAndConsumer) ConsumeRemainStock(stockOrders []ItemO
 					return err
 				}
 				// update stock db
-				err = s.stockRepo.Update(stock)
+				err = s.stockRepo.Update(&stock)
 				if err != nil {
 					return err
 				}
@@ -53,7 +53,7 @@ func (s *StockItemRemainCheckAndConsumer) IncrementCanceledRemain(stockOrders []
 					return err
 				}
 				// update stock db
-				err = s.stockRepo.Update(stock)
+				err = s.stockRepo.Update(&stock)
 				if err != nil {
 					return err
 				}

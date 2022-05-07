@@ -12,8 +12,8 @@ type OrderInfoRepository interface {
 	Find(id string) (*OrderInfo, error)
 	FindByPickupDate(date string) ([]OrderInfo, error)
 	FindAll() ([]OrderInfo, error)
-	Create(item OrderInfo) (string, error)
-	UpdateOrderStatus(item OrderInfo) error
+	Create(item *OrderInfo) (string, error)
+	UpdateOrderStatus(item *OrderInfo) error
 }
 
 type OrderInfo struct {

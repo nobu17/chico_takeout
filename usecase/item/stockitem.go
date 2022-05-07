@@ -108,7 +108,7 @@ func (i *StockItemUseCase) Create(model StockItemCreateModel) (string, error) {
 		return "", err
 	}
 
-	return i.stockItemRepository.Create(*item)
+	return i.stockItemRepository.Create(item)
 }
 
 func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
@@ -130,7 +130,7 @@ func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
 	if err != nil {
 		return err
 	}
-	return i.stockItemRepository.Update(*item)
+	return i.stockItemRepository.Update(item)
 }
 
 func (i *StockItemUseCase) Delete(id string) error {
@@ -158,5 +158,5 @@ func (i *StockItemUseCase) UpdateRemain(model StockItemRemainUpdateModel) error 
 	if err != nil {
 		return err
 	}
-	return i.stockItemRepository.Update(*item)
+	return i.stockItemRepository.Update(item)
 }

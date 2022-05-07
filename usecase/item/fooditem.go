@@ -108,7 +108,7 @@ func (f *FoodItemUseCase) Create(model FoodItemCreateModel) (string, error) {
 		return "", err
 	}
 
-	return f.foodItemRepository.Create(*item)
+	return f.foodItemRepository.Create(item)
 }
 
 func (i *FoodItemUseCase) Update(model FoodItemUpdateModel) error {
@@ -130,7 +130,7 @@ func (i *FoodItemUseCase) Update(model FoodItemUpdateModel) error {
 	if err != nil {
 		return err
 	}
-	return i.foodItemRepository.Update(*item)
+	return i.foodItemRepository.Update(item)
 }
 
 func (f *FoodItemUseCase) Delete(id string) error {

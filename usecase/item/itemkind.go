@@ -69,7 +69,7 @@ func (i *ItemKindUseCase) Create(model ItemKindCreateModel) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return i.repository.Create(*item)
+	return i.repository.Create(item)
 }
 
 func (i *ItemKindUseCase) Update(model ItemKinddUpdateModel) error {
@@ -86,7 +86,7 @@ func (i *ItemKindUseCase) Update(model ItemKinddUpdateModel) error {
 	if err != nil {
 		return err
 	}
-	return i.repository.Update(*item)
+	return i.repository.Update(item)
 }
 
 func (i *ItemKindUseCase) Delete(id string) error {

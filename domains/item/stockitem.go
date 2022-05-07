@@ -33,7 +33,7 @@ func NewStockItem(name, description string, priority, maxOrder, price int, kindI
 }
 
 func (s *StockItem) GetRemain() int {
-	return s.remain.value
+	return s.remain.GetValue()
 }
 
 func (s *StockItem) SetRemain(value int) error {
@@ -67,4 +67,3 @@ func (s *StockItem) IncreseRemain(value int) error {
 	s.remain = *remain
 	return nil
 }
-

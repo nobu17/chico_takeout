@@ -53,6 +53,9 @@ func (i *itemKindUseCase) Find(id string) (*ItemKindModel, error) {
 	if err != nil {
 		return nil, err
 	}
+	if item == nil {
+		return nil, common.NewNotFoundError(id)
+	}
 
 	return newItemKindModel(item), nil
 }

@@ -21,19 +21,18 @@ func (i *ItemKindCreateRequest) toModel() *usecase.ItemKindCreateModel {
 }
 
 type ItemKindUpdateRequest struct {
-	Id       string `json:"id" binding:"required"`
 	Name     string `json:"name" binding:"required"`
-	Priority int    `form:"priority" binding:"required"`
+	Priority int    `json:"priority" binding:"required"`
 }
 
-func (i *ItemKindUpdateRequest) toModel() *usecase.ItemKinddUpdateModel {
-	return &usecase.ItemKinddUpdateModel{Id: i.Id, Name: i.Name, Priority: i.Priority}
+func (i *ItemKindUpdateRequest) toModel(id string) *usecase.ItemKinddUpdateModel {
+	return &usecase.ItemKinddUpdateModel{Id: id, Name: i.Name, Priority: i.Priority}
 }
 
 type ItemKindData struct {
 	Id       string `json:"id"`
 	Name     string `json:"name" binding:"required"`
-	Priority int    `form:"priority" binding:"required"`
+	Priority int    `json:"priority" binding:"required"`
 }
 
 func newItemKindData(item *usecase.ItemKindModel) *ItemKindData {
@@ -72,6 +71,7 @@ func (i *itemKindHandler) Get(c *gin.Context) {
 	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, newItemKindData(item))
 }
@@ -88,10 +88,11 @@ func (i *itemKindHandler) Post(c *gin.Context) {
 }
 
 func (i *itemKindHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req ItemKindUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := i.usecase.Update(req.toModel())
+	err := i.usecase.Update(req.toModel(id))
 	if err != nil {
 		i.HandleError(c, err)
 	}

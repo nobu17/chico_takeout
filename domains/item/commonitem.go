@@ -120,15 +120,15 @@ func (s *commonItem) GetName() string {
 }
 
 func (s *commonItem) GetPriority() int {
-	return s.priority.value
+	return s.priority.GetValue()
 }
 
 func (s *commonItem) GetMaxOrder() int {
-	return s.maxOrder.value
+	return s.maxOrder.GetValue()
 }
 
 func (s *commonItem) GetPrice() int {
-	return s.price.value
+	return s.price.GetValue()
 }
 
 func (s *commonItem) GetDescription() string {

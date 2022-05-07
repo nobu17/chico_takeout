@@ -73,6 +73,7 @@ func (s *specialHolidayHandler) Get(c *gin.Context) {
 	model, err := s.usecase.Find(id)
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, newSpecialHolidayData(*model))
 }
@@ -81,6 +82,7 @@ func (s *specialHolidayHandler) GetAll(c *gin.Context) {
 	alls, err := s.usecase.FindAll()
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	allData := []SpecialHolidayData{}
 	for _, item := range alls {
@@ -96,6 +98,7 @@ func (s *specialHolidayHandler) Post(c *gin.Context) {
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, SpecialHolidayCreateResponse{Id: id})
 }
@@ -107,6 +110,7 @@ func (s *specialHolidayHandler) Put(c *gin.Context) {
 	err := s.usecase.Update(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, nil)
 }
@@ -116,6 +120,7 @@ func (i *specialHolidayHandler) Delete(c *gin.Context) {
 	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }

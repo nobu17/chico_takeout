@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"chico/takeout/common"
+	"chico/takeout/domains/shared"
 )
 
 const (
@@ -102,7 +103,7 @@ func (d *DateRange) IsOverlap(other DateRange) bool {
 }
 
 type Date struct {
-	value string
+	shared.StringValue
 }
 
 func NewDate(value string) (*Date, error) {
@@ -110,5 +111,5 @@ func NewDate(value string) (*Date, error) {
 	if err != nil {
 		return nil, common.NewValidationError("date", fmt.Sprintf("can not convert date:%s", value))
 	}
-	return &Date{value: value}, nil
+	return &Date{StringValue: shared.NewStringValue(value)}, nil
 }

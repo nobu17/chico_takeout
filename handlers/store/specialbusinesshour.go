@@ -85,6 +85,7 @@ func (s *specialBusinessHourHandler) Get(c *gin.Context) {
 	model, err := s.usecase.Find(id)
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, newSpecialBusinessHourData(*model))
 }
@@ -93,6 +94,7 @@ func (s *specialBusinessHourHandler) GetAll(c *gin.Context) {
 	alls, err := s.usecase.FindAll()
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	allData := []SpecialBusinessHourData{}
 	for _, item := range alls {
@@ -108,6 +110,7 @@ func (s *specialBusinessHourHandler) Post(c *gin.Context) {
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, SpecialHolidayCreateResponse{Id: id})
 }
@@ -119,6 +122,7 @@ func (s *specialBusinessHourHandler) Put(c *gin.Context) {
 	err := s.usecase.Update(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, nil)
 }
@@ -128,6 +132,7 @@ func (i *specialBusinessHourHandler) Delete(c *gin.Context) {
 	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }

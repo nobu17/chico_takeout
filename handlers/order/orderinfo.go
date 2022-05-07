@@ -71,6 +71,7 @@ func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, OrderInfoCreateResponce{Id: id})
 }
@@ -82,6 +83,7 @@ func (s *orderInfoHandler) PostCancel(c *gin.Context) {
 	err := s.usecase.Cancel(req.Id)
 	if err != nil {
 		s.HandleError(c, err)
+		return
 	}
 	s.HandleOK(c, nil)
 }

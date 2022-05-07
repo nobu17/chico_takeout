@@ -102,6 +102,7 @@ func (i *stockItemHandler) Get(c *gin.Context) {
 	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, newStockItemData(item))
 }
@@ -113,6 +114,7 @@ func (i *stockItemHandler) Post(c *gin.Context) {
 	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, StockItemCreateResponse{Id: id})
 }
@@ -124,6 +126,7 @@ func (i *stockItemHandler) Put(c *gin.Context) {
 	err := i.usecase.Update(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }
@@ -133,6 +136,7 @@ func (i *stockItemHandler) Delete(c *gin.Context) {
 	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }
@@ -144,6 +148,7 @@ func (i *stockItemHandler) PutRemain(c *gin.Context) {
 	err := i.usecase.UpdateRemain(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }

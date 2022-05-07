@@ -72,6 +72,7 @@ func (b *businessHoursHandler) Get(c *gin.Context) {
 	model, err := b.usecase.GetAll()
 	if err != nil {
 		b.HandleError(c, err)
+		return
 	}
 	b.HandleOK(c, newBusinessHoursData(*model))
 }
@@ -83,6 +84,7 @@ func (b *businessHoursHandler) Put(c *gin.Context) {
 	err := b.usecase.Update(req.toModel())
 	if err != nil {
 		b.HandleError(c, err)
+		return
 	}
 	b.HandleOK(c, nil)
 }

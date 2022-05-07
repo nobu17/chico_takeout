@@ -104,7 +104,7 @@ func (s *SpecialBusinessHour) GetName() string {
 }
 
 func (s *SpecialBusinessHour) GetDate() string {
-	return s.date.value
+	return s.date.GetValue()
 }
 
 func (s *SpecialBusinessHour) GetStart() string {

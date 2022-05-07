@@ -13,15 +13,32 @@ type ItemKindMemoryRepository struct {
 	inMemory map[string]*domains.ItemKind
 }
 
+func (i *ItemKindMemoryRepository) GetMemory() map[string]*domains.ItemKind {
+	return i.inMemory
+}
+
+func resetMemory() {
+	memory = map[string]*domains.ItemKind{}
+	item1, _ := domains.NewItemKind("item1", 1)
+	memory[item1.GetId()] = item1
+	item2, _ := domains.NewItemKind("item2", 2)
+	memory[item2.GetId()] = item2
+}
+
 func NewItemKindMemoryRepository() *ItemKindMemoryRepository {
 	if memory == nil {
-		memory = map[string]*domains.ItemKind{}
-		item1, _ := domains.NewItemKind("item1", 1)
-		memory[item1.GetId()] = item1
-		item2, _ := domains.NewItemKind("item2", 2)
-		memory[item2.GetId()] = item2
+		resetMemory()
 	}
 	return &ItemKindMemoryRepository{memory}
+}
+
+func NewItemKindMemoryRepositoryWithParam(param map[string]*domains.ItemKind) *ItemKindMemoryRepository {
+	memory = param
+	return &ItemKindMemoryRepository{memory}
+}
+
+func (i *ItemKindMemoryRepository) Rest() {
+	resetMemory()
 }
 
 func (i *ItemKindMemoryRepository) Find(id string) (*domains.ItemKind, error) {

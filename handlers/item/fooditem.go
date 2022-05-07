@@ -101,6 +101,7 @@ func (i *foodItemHandler) Get(c *gin.Context) {
 	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, newFoodItemData(item))
 }
@@ -112,6 +113,7 @@ func (i *foodItemHandler) Post(c *gin.Context) {
 	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, FoodItemCreateResponse{Id: id})
 }
@@ -123,6 +125,7 @@ func (i *foodItemHandler) Put(c *gin.Context) {
 	err := i.usecase.Update(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }
@@ -132,6 +135,7 @@ func (i *foodItemHandler) Delete(c *gin.Context) {
 	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }

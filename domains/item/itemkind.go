@@ -1,10 +1,7 @@
 package item
 
 import (
-	"fmt"
-	"strings"
-
-	"chico/takeout/common"
+	"chico/takeout/domains/shared/validator"
 
 	"github.com/google/uuid"
 )
@@ -24,32 +21,18 @@ type ItemKind struct {
 }
 
 const (
-	ItemNameMaxLength = 10
+	ItemNameMaxLength = 15
 )
 
+var nameValidator = validator.NewStingLength("ItemKind", ItemNameMaxLength)
+
 func NewItemKind(name string, priority int) (*ItemKind, error) {
-
-	if err := validateItemKindName(name); err != nil {
+	item := &ItemKind{id: uuid.NewString()}
+	if err := item.Set(name, priority); err != nil {
 		return nil, err
 	}
 
-	pri, err := NewPriority(priority)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ItemKind{id: uuid.NewString(), name: name, priority: *pri}, nil
-}
-
-func validateItemKindName(name string) error {
-	if strings.TrimSpace(name) == "" {
-		return common.NewValidationError("name", "required")
-	}
-
-	if len(name) > ItemNameMaxLength {
-		return common.NewValidationError("name", fmt.Sprintf("MaxLength:%d", ItemNameMaxLength))
-	}
-	return nil
+	return item, nil
 }
 
 func (i *ItemKind) GetId() string {
@@ -61,11 +44,11 @@ func (i *ItemKind) GetName() string {
 }
 
 func (i *ItemKind) GetPriority() int {
-	return i.priority.value
+	return i.priority.GetValue()
 }
 
 func (i *ItemKind) Set(name string, priority int) error {
-	if err := validateItemKindName(name); err != nil {
+	if err := nameValidator.Validate(name); err != nil {
 		return err
 	}
 

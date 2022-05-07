@@ -56,7 +56,7 @@ func validateScheduleIds(scheduleIds []string) error {
 }
 
 func (s *FoodItem) GetMaxOrderPerDay() int {
-	return s.maxOrderPerDay.value
+	return s.maxOrderPerDay.GetValue()
 }
 
 func (s *FoodItem) GetScheduleIds() []string {

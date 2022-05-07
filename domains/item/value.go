@@ -4,33 +4,28 @@ import (
 	"fmt"
 
 	"chico/takeout/common"
+	"chico/takeout/domains/shared"
+	"chico/takeout/domains/shared/validator"
 )
 
 type Priority struct {
-	value int
+	shared.IntValue
 }
 
+var priorityValidator = validator.NewPlusInteger("Priority")
+
 func NewPriority(value int) (*Priority, error) {
-	if err := validatePriorityValue(value); err != nil {
+	if err := priorityValidator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &Priority{value: value}, nil
+	return &Priority{IntValue: shared.NewIntValue(value)}, nil
 }
 
-func validatePriorityValue(priority int) error {
-	if priority < 1 {
-		return common.NewValidationError("priority", "Need to be greater than 1")
-	}
-	return nil
-}
-
-func (p *Priority) GetValue() int {
-	return p.value
-}
+var maxOrderValidator = validator.NewRangeInteger("MaxOrder", 1, MaxOrderMaxValue)
 
 type MaxOrder struct {
-	value int
+	shared.IntValue
 }
 
 const (
@@ -38,135 +33,84 @@ const (
 )
 
 func NewMaxOrder(value int) (*MaxOrder, error) {
-	if err := validateMaxOrder(value); err != nil {
+	if err := maxOrderValidator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &MaxOrder{value: value}, nil
-}
-
-func validateMaxOrder(maxOrder int) error {
-	if maxOrder < 1 {
-		return common.NewValidationError("maxOrder", "Need to be greater than 1")
-	}
-	if maxOrder > MaxOrderMaxValue {
-		return common.NewValidationError("maxOrder", fmt.Sprintf("Need to be less than %d", MaxOrderMaxValue))
-	}
-	return nil
-}
-
-func (m *MaxOrder) GetValue() int {
-	return m.value
+	return &MaxOrder{IntValue: shared.NewIntValue(value)}, nil
 }
 
 func (m *MaxOrder) WithinLimit(request int) error {
-	if m.value < request {
-		return common.NewValidationError("maxOrder", fmt.Sprintf("Need to be less than. max:%d, request:%d", m.value, request))
+	if m.GetValue() < request {
+		return common.NewValidationError("maxOrder", fmt.Sprintf("Need to be less than. max:%d, request:%d", m.GetValue(), request))
 	}
 	return nil
 }
 
 type Price struct {
-	maxValue int
-	value    int
+	shared.IntValue
 }
 
 func NewPrice(value, maxValue int) (*Price, error) {
-	if err := validatePrice(value, maxValue); err != nil {
+	validator := validator.NewRangeInteger("Price", 1, maxValue)
+	if err := validator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &Price{value: value, maxValue: maxValue}, nil
-}
-
-func validatePrice(price, maxValue int) error {
-	if price < 1 {
-		return common.NewValidationError("price", "Need to be greater than 1")
-	}
-	if price > maxValue {
-		return common.NewValidationError("price", fmt.Sprintf("Need to be less than %d", maxValue))
-	}
-	return nil
-}
-
-func (p *Price) GetValue() int {
-	return p.value
+	return &Price{IntValue: shared.NewIntValue(value)}, nil
 }
 
 type StockRemain struct {
 	maxValue int
-	value    int
+	shared.IntValue
 }
 
 func NewStockRemain(value, maxValue int) (*StockRemain, error) {
-	if err := validateStockRemain(value, maxValue); err != nil {
+	validator := validator.NewRangeInteger("StockRemain", 1, maxValue)
+	if err := validator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &StockRemain{value: value, maxValue: maxValue}, nil
-}
-
-func validateStockRemain(value, maxValue int) error {
-	if value < 0 {
-		return common.NewValidationError("stock remain", "Need to be greater than 1")
-	}
-	if value > maxValue {
-		return common.NewValidationError("stock remain", fmt.Sprintf("Need to be less than %d", maxValue))
-	}
-	return nil
-}
-
-func (p *StockRemain) GetValue() int {
-	return p.value
+	return &StockRemain{IntValue: shared.NewIntValue(value), maxValue: maxValue}, nil
 }
 
 func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	if request < 1 {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
 	}
-	remain := p.value - request
+	remain := p.GetValue() - request
 	if remain < 0 {
-		return nil, common.NewValidationError("stock remain", fmt.Sprintf("remain count is insufficient. remain:%d, request:%d", p.value, request))
+		return nil, common.NewValidationError("stock remain", fmt.Sprintf("remain count is insufficient. remain:%d, request:%d", p.GetValue(), request))
 	}
-	return &StockRemain{remain, p.maxValue}, nil
+	return &StockRemain{
+		IntValue: shared.NewIntValue(remain),
+		maxValue: p.maxValue}, nil
 }
 
 func (p *StockRemain) Increase(request int) (*StockRemain, error) {
 	if request < 1 {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
 	}
-	remain := p.value + request
-	return &StockRemain{remain, p.maxValue}, nil
-}
-
-
-
-type MaxOrderPerDay struct {
-	value int
+	remain := p.GetValue() + request
+	return &StockRemain{
+		IntValue: shared.NewIntValue(remain),
+		maxValue: p.maxValue}, nil
 }
 
 const (
 	MaxOrderPerDayMaxValue = 30
 )
 
+type MaxOrderPerDay struct {
+	shared.IntValue
+}
+
+var maxOrderPerDayValidator = validator.NewRangeInteger("MaxOrderPerDay", 1, MaxOrderPerDayMaxValue)
+
 func NewMaxOrderPerDay(value int) (*MaxOrderPerDay, error) {
-	if err := validateMaxOrderPerDay(value); err != nil {
+	if err := maxOrderPerDayValidator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &MaxOrderPerDay{value: value}, nil
-}
-
-func validateMaxOrderPerDay(maxOrder int) error {
-	if maxOrder < 1 {
-		return common.NewValidationError("MaxOrderPerDay", "Need to be greater than 1")
-	}
-	if maxOrder > MaxOrderMaxValue {
-		return common.NewValidationError("MaxOrderPerDay", fmt.Sprintf("Need to be less than %d", MaxOrderPerDayMaxValue))
-	}
-	return nil
-}
-
-func (m *MaxOrderPerDay) GetValue() int {
-	return m.value
+	return &MaxOrderPerDay{IntValue: shared.NewIntValue(value)}, nil
 }

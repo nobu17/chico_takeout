@@ -76,15 +76,15 @@ func (s *StockItemRemainUpdateRequest) toModel() *usecase.StockItemRemainUpdateM
 
 type stockItemHandler struct {
 	*handlers.BaseHandler
-	useecase usecase.StockItemUseCase
+	usecase usecase.StockItemUseCase
 }
 
 func NewStockItemHandler(u usecase.StockItemUseCase) *stockItemHandler {
-	return &stockItemHandler{useecase: u}
+	return &stockItemHandler{usecase: u}
 }
 
 func (i *stockItemHandler) GetAll(c *gin.Context) {
-	items, err := i.useecase.FindAll()
+	items, err := i.usecase.FindAll()
 	if err != nil {
 		i.HandleError(c, err)
 		return
@@ -99,7 +99,7 @@ func (i *stockItemHandler) GetAll(c *gin.Context) {
 
 func (i *stockItemHandler) Get(c *gin.Context) {
 	id := c.Param("id")
-	item, err := i.useecase.Find((id))
+	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -110,7 +110,7 @@ func (i *stockItemHandler) Post(c *gin.Context) {
 	var req StockItemCreateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := i.useecase.Create(*req.toModel())
+	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -121,7 +121,7 @@ func (i *stockItemHandler) Put(c *gin.Context) {
 	var req StockItemUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := i.useecase.Update(*req.toModel())
+	err := i.usecase.Update(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -130,7 +130,7 @@ func (i *stockItemHandler) Put(c *gin.Context) {
 
 func (i *stockItemHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	err := i.useecase.Delete(id)
+	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -141,7 +141,7 @@ func (i *stockItemHandler) PutRemain(c *gin.Context) {
 	var req StockItemRemainUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := i.useecase.UpdateRemain(*req.toModel())
+	err := i.usecase.UpdateRemain(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}

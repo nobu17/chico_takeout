@@ -43,22 +43,30 @@ type SpecialBusinessHourUpdateModel struct {
 	BusinessHourId string
 }
 
-type SpecialBusinessHoursUseCase struct {
+type SpecialBusinessHoursUseCase interface {
+	Find(id string) (*SpecialBusinessHourModel, error) 
+	FindAll() ([]SpecialBusinessHourModel, error)
+	Create(model *SpecialBusinessHourCreateModel) (string, error)
+	Update(model *SpecialBusinessHourUpdateModel) error
+	Delete(id string) error
+}
+
+type specialBusinessHoursUseCase struct {
 	repository   domains.SpecialBusinessHourRepository
 	storeService domains.StoreService
 }
 
 func NewSpecialBusinessHoursUseCase(
 	businessHoursRepository domains.BusinessHoursRepository,
-	specialBusinessHourRepository domains.SpecialBusinessHourRepository) *SpecialBusinessHoursUseCase {
-	return &SpecialBusinessHoursUseCase{
+	specialBusinessHourRepository domains.SpecialBusinessHourRepository) SpecialBusinessHoursUseCase {
+	return &specialBusinessHoursUseCase{
 		repository:   specialBusinessHourRepository,
 		storeService: *domains.NewStoreService(businessHoursRepository, specialBusinessHourRepository),
 	}
 }
 
-func (i *SpecialBusinessHoursUseCase) Find(id string) (*SpecialBusinessHourModel, error) {
-	item, err := i.repository.Find(id)
+func (s *specialBusinessHoursUseCase) Find(id string) (*SpecialBusinessHourModel, error) {
+	item, err := s.repository.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +74,8 @@ func (i *SpecialBusinessHoursUseCase) Find(id string) (*SpecialBusinessHourModel
 	return newSpecialBusinessHourModel(item), nil
 }
 
-func (i *SpecialBusinessHoursUseCase) FindAll() ([]SpecialBusinessHourModel, error) {
-	items, err := i.repository.FindAll()
+func (s *specialBusinessHoursUseCase) FindAll() ([]SpecialBusinessHourModel, error) {
+	items, err := s.repository.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +89,13 @@ func (i *SpecialBusinessHoursUseCase) FindAll() ([]SpecialBusinessHourModel, err
 	return models, nil
 }
 
-func (s *SpecialBusinessHoursUseCase) Create(model SpecialBusinessHourCreateModel) (string, error) {
+func (s *specialBusinessHoursUseCase) Create(model *SpecialBusinessHourCreateModel) (string, error) {
 	item, err := domains.NewSpecialBusinessHour(model.Name, model.Date, model.Start, model.End, model.BusinessHourId)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.validate(*item)
+	err = s.validate(item)
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +103,7 @@ func (s *SpecialBusinessHoursUseCase) Create(model SpecialBusinessHourCreateMode
 	return s.repository.Create(item)
 }
 
-func (s *SpecialBusinessHoursUseCase) Update(model SpecialBusinessHourUpdateModel) error {
+func (s *specialBusinessHoursUseCase) Update(model *SpecialBusinessHourUpdateModel) error {
 	item, err := s.repository.Find(model.Id)
 	if err != nil {
 		return err
@@ -109,7 +117,7 @@ func (s *SpecialBusinessHoursUseCase) Update(model SpecialBusinessHourUpdateMode
 		return err
 	}
 
-	err = s.validate(*item)
+	err = s.validate(item)
 	if err != nil {
 		return err
 	}
@@ -117,7 +125,7 @@ func (s *SpecialBusinessHoursUseCase) Update(model SpecialBusinessHourUpdateMode
 	return s.repository.Update(item)
 }
 
-func (i *SpecialBusinessHoursUseCase) Delete(id string) error {
+func (i *specialBusinessHoursUseCase) Delete(id string) error {
 	item, err := i.repository.Find(id)
 	if err != nil {
 		return err
@@ -129,7 +137,7 @@ func (i *SpecialBusinessHoursUseCase) Delete(id string) error {
 	return i.repository.Delete(id)
 }
 
-func (s *SpecialBusinessHoursUseCase) validate(item domains.SpecialBusinessHour) error {
+func (s *specialBusinessHoursUseCase) validate(item *domains.SpecialBusinessHour) error {
 	// check business hour id exists
 	exists, err := s.storeService.ExistsBusinessHour(item.GetBusinessHourId())
 	if err != nil {

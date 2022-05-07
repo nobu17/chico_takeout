@@ -93,7 +93,7 @@ func (s *specialHolidayHandler) Post(c *gin.Context) {
 	var req SpecialHolidayCreateData
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := s.usecase.Create(*req.toModel())
+	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 	}
@@ -104,7 +104,7 @@ func (s *specialHolidayHandler) Put(c *gin.Context) {
 	var req SpecialHolidayUpdateData
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := s.usecase.Update(*req.toModel())
+	err := s.usecase.Update(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 	}

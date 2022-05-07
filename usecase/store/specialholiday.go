@@ -34,19 +34,27 @@ type SpecialHolidayUpdateModel struct {
 	End   string
 }
 
-type SpecialHolidayUseCase struct {
+type SpecialHolidayUseCase interface {
+	Find(id string) (*SpecialHolidayModel, error)
+	FindAll() ([]SpecialHolidayModel, error)
+	Create(model *SpecialHolidayCreateModel) (string, error)
+	Update(model *SpecialHolidayUpdateModel) error
+	Delete(id string) error
+}
+
+type specialHolidayUseCase struct {
 	repository     domains.SpecialHolidayRepository
 	holidayService domains.HolidayService
 }
 
-func NewSpecialHolidayUseCase(repository domains.SpecialHolidayRepository) *SpecialHolidayUseCase {
-	return &SpecialHolidayUseCase{
+func NewSpecialHolidayUseCase(repository domains.SpecialHolidayRepository) SpecialHolidayUseCase {
+	return &specialHolidayUseCase{
 		repository:     repository,
 		holidayService: *domains.NewHolidayService(repository),
 	}
 }
 
-func (i *SpecialHolidayUseCase) Find(id string) (*SpecialHolidayModel, error) {
+func (i *specialHolidayUseCase) Find(id string) (*SpecialHolidayModel, error) {
 	item, err := i.repository.Find(id)
 	if err != nil {
 		return nil, err
@@ -55,7 +63,7 @@ func (i *SpecialHolidayUseCase) Find(id string) (*SpecialHolidayModel, error) {
 	return newSpecialHolidayModel(item), nil
 }
 
-func (i *SpecialHolidayUseCase) FindAll() ([]SpecialHolidayModel, error) {
+func (i *specialHolidayUseCase) FindAll() ([]SpecialHolidayModel, error) {
 	items, err := i.repository.FindAll()
 	if err != nil {
 		return nil, err
@@ -70,12 +78,12 @@ func (i *SpecialHolidayUseCase) FindAll() ([]SpecialHolidayModel, error) {
 	return models, nil
 }
 
-func (s *SpecialHolidayUseCase) Create(model SpecialHolidayCreateModel) (string, error) {
+func (s *specialHolidayUseCase) Create(model *SpecialHolidayCreateModel) (string, error) {
 	item, err := domains.NewSpecialHoliday(model.Name, model.Start, model.End)
 	if err != nil {
 		return "", err
 	}
-	err = s.checkOverlap(*item)
+	err = s.checkOverlap(item)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +91,7 @@ func (s *SpecialHolidayUseCase) Create(model SpecialHolidayCreateModel) (string,
 	return s.repository.Create(item)
 }
 
-func (s *SpecialHolidayUseCase) Update(model SpecialHolidayUpdateModel) error {
+func (s *specialHolidayUseCase) Update(model *SpecialHolidayUpdateModel) error {
 	item, err := s.repository.Find(model.Id)
 	if err != nil {
 		return err
@@ -97,7 +105,7 @@ func (s *SpecialHolidayUseCase) Update(model SpecialHolidayUpdateModel) error {
 		return err
 	}
 
-	err = s.checkOverlap(*item)
+	err = s.checkOverlap(item)
 	if err != nil {
 		return err
 	}
@@ -105,7 +113,7 @@ func (s *SpecialHolidayUseCase) Update(model SpecialHolidayUpdateModel) error {
 	return s.repository.Update(item)
 }
 
-func (i *SpecialHolidayUseCase) Delete(id string) error {
+func (i *specialHolidayUseCase) Delete(id string) error {
 	item, err := i.repository.Find(id)
 	if err != nil {
 		return err
@@ -117,7 +125,7 @@ func (i *SpecialHolidayUseCase) Delete(id string) error {
 	return i.repository.Delete(id)
 }
 
-func (s *SpecialHolidayUseCase) checkOverlap(item domains.SpecialHoliday) error {
+func (s *specialHolidayUseCase) checkOverlap(item *domains.SpecialHoliday) error {
 	isOverwrap, err := s.holidayService.CheckOverWrap(item)
 	if err != nil {
 		return err

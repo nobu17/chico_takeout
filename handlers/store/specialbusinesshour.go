@@ -105,7 +105,7 @@ func (s *specialBusinessHourHandler) Post(c *gin.Context) {
 	var req SpecialBusinessHourCreateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := s.usecase.Create(*req.toModel())
+	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 	}
@@ -116,7 +116,7 @@ func (s *specialBusinessHourHandler) Put(c *gin.Context) {
 	var req SpecialBusinessHourUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := s.usecase.Update(*req.toModel())
+	err := s.usecase.Update(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 	}

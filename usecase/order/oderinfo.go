@@ -34,7 +34,12 @@ type CommonItemOrderModel struct {
 	Quantity int
 }
 
-type OrderInfoUseCase struct {
+type OrderInfoUseCase interface {
+	Create(model *OrderInfoCreateModel) (string, error)
+	Cancel(id string) error
+}
+
+type orderInfoUseCase struct {
 	orderInfoRepository domains.OrderInfoRepository
 	stockRepo           idomains.StockItemRepository
 	factory             domains.OrderInfoFactory
@@ -45,8 +50,8 @@ type OrderInfoUseCase struct {
 func NewOrderInfoUseCase(
 	orderInfoRepository domains.OrderInfoRepository,
 	stockRepo idomains.StockItemRepository,
-	foodRepo idomains.FoodItemRepository) *OrderInfoUseCase {
-	return &OrderInfoUseCase{
+	foodRepo idomains.FoodItemRepository) OrderInfoUseCase {
+	return &orderInfoUseCase{
 		orderInfoRepository: orderInfoRepository,
 		stockRepo:           stockRepo,
 		factory:             *domains.NewOrderInfoFactory(stockRepo, foodRepo),
@@ -55,7 +60,7 @@ func NewOrderInfoUseCase(
 	}
 }
 
-func (o *OrderInfoUseCase) Create(model OrderInfoCreateModel) (string, error) {
+func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 	stockOrders := []domains.ItemOrder{}
 	for _, item := range model.StockItems {
 		stockOrders = append(stockOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
@@ -82,7 +87,7 @@ func (o *OrderInfoUseCase) Create(model OrderInfoCreateModel) (string, error) {
 	return o.orderInfoRepository.Create(order)
 }
 
-func (o *OrderInfoUseCase) Cancel(id string) error {
+func (o *orderInfoUseCase) Cancel(id string) error {
 	order, err := o.orderInfoRepository.Find(id)
 	if err != nil {
 		return err

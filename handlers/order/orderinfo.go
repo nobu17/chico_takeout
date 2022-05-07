@@ -68,7 +68,7 @@ func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 	var req OrderInfoCreateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := s.usecase.Create(*req.toModel())
+	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 	}

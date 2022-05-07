@@ -69,7 +69,7 @@ func NewbusinessHoursHandler(usecase usecases.BusinessHoursUseCase) *businessHou
 }
 
 func (b *businessHoursHandler) Get(c *gin.Context) {
-	model, err := b.usecase.Fetch()
+	model, err := b.usecase.GetAll()
 	if err != nil {
 		b.HandleError(c, err)
 	}
@@ -80,7 +80,7 @@ func (b *businessHoursHandler) Put(c *gin.Context) {
 	var req BusinessHoursUpdateData
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := b.usecase.Update(*req.toModel())
+	err := b.usecase.Update(req.toModel())
 	if err != nil {
 		b.HandleError(c, err)
 	}

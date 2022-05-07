@@ -30,7 +30,7 @@ func setupRouter() *gin.Engine {
 	{
 		repo := memory.NewItemKindMemoryRepository()
 		useCase := itemUseCase.NewItemKindUseCase(repo)
-		handler := itemHandler.NewItemKindHandler(*useCase)
+		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
 		kind.POST("/", handler.Post)
@@ -43,7 +43,7 @@ func setupRouter() *gin.Engine {
 	{
 		stockRepo := memory.NewStockItemMemoryRepository()
 		useCase := itemUseCase.NewStockItemUseCase(stockRepo, kindRepo)
-		handler := itemHandler.NewStockItemHandler(*useCase)
+		handler := itemHandler.NewStockItemHandler(useCase)
 		stock.GET("/:id", handler.Get)
 		stock.GET("/", handler.GetAll)
 		stock.POST("/", handler.Post)
@@ -57,7 +57,7 @@ func setupRouter() *gin.Engine {
 	{
 		foodRepo := memory.NewFoodItemMemoryRepository()
 		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, kindRepo)
-		handler := itemHandler.NewFoodItemHandler(*useCase)
+		handler := itemHandler.NewFoodItemHandler(useCase)
 		food.GET("/:id", handler.Get)
 		food.GET("/", handler.GetAll)
 		food.POST("/", handler.Post)
@@ -71,14 +71,14 @@ func setupRouter() *gin.Engine {
 	hour := r.Group("/store/hour")
 	{
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
-		handler := storeHandler.NewbusinessHoursHandler(*useCase)
+		handler := storeHandler.NewbusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/", handler.Put)
 	}
 	specialHour := r.Group("/store/special_hour")
 	{
 		useCase := storeUseCase.NewSpecialBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
-		handler := storeHandler.NewSpecialBusinessHourHandler(*useCase)
+		handler := storeHandler.NewSpecialBusinessHourHandler(useCase)
 		specialHour.GET("/:id", handler.Get)
 		specialHour.GET("/", handler.GetAll)
 		specialHour.POST("/", handler.Post)
@@ -91,7 +91,7 @@ func setupRouter() *gin.Engine {
 	holiday := r.Group("/store/holiday")
 	{
 		useCase := storeUseCase.NewSpecialHolidayUseCase(holidayRepo)
-		handler := storeHandler.NewSpecialHolidayHandler(*useCase)
+		handler := storeHandler.NewSpecialHolidayHandler(useCase)
 		holiday.GET("/:id", handler.Get)
 		holiday.GET("/", handler.GetAll)
 		holiday.POST("/", handler.Post)

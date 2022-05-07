@@ -46,7 +46,7 @@ func NewHolidayService(specialHolidayRepository SpecialHolidayRepository) *Holid
 	}
 }
 
-func (h *HolidayService) CheckOverWrap(item SpecialHoliday) (bool, error) {
+func (h *HolidayService) CheckOverWrap(item *SpecialHoliday) (bool, error) {
 	holidays, err := h.specialHolidayRepository.FindAll()
 	if err != nil {
 		return false, err

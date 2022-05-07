@@ -1,8 +1,8 @@
 package item
 
 import (
-	usecase "chico/takeout/usecase/item"
 	"chico/takeout/handlers"
+	usecase "chico/takeout/usecase/item"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,15 +46,15 @@ func newItemKindData(item *usecase.ItemKindModel) *ItemKindData {
 
 type itemKindHandler struct {
 	*handlers.BaseHandler
-	useecase usecase.ItemKindUseCase
+	usecase usecase.ItemKindUseCase
 }
 
 func NewItemKindHandler(u usecase.ItemKindUseCase) *itemKindHandler {
-	return &itemKindHandler{useecase: u}
+	return &itemKindHandler{usecase: u}
 }
 
 func (i *itemKindHandler) GetAll(c *gin.Context) {
-	items, err := i.useecase.FindAll()
+	items, err := i.usecase.FindAll()
 	if err != nil {
 		i.HandleError(c, err)
 		return
@@ -69,7 +69,7 @@ func (i *itemKindHandler) GetAll(c *gin.Context) {
 
 func (i *itemKindHandler) Get(c *gin.Context) {
 	id := c.Param("id")
-	item, err := i.useecase.Find((id))
+	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -80,7 +80,7 @@ func (i *itemKindHandler) Post(c *gin.Context) {
 	var req ItemKindCreateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := i.useecase.Create(*req.toModel())
+	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -91,7 +91,7 @@ func (i *itemKindHandler) Put(c *gin.Context) {
 	var req ItemKindUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := i.useecase.Update(*req.toModel())
+	err := i.usecase.Update(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -100,7 +100,7 @@ func (i *itemKindHandler) Put(c *gin.Context) {
 
 func (i *itemKindHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	err := i.useecase.Delete(id)
+	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
 	}

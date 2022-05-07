@@ -107,19 +107,26 @@ func toDomainWeekday(weekdays []Weekday) []domains.Weekday {
 	return converted
 }
 
-type BusinessHoursUseCase struct {
+type BusinessHoursUseCase interface {
+	GetAll() (*BusinessHoursModel, error)
+	Update(model *BusinessHoursUpdateModel) error
+}
+
+type businessHoursUseCase struct {
 	businessHoursRepository domains.BusinessHoursRepository
 	storeService            domains.StoreService
 }
 
-func NewBusinessHoursUseCase(businessHoursRepository domains.BusinessHoursRepository, specialBusinessHourRepository domains.SpecialBusinessHourRepository) *BusinessHoursUseCase {
-	return &BusinessHoursUseCase{
+func NewBusinessHoursUseCase(
+	businessHoursRepository domains.BusinessHoursRepository,
+	specialBusinessHourRepository domains.SpecialBusinessHourRepository) BusinessHoursUseCase {
+	return &businessHoursUseCase{
 		businessHoursRepository: businessHoursRepository,
 		storeService:            *domains.NewStoreService(businessHoursRepository, specialBusinessHourRepository),
 	}
 }
 
-func (b *BusinessHoursUseCase) Fetch() (*BusinessHoursModel, error) {
+func (b *businessHoursUseCase) GetAll() (*BusinessHoursModel, error) {
 	data, err := b.storeService.FetchBusinessHours()
 	if err != nil {
 		return nil, err
@@ -127,7 +134,7 @@ func (b *BusinessHoursUseCase) Fetch() (*BusinessHoursModel, error) {
 	return newBusinessHoursModel(data), nil
 }
 
-func (b *BusinessHoursUseCase) Update(model BusinessHoursUpdateModel) error {
+func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {
 	businessHours, err := b.storeService.FetchBusinessHours()
 	if err != nil {
 		return err

@@ -75,15 +75,15 @@ func (s *FoodItemUpdateRequest) toModel() *usecase.FoodItemUpdateModel {
 
 type foodItemHandler struct {
 	*handlers.BaseHandler
-	useecase usecase.FoodItemUseCase
+	usecase usecase.FoodItemUseCase
 }
 
 func NewFoodItemHandler(u usecase.FoodItemUseCase) *foodItemHandler {
-	return &foodItemHandler{useecase: u}
+	return &foodItemHandler{usecase: u}
 }
 
 func (i *foodItemHandler) GetAll(c *gin.Context) {
-	items, err := i.useecase.FindAll()
+	items, err := i.usecase.FindAll()
 	if err != nil {
 		i.HandleError(c, err)
 		return
@@ -98,7 +98,7 @@ func (i *foodItemHandler) GetAll(c *gin.Context) {
 
 func (i *foodItemHandler) Get(c *gin.Context) {
 	id := c.Param("id")
-	item, err := i.useecase.Find((id))
+	item, err := i.usecase.Find((id))
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -109,7 +109,7 @@ func (i *foodItemHandler) Post(c *gin.Context) {
 	var req FoodItemCreateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	id, err := i.useecase.Create(*req.toModel())
+	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -120,7 +120,7 @@ func (i *foodItemHandler) Put(c *gin.Context) {
 	var req FoodItemUpdateRequest
 	// validation is executed model
 	c.ShouldBind(&req)
-	err := i.useecase.Update(*req.toModel())
+	err := i.usecase.Update(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
 	}
@@ -129,7 +129,7 @@ func (i *foodItemHandler) Put(c *gin.Context) {
 
 func (i *foodItemHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	err := i.useecase.Delete(id)
+	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
 	}

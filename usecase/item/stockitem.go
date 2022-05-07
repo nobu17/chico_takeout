@@ -43,21 +43,30 @@ func newStockItemModel(item *domains.StockItem, kind *domains.ItemKind) *StockIt
 	}
 }
 
-type StockItemUseCase struct {
+type StockItemUseCase interface {
+	Find(id string) (*StockItemModel, error)
+	FindAll() ([]StockItemModel, error)
+	Create(model *StockItemCreateModel) (string, error)
+	Update(model *StockItemUpdateModel) error
+	Delete(id string) error
+	UpdateRemain(model *StockItemRemainUpdateModel) error
+}
+
+type stockItemUseCase struct {
 	stockItemRepository domains.StockItemRepository
 	itemKindRepository  domains.ItemKindRepository
 	commonItemUseCase
 }
 
-func NewStockItemUseCase(stockItemRepository domains.StockItemRepository, itemKindRepository domains.ItemKindRepository) *StockItemUseCase {
-	return &StockItemUseCase{
+func NewStockItemUseCase(stockItemRepository domains.StockItemRepository, itemKindRepository domains.ItemKindRepository) StockItemUseCase {
+	return &stockItemUseCase{
 		stockItemRepository: stockItemRepository,
 		itemKindRepository:  itemKindRepository,
 		commonItemUseCase:   *newCommonItemUseCase(itemKindRepository),
 	}
 }
 
-func (i *StockItemUseCase) Find(id string) (*StockItemModel, error) {
+func (i *stockItemUseCase) Find(id string) (*StockItemModel, error) {
 	item, err := i.stockItemRepository.Find(id)
 	if err != nil {
 		return nil, err
@@ -74,7 +83,7 @@ func (i *StockItemUseCase) Find(id string) (*StockItemModel, error) {
 	return newStockItemModel(item, kind), nil
 }
 
-func (i *StockItemUseCase) FindAll() ([]StockItemModel, error) {
+func (i *stockItemUseCase) FindAll() ([]StockItemModel, error) {
 	items, err := i.stockItemRepository.FindAll()
 	if err != nil {
 		return nil, err
@@ -97,7 +106,7 @@ func (i *StockItemUseCase) FindAll() ([]StockItemModel, error) {
 	return models, nil
 }
 
-func (i *StockItemUseCase) Create(model StockItemCreateModel) (string, error) {
+func (i *stockItemUseCase) Create(model *StockItemCreateModel) (string, error) {
 	item, err := domains.NewStockItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
 	if err != nil {
 		return "", err
@@ -111,7 +120,7 @@ func (i *StockItemUseCase) Create(model StockItemCreateModel) (string, error) {
 	return i.stockItemRepository.Create(item)
 }
 
-func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
+func (i *stockItemUseCase) Update(model *StockItemUpdateModel) error {
 	item, err := i.stockItemRepository.Find(model.Id)
 	if err != nil {
 		return err
@@ -133,7 +142,7 @@ func (i *StockItemUseCase) Update(model StockItemUpdateModel) error {
 	return i.stockItemRepository.Update(item)
 }
 
-func (i *StockItemUseCase) Delete(id string) error {
+func (i *stockItemUseCase) Delete(id string) error {
 	item, err := i.stockItemRepository.Find(id)
 	if err != nil {
 		return err
@@ -145,7 +154,7 @@ func (i *StockItemUseCase) Delete(id string) error {
 	return i.stockItemRepository.Delete(id)
 }
 
-func (i *StockItemUseCase) UpdateRemain(model StockItemRemainUpdateModel) error {
+func (i *stockItemUseCase) UpdateRemain(model *StockItemRemainUpdateModel) error {
 	item, err := i.stockItemRepository.Find(model.Id)
 	if err != nil {
 		return err

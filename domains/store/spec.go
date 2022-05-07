@@ -15,7 +15,7 @@ func NewSpecialBusinessHourSpecification(specialHours []SpecialBusinessHour) *Sp
 	}
 }
 
-func (s *SpecialBusinessHourSpecification) Validate(item SpecialBusinessHour) error {
+func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) error {
 	exists, err := s.businessHourIdIsAssigned(item)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (s *SpecialBusinessHourSpecification) Validate(item SpecialBusinessHour) er
 	return nil
 }
 
-func (s *SpecialBusinessHourSpecification) businessHourIdIsAssigned(item SpecialBusinessHour) (bool, error) {
+func (s *SpecialBusinessHourSpecification) businessHourIdIsAssigned(item *SpecialBusinessHour) (bool, error) {
 	for _, hour := range s.specialHours {
 		if item.HaveSameBusinessHourId(hour) {
 			return true, nil
@@ -44,7 +44,7 @@ func (s *SpecialBusinessHourSpecification) businessHourIdIsAssigned(item Special
 	return false, nil
 }
 
-func (s *SpecialBusinessHourSpecification) dateIsOverwarped(item SpecialBusinessHour) (bool, error) {
+func (s *SpecialBusinessHourSpecification) dateIsOverwarped(item *SpecialBusinessHour) (bool, error) {
 	for _, hour := range s.specialHours {
 		// skip self
 		if item.Equals(hour) {

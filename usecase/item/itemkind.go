@@ -30,17 +30,25 @@ type ItemKinddUpdateModel struct {
 	Priority int
 }
 
-type ItemKindUseCase struct {
+type ItemKindUseCase interface {
+	Find(id string) (*ItemKindModel, error)
+	FindAll() ([]ItemKindModel, error)
+	Create(model *ItemKindCreateModel) (string, error)
+	Update(model *ItemKinddUpdateModel) error
+	Delete(id string) error
+}
+
+type itemKindUseCase struct {
 	repository domains.ItemKindRepository
 }
 
-func NewItemKindUseCase(repository domains.ItemKindRepository) *ItemKindUseCase {
-	return &ItemKindUseCase{
+func NewItemKindUseCase(repository domains.ItemKindRepository) ItemKindUseCase {
+	return &itemKindUseCase{
 		repository: repository,
 	}
 }
 
-func (i *ItemKindUseCase) Find(id string) (*ItemKindModel, error) {
+func (i *itemKindUseCase) Find(id string) (*ItemKindModel, error) {
 	item, err := i.repository.Find(id)
 	if err != nil {
 		return nil, err
@@ -49,7 +57,7 @@ func (i *ItemKindUseCase) Find(id string) (*ItemKindModel, error) {
 	return newItemKindModel(item), nil
 }
 
-func (i *ItemKindUseCase) FindAll() ([]ItemKindModel, error) {
+func (i *itemKindUseCase) FindAll() ([]ItemKindModel, error) {
 	items, err := i.repository.FindAll()
 	if err != nil {
 		return nil, err
@@ -64,7 +72,7 @@ func (i *ItemKindUseCase) FindAll() ([]ItemKindModel, error) {
 	return models, nil
 }
 
-func (i *ItemKindUseCase) Create(model ItemKindCreateModel) (string, error) {
+func (i *itemKindUseCase) Create(model *ItemKindCreateModel) (string, error) {
 	item, err := domains.NewItemKind(model.Name, model.Priority)
 	if err != nil {
 		return "", err
@@ -72,7 +80,7 @@ func (i *ItemKindUseCase) Create(model ItemKindCreateModel) (string, error) {
 	return i.repository.Create(item)
 }
 
-func (i *ItemKindUseCase) Update(model ItemKinddUpdateModel) error {
+func (i *itemKindUseCase) Update(model *ItemKinddUpdateModel) error {
 	item, err := i.repository.Find(model.Id)
 	if err != nil {
 		return err
@@ -89,7 +97,7 @@ func (i *ItemKindUseCase) Update(model ItemKinddUpdateModel) error {
 	return i.repository.Update(item)
 }
 
-func (i *ItemKindUseCase) Delete(id string) error {
+func (i *itemKindUseCase) Delete(id string) error {
 	item, err := i.repository.Find(id)
 	if err != nil {
 		return err

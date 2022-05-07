@@ -44,21 +44,29 @@ type FoodItemUpdateModel struct {
 	MaxOrderPerDay int
 }
 
-type FoodItemUseCase struct {
+type FoodItemUseCase interface {
+	Find(id string) (*FoodItemModel, error)
+	FindAll() ([]FoodItemModel, error)
+	Create(model *FoodItemCreateModel) (string, error)
+	Update(model *FoodItemUpdateModel) error
+	Delete(id string) error
+}
+
+type foodItemUseCase struct {
 	foodItemRepository domains.FoodItemRepository
 	itemKindRepository domains.ItemKindRepository
 	commonItemUseCase
 }
 
-func NewFoodItemUseCase(foodItemRepository domains.FoodItemRepository, itemKindRepository domains.ItemKindRepository) *FoodItemUseCase {
-	return &FoodItemUseCase{
+func NewFoodItemUseCase(foodItemRepository domains.FoodItemRepository, itemKindRepository domains.ItemKindRepository) FoodItemUseCase {
+	return &foodItemUseCase{
 		foodItemRepository: foodItemRepository,
 		itemKindRepository: itemKindRepository,
 		commonItemUseCase:  *newCommonItemUseCase(itemKindRepository),
 	}
 }
 
-func (f *FoodItemUseCase) Find(id string) (*FoodItemModel, error) {
+func (f *foodItemUseCase) Find(id string) (*FoodItemModel, error) {
 	item, err := f.foodItemRepository.Find(id)
 	if err != nil {
 		return nil, err
@@ -75,7 +83,7 @@ func (f *FoodItemUseCase) Find(id string) (*FoodItemModel, error) {
 	return newFoodItemModel(item, kind), nil
 }
 
-func (f *FoodItemUseCase) FindAll() ([]FoodItemModel, error) {
+func (f *foodItemUseCase) FindAll() ([]FoodItemModel, error) {
 	items, err := f.foodItemRepository.FindAll()
 	if err != nil {
 		return nil, err
@@ -98,7 +106,7 @@ func (f *FoodItemUseCase) FindAll() ([]FoodItemModel, error) {
 	return models, nil
 }
 
-func (f *FoodItemUseCase) Create(model FoodItemCreateModel) (string, error) {
+func (f *foodItemUseCase) Create(model *FoodItemCreateModel) (string, error) {
 	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled)
 	if err != nil {
 		return "", err
@@ -111,7 +119,7 @@ func (f *FoodItemUseCase) Create(model FoodItemCreateModel) (string, error) {
 	return f.foodItemRepository.Create(item)
 }
 
-func (i *FoodItemUseCase) Update(model FoodItemUpdateModel) error {
+func (i *foodItemUseCase) Update(model *FoodItemUpdateModel) error {
 	item, err := i.foodItemRepository.Find(model.Id)
 	if err != nil {
 		return err
@@ -133,7 +141,7 @@ func (i *FoodItemUseCase) Update(model FoodItemUpdateModel) error {
 	return i.foodItemRepository.Update(item)
 }
 
-func (f *FoodItemUseCase) Delete(id string) error {
+func (f *foodItemUseCase) Delete(id string) error {
 	item, err := f.foodItemRepository.Find(id)
 	if err != nil {
 		return err

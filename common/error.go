@@ -19,12 +19,36 @@ type UpdateTargetNotFoundError struct {
 	id   string
 }
 
-func NewUpdateTargetNotFoundError(name string) *NotFoundError {
-	return &NotFoundError{name: name}
+func NewUpdateTargetNotFoundError(id string) *UpdateTargetNotFoundError {
+	return &UpdateTargetNotFoundError{id: id}
 }
 
 func (v *UpdateTargetNotFoundError) Error() string {
 	return fmt.Sprintf("Update target not Found. Id:%s", v.id)
+}
+
+type UpdateTargetRelatedNotFoundError struct {
+	id   string
+}
+
+func NewUpdateTargetRelatedNotFoundError(id string) *UpdateTargetRelatedNotFoundError {
+	return &UpdateTargetRelatedNotFoundError{id: id}
+}
+
+func (v *UpdateTargetRelatedNotFoundError) Error() string {
+	return fmt.Sprintf("Related target for update not Found. Id:%s", v.id)
+}
+
+type RelatedItemNotFoundError struct {
+	id   string
+}
+
+func NewRelatedItemNotFoundError(id string) *RelatedItemNotFoundError {
+	return &RelatedItemNotFoundError{id: id}
+}
+
+func (v *RelatedItemNotFoundError) Error() string {
+	return fmt.Sprintf("Related target not Found. Id:%s", v.id)
 }
 
 type NotFoundError struct {

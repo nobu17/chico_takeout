@@ -5,6 +5,8 @@ import (
 	"sort"
 
 	domains "chico/takeout/domains/item"
+
+	"github.com/jinzhu/copier"
 )
 
 var memory map[string]*domains.ItemKind
@@ -17,7 +19,7 @@ func (i *ItemKindMemoryRepository) GetMemory() map[string]*domains.ItemKind {
 	return i.inMemory
 }
 
-func resetMemory() {
+func resetKindMemory() {
 	memory = map[string]*domains.ItemKind{}
 	item1, _ := domains.NewItemKind("item1", 1)
 	memory[item1.GetId()] = item1
@@ -27,7 +29,7 @@ func resetMemory() {
 
 func NewItemKindMemoryRepository() *ItemKindMemoryRepository {
 	if memory == nil {
-		resetMemory()
+		resetKindMemory()
 	}
 	return &ItemKindMemoryRepository{memory}
 }
@@ -37,13 +39,16 @@ func NewItemKindMemoryRepositoryWithParam(param map[string]*domains.ItemKind) *I
 	return &ItemKindMemoryRepository{memory}
 }
 
-func (i *ItemKindMemoryRepository) Rest() {
-	resetMemory()
+func (i *ItemKindMemoryRepository) Reset() {
+	resetKindMemory()
 }
 
 func (i *ItemKindMemoryRepository) Find(id string) (*domains.ItemKind, error) {
 	if val, ok := i.inMemory[id]; ok {
-		return val, nil
+		// need copy to protect
+		duplicated := domains.ItemKind{}
+		copier.Copy(&duplicated, &val)
+		return &duplicated, nil
 	}
 	return nil, nil
 }

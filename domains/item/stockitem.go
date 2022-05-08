@@ -14,22 +14,20 @@ type StockItem struct {
 }
 
 const (
-	StockItemNameMaxLength        = 15
-	StockItemDescriptionMaxLength = 150
-	StockItemMaxOrderMaxValue     = 30
-	StockItemMaxPrice             = 20000
 	StockItemMaxRemain            = 999
 )
 
 func NewStockItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool) (*StockItem, error) {
 	// stock first remain is 0
-	remain, _ := NewStockRemain(0, StockItemMaxRemain)
+	remain, err := NewStockRemain(0, StockItemMaxRemain)
+	if err != nil {
+		return nil, err
+	}
 	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
 	if err != nil {
 		return nil, err
 	}
-	item := StockItem{commonItem: *common, remain: *remain}
-	return &item, nil
+	return &StockItem{commonItem: *common, remain: *remain}, nil
 }
 
 func (s *StockItem) GetRemain() int {
@@ -46,10 +44,6 @@ func (s *StockItem) SetRemain(value int) error {
 }
 
 func (s *StockItem) ConsumeRemain(value int) error {
-	// check max order request at first
-	if err := s.maxOrder.WithinLimit(value); err != nil {
-		return nil
-	}
 	// try to consume stock
 	remain, err := s.remain.Consume(value)
 	if err != nil {

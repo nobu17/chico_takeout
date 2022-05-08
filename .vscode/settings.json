@@ -2,5 +2,5 @@
   "go.formatTool": "gofmt",
   "editor.guides.bracketPairs": true,
   "editor.bracketPairColorization.enabled": true,
-  "cSpell.words": ["gonic"]
+  "cSpell.words": ["gonic", "jinzhu", "stretchr"]
 }

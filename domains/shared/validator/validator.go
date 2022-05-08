@@ -24,7 +24,6 @@ func (s *StingLength) Validate(val string) error {
 	if strings.TrimSpace(val) == "" {
 		return common.NewValidationError(s.name, "required")
 	}
-
 	if utf8.RuneCountInString(val) > s.maxLength {
 		return common.NewValidationError("name", fmt.Sprintf("MaxLength:%d", s.maxLength))
 	}

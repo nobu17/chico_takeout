@@ -66,7 +66,7 @@ type StockRemain struct {
 }
 
 func NewStockRemain(value, maxValue int) (*StockRemain, error) {
-	validator := validator.NewRangeInteger("StockRemain", 1, maxValue)
+	validator := validator.NewRangeInteger("StockRemain", 0, maxValue)
 	if err := validator.Validate(value); err != nil {
 		return nil, err
 	}
@@ -82,9 +82,7 @@ func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	if remain < 0 {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("remain count is insufficient. remain:%d, request:%d", p.GetValue(), request))
 	}
-	return &StockRemain{
-		IntValue: shared.NewIntValue(remain),
-		maxValue: p.maxValue}, nil
+	return NewStockRemain(remain, p.maxValue)
 }
 
 func (p *StockRemain) Increase(request int) (*StockRemain, error) {
@@ -92,9 +90,7 @@ func (p *StockRemain) Increase(request int) (*StockRemain, error) {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
 	}
 	remain := p.GetValue() + request
-	return &StockRemain{
-		IntValue: shared.NewIntValue(remain),
-		maxValue: p.maxValue}, nil
+	return NewStockRemain(remain, p.maxValue)
 }
 
 const (
@@ -113,4 +109,29 @@ func NewMaxOrderPerDay(value int) (*MaxOrderPerDay, error) {
 	}
 
 	return &MaxOrderPerDay{IntValue: shared.NewIntValue(value)}, nil
+}
+
+type Descritpion struct {
+	shared.StringValue
+}
+
+func NewDescritpion(value string, maxLength int) (*Descritpion, error) {
+	validator := validator.NewStingLength("Descritpion", maxLength)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Descritpion{StringValue: shared.NewStringValue(value)}, nil
+}
+
+type Name struct {
+	shared.StringValue
+}
+func NewName(value string, maxLength int) (*Name, error) {
+	validator := validator.NewStingLength("Name", maxLength)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Name{StringValue: shared.NewStringValue(value)}, nil
 }

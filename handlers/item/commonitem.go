@@ -12,7 +12,6 @@ type CommonItemCreateRequest struct {
 }
 
 type CommonItemUpdateRequest struct {
-	Id     string `json:"id" binding:"required"`
 	KindId string `json:"kindId" binding:"required"`
 	CommonItemBaseData
 }
@@ -23,5 +22,5 @@ type CommonItemBaseData struct {
 	MaxOrder    int    `json:"maxOrder" binding:"required"`
 	Price       int    `json:"price" binding:"required"`
 	Description string `json:"description" binding:"required"`
-	Enabled     bool   `json:"enabled" binding:"required"`
+	Enabled     *bool  `json:"enabled" binding:"required"`
 }

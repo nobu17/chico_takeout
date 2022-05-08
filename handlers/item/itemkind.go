@@ -78,11 +78,13 @@ func (i *itemKindHandler) Get(c *gin.Context) {
 
 func (i *itemKindHandler) Post(c *gin.Context) {
 	var req ItemKindCreateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !i.ShouldBind(c, &req) {
+		return
+	}
 	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, ItemKindCreateResponse{Id: id})
 }
@@ -90,11 +92,13 @@ func (i *itemKindHandler) Post(c *gin.Context) {
 func (i *itemKindHandler) Put(c *gin.Context) {
 	id := c.Param("id")
 	var req ItemKindUpdateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !i.ShouldBind(c, &req) {
+		return
+	}
 	err := i.usecase.Update(req.toModel(id))
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }
@@ -104,6 +108,7 @@ func (i *itemKindHandler) Delete(c *gin.Context) {
 	err := i.usecase.Delete(id)
 	if err != nil {
 		i.HandleError(c, err)
+		return
 	}
 	i.HandleOK(c, nil)
 }

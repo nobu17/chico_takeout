@@ -1,8 +1,6 @@
 package item
 
 import (
-	"fmt"
-
 	"chico/takeout/common"
 	domains "chico/takeout/domains/item"
 )
@@ -49,7 +47,7 @@ func (c *commonItemUseCase) ExistsKind(item domains.CommonItemImpl) error {
 		return err
 	}
 	if !exists {
-		return common.NewUpdateTargetNotFoundError(fmt.Sprintf("kind id is not exists.kind id:%s", item.GetKindId()))
+		return common.NewUpdateTargetRelatedNotFoundError(item.GetKindId())
 	}
 	return nil
 }

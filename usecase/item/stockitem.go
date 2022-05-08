@@ -95,7 +95,7 @@ func (i *stockItemUseCase) FindAll() ([]StockItemModel, error) {
 	models := []StockItemModel{}
 	for _, item := range items {
 		for _, kind := range kinds {
-			if item.GetKindId() == kind.GetId() {
+			if item.HasKind(kind) {
 				model := newStockItemModel(&item, &kind)
 				models = append(models, *model)
 				break
@@ -130,15 +130,16 @@ func (i *stockItemUseCase) Update(model *StockItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
+	if err != nil {
+		return err
+	}
+
 	err = i.ExistsKind(item)
 	if err != nil {
 		return err
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
-	if err != nil {
-		return err
-	}
 	return i.stockItemRepository.Update(item)
 }
 

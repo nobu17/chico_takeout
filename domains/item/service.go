@@ -21,7 +21,8 @@ func (i *ItemService) ExistsKind(item CommonItemImpl) (bool, error) {
 		return false, err
 	}
 	if kind == nil {
-		return false, common.NewNotFoundError(fmt.Sprintf("item kind not found.StockItemId:%s, ItemKindId:%s", item.GetId(), item.GetKindId()))
+		// return false, common.NewNotFoundError(fmt.Sprintf("item kind not found.StockItemId:%s, ItemKindId:%s", item.GetId(), item.GetKindId()))
+		return false, nil
 	}
 	return true, nil
 }

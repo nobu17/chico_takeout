@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"chico/takeout/common"
@@ -22,9 +23,19 @@ func (b *BaseHandler) HandleError(c *gin.Context, e error) {
 		c.String(http.StatusBadRequest, vErr.Error())
 		return
 	}
+	var rErr *common.RelatedItemNotFoundError
+	if errors.As(e, &rErr) {
+		c.String(http.StatusInternalServerError, rErr.Error())
+		return
+	}
+	var utErr *common.UpdateTargetRelatedNotFoundError
+	if errors.As(e, &utErr) {
+		c.String(http.StatusBadRequest, utErr.Error())
+		return
+	}
 	var uErr *common.UpdateTargetNotFoundError
 	if errors.As(e, &uErr) {
-		c.String(http.StatusBadRequest, uErr.Error())
+		c.String(http.StatusNotFound, uErr.Error())
 		return
 	}
 	var nErr *common.NotFoundError
@@ -45,4 +56,13 @@ func (b *BaseHandler) HandleOK(c *gin.Context, jsonData interface{}) {
 		return
 	}
 	c.JSON(http.StatusOK, "")
+}
+
+func (b *BaseHandler) ShouldBind(c *gin.Context, request interface{}) bool {
+	err := c.ShouldBind(request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, fmt.Sprintf("bad parameters.%s", err))
+		return false
+	}
+	return true
 }

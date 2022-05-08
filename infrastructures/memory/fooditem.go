@@ -5,6 +5,8 @@ import (
 	"sort"
 
 	domains "chico/takeout/domains/item"
+
+	"github.com/jinzhu/copier"
 )
 
 var foodMemory map[string]*domains.FoodItem
@@ -37,7 +39,10 @@ func NewFoodItemMemoryRepository() *FoodItemMemoryRepository {
 
 func (s *FoodItemMemoryRepository) Find(id string) (*domains.FoodItem, error) {
 	if val, ok := s.inMemory[id]; ok {
-		return val, nil
+		// need copy to protect
+		duplicated := domains.FoodItem{}
+		copier.Copy(&duplicated, &val)
+		return &duplicated, nil
 	}
 	return nil, nil
 }

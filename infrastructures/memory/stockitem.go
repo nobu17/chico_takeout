@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	domains "chico/takeout/domains/item"
+	"github.com/jinzhu/copier"
 )
 
 var stockMemory map[string]*domains.StockItem
@@ -15,23 +16,39 @@ type StockItemMemoryRepository struct {
 
 func NewStockItemMemoryRepository() *StockItemMemoryRepository {
 	if stockMemory == nil {
-		kindRepos := NewItemKindMemoryRepository()
-		allKinds, _ := kindRepos.FindAll()
-	
-		stockMemory = map[string]*domains.StockItem{}
-		item1, _ := domains.NewStockItem("stock1", "item1", 1, 4, 100, allKinds[0].GetId(), true)
-		stockMemory[item1.GetId()] = item1
-		fmt.Println("stock item1:", item1.GetId(), item1.GetKindId())
-		item2, _ := domains.NewStockItem("stock2", "item2", 2, 5, 200, allKinds[1].GetId(), true)
-		stockMemory[item2.GetId()] = item2
+		resetStockItemMemory()
 	}
 
 	return &StockItemMemoryRepository{stockMemory}
 }
 
+func resetStockItemMemory() {
+	kindRepos := NewItemKindMemoryRepository()
+	allKinds, _ := kindRepos.FindAll()
+
+	stockMemory = map[string]*domains.StockItem{}
+	item1, _ := domains.NewStockItem("stock1", "item1", 1, 4, 100, allKinds[0].GetId(), true)
+	item1.SetRemain(10)
+	stockMemory[item1.GetId()] = item1
+	fmt.Println("stock item1:", item1.GetId(), item1.GetKindId())
+	item2, _ := domains.NewStockItem("stock2", "item2", 2, 5, 200, allKinds[1].GetId(), true)
+	stockMemory[item2.GetId()] = item2
+}
+
+func (s *StockItemMemoryRepository) GetMemory() map[string]*domains.StockItem {
+	return s.inMemory
+}
+
+func (s *StockItemMemoryRepository) Reset() {
+	resetStockItemMemory()
+}
+
 func (s *StockItemMemoryRepository) Find(id string) (*domains.StockItem, error) {
 	if val, ok := s.inMemory[id]; ok {
-		return val, nil
+		// need copy to protect
+		duplicated := domains.StockItem{}
+		copier.Copy(&duplicated, &val)
+		return &duplicated, nil
 	}
 	return nil, nil
 }

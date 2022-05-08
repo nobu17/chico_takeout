@@ -1,7 +1,6 @@
 package item
 
 import (
-	"fmt"
 	"strings"
 
 	"chico/takeout/common"
@@ -9,13 +8,19 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	CommonItemMaxPrice             = 20000
+	CommonItemDescriptionMaxLength = 150
+	CommonItemNameMaxLength        = 15
+)
+
 type commonItem struct {
 	id          string
-	name        string
+	name        Name
 	priority    Priority
 	maxOrder    MaxOrder
 	price       Price
-	description string
+	description Descritpion
 	kindId      string
 	enabled     bool
 }
@@ -37,7 +42,8 @@ func newCommonItem(name, description string, priority, maxOrder, price int, kind
 }
 
 func (s *commonItem) Set(name, description string, priority, maxOrder, price int, kindId string, enabled bool) error {
-	if err := s.validateName(name); err != nil {
+	nameV, err := NewName(name, CommonItemNameMaxLength)
+	if err != nil {
 		return err
 	}
 
@@ -51,12 +57,13 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 		return err
 	}
 
-	priceV, err := NewPrice(price, StockItemMaxPrice)
+	priceV, err := NewPrice(price, CommonItemMaxPrice)
 	if err != nil {
 		return err
 	}
 
-	if err := s.validateDescription(description); err != nil {
+	desc, err := NewDescritpion(description, CommonItemDescriptionMaxLength)
+	if err != nil {
 		return err
 	}
 
@@ -64,35 +71,13 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 		return err
 	}
 
-	s.name = name
+	s.name = *nameV
 	s.priority = *priV
 	s.maxOrder = *maxO
 	s.price = *priceV
-	s.description = description
+	s.description = *desc
 	s.kindId = kindId
 	s.enabled = enabled
-	return nil
-}
-
-func (s *commonItem) validateName(name string) error {
-	if strings.TrimSpace(name) == "" {
-		return common.NewValidationError("name", "required")
-	}
-
-	if len(name) > StockItemNameMaxLength {
-		return common.NewValidationError("name", fmt.Sprintf("MaxLength:%d", StockItemNameMaxLength))
-	}
-	return nil
-}
-
-func (s *commonItem) validateDescription(description string) error {
-	if strings.TrimSpace(description) == "" {
-		return common.NewValidationError("description", "required")
-	}
-
-	if len(description) > StockItemDescriptionMaxLength {
-		return common.NewValidationError("description", fmt.Sprintf("MaxLength:%d", StockItemDescriptionMaxLength))
-	}
 	return nil
 }
 
@@ -116,7 +101,7 @@ func (s *commonItem) GetId() string {
 }
 
 func (s *commonItem) GetName() string {
-	return s.name
+	return s.name.GetValue()
 }
 
 func (s *commonItem) GetPriority() int {
@@ -132,7 +117,7 @@ func (s *commonItem) GetPrice() int {
 }
 
 func (s *commonItem) GetDescription() string {
-	return s.description
+	return s.description.GetValue()
 }
 
 func (s *commonItem) GetKindId() string {
@@ -141,4 +126,8 @@ func (s *commonItem) GetKindId() string {
 
 func (s *commonItem) GetEnabled() bool {
 	return s.enabled
+}
+
+func (s *commonItem) HasKind(kind ItemKind) bool {
+	return s.kindId == kind.GetId()
 }

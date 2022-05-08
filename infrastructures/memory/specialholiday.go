@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	domains "chico/takeout/domains/store"
+
+	"github.com/jinzhu/copier"
 )
 
 var specialHolidayMemory map[string]*domains.SpecialHoliday
@@ -32,7 +34,10 @@ func NewSpecialHolidayMemoryRepository() *SpecialHolidayMemoryRepository {
 
 func (i *SpecialHolidayMemoryRepository) Find(id string) (*domains.SpecialHoliday, error) {
 	if val, ok := i.inMemory[id]; ok {
-		return val, nil
+		// need copy to protect
+		duplicated := domains.SpecialHoliday{}
+		copier.Copy(&duplicated, &val)
+		return &duplicated, nil
 	}
 	return nil, nil
 }

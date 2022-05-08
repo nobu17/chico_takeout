@@ -14,6 +14,7 @@ type StockItemResponse struct {
 
 func newStockItemData(item *usecase.StockItemModel) *StockItemResponse {
 	kind := newItemKindData(&item.Kind)
+	enabled := item.Enabled
 	return &StockItemResponse{
 		CommonItemResponse: CommonItemResponse{
 			Id:   item.Id,
@@ -24,6 +25,7 @@ func newStockItemData(item *usecase.StockItemModel) *StockItemResponse {
 				MaxOrder:    item.MaxOrder,
 				Price:       item.Price,
 				Description: item.Description,
+				Enabled:     &enabled,
 			},
 		},
 		Remain: item.Remain,
@@ -43,7 +45,7 @@ func (s *StockItemCreateRequest) toModel() *usecase.StockItemCreateModel {
 		CommonItemCreateModel: usecase.CommonItemCreateModel{
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled,
 			},
 		},
 	}
@@ -53,25 +55,24 @@ type StockItemUpdateRequest struct {
 	CommonItemUpdateRequest
 }
 
-func (s *StockItemUpdateRequest) toModel() *usecase.StockItemUpdateModel {
+func (s *StockItemUpdateRequest) toModel(id string) *usecase.StockItemUpdateModel {
 	return &usecase.StockItemUpdateModel{
 		CommonItemUpdateModel: usecase.CommonItemUpdateModel{
-			Id:     s.Id,
+			Id:     id,
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled,
 			},
 		},
 	}
 }
 
 type StockItemRemainUpdateRequest struct {
-	Id     string `json:"id" binding:"required"`
 	Remain int    `json:"remain" binding:"required"`
 }
 
-func (s *StockItemRemainUpdateRequest) toModel() *usecase.StockItemRemainUpdateModel {
-	return &usecase.StockItemRemainUpdateModel{Id: s.Id, Remain: s.Remain}
+func (s *StockItemRemainUpdateRequest) toModel(id string) *usecase.StockItemRemainUpdateModel {
+	return &usecase.StockItemRemainUpdateModel{Id: id, Remain: s.Remain}
 }
 
 type stockItemHandler struct {
@@ -109,8 +110,9 @@ func (i *stockItemHandler) Get(c *gin.Context) {
 
 func (i *stockItemHandler) Post(c *gin.Context) {
 	var req StockItemCreateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !i.ShouldBind(c, &req) {
+		return
+	}
 	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
@@ -120,10 +122,12 @@ func (i *stockItemHandler) Post(c *gin.Context) {
 }
 
 func (i *stockItemHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req StockItemUpdateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := i.usecase.Update(req.toModel())
+	if !i.ShouldBind(c, &req) {
+		return
+	}
+	err := i.usecase.Update(req.toModel(id))
 	if err != nil {
 		i.HandleError(c, err)
 		return
@@ -142,10 +146,12 @@ func (i *stockItemHandler) Delete(c *gin.Context) {
 }
 
 func (i *stockItemHandler) PutRemain(c *gin.Context) {
+	id := c.Param("id")
 	var req StockItemRemainUpdateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := i.usecase.UpdateRemain(req.toModel())
+	if !i.ShouldBind(c, &req) {
+		return
+	}
+	err := i.usecase.UpdateRemain(req.toModel(id))
 	if err != nil {
 		i.HandleError(c, err)
 		return

@@ -16,15 +16,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var memoryMaps map[string]*domains.ItemKind
+var kindMemoryMaps map[string]*domains.ItemKind
 
-func SetupRouter() *gin.Engine {
+func SetupKindRouter() *gin.Engine {
 	r := gin.Default()
 	kind := r.Group("/item/kind")
 	{
 		repo := memory.NewItemKindMemoryRepository()
-		repo.Rest()
-		memoryMaps = repo.GetMemory()
+		repo.Reset()
+		kindMemoryMaps = repo.GetMemory()
 		useCase := itemUseCase.NewItemKindUseCase(repo)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
@@ -37,7 +37,7 @@ func SetupRouter() *gin.Engine {
 }
 
 func TestItemKindHandler_GETALL(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 	req, _ := http.NewRequest("GET", "/item/kind/", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -49,8 +49,8 @@ func TestItemKindHandler_GETALL(t *testing.T) {
 	var response []map[string]interface{}
 	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
-	if len(response) != len(memoryMaps) {
-		t.Errorf("response length should be %d, actual:%d", len(memoryMaps), len(response))
+	if len(response) != len(kindMemoryMaps) {
+		t.Errorf("response length should be %d, actual:%d", len(kindMemoryMaps), len(response))
 		return
 	}
 	// var want []map[string]interface{}
@@ -65,14 +65,14 @@ func TestItemKindHandler_GETALL(t *testing.T) {
 }
 
 func TestItemKindHandler_GET(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	wants := map[string]map[string]interface{}{
 		"item1": {"priority": 1, "name": "item1"},
 		"item2": {"priority": 2, "name": "item2"},
 	}
 
-	for id := range memoryMaps {
+	for id := range kindMemoryMaps {
 		req, _ := http.NewRequest("GET", "/item/kind/"+id, nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -90,7 +90,7 @@ func TestItemKindHandler_GET(t *testing.T) {
 }
 
 func TestItemKindHandler_GET_NotFound(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	req, _ := http.NewRequest("GET", "/item/kind/12345", nil)
 	w := httptest.NewRecorder()
@@ -108,7 +108,7 @@ func TestItemKindHandler_GET_NotFound(t *testing.T) {
 }
 
 func TestItemKindHandler_POST(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	want := map[string]interface{}{"priority": 4, "name": "add"}
 	body := map[string]interface{}{
@@ -141,7 +141,7 @@ func TestItemKindHandler_POST(t *testing.T) {
 		return
 	}
 
-	// confirm result
+	// confirm result from result id
 	getReq, _ := http.NewRequest("GET", "/item/kind/"+id, nil)
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, getReq)
@@ -163,7 +163,7 @@ func TestItemKindHandler_POST_BadRequest(t *testing.T) {
 		want int
 	}
 
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	inputs := []input{
 		{name: "only name", args: map[string]interface{}{"name": "added"}, want: 2},
@@ -209,10 +209,10 @@ func TestItemKindHandler_POST_BadRequest(t *testing.T) {
 }
 
 func TestItemKindHandler_PUT(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	ids := []string{}
-	for id := range memoryMaps {
+	for id := range kindMemoryMaps {
 		ids = append(ids, id)
 	}
 
@@ -260,10 +260,10 @@ func TestItemKindHandler_PUT_BadRequest(t *testing.T) {
 		want map[string]interface{}
 	}
 
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	ids := []string{}
-	for id := range memoryMaps {
+	for id := range kindMemoryMaps {
 		ids = append(ids, id)
 	}
 
@@ -316,7 +316,7 @@ func TestItemKindHandler_PUT_NotFound(t *testing.T) {
 		"priority": 3,
 	}
 
-	r := SetupRouter()
+	r := SetupKindRouter()
 	jBytes, err := json.Marshal(body)
 	if err != nil {
 		t.Errorf("failed to marshal json for test.:%s", err)
@@ -336,10 +336,10 @@ func TestItemKindHandler_PUT_NotFound(t *testing.T) {
 }
 
 func TestItemKindHandler_DELETE(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	ids := []string{}
-	for id := range memoryMaps {
+	for id := range kindMemoryMaps {
 		ids = append(ids, id)
 	}
 
@@ -361,7 +361,7 @@ func TestItemKindHandler_DELETE(t *testing.T) {
 }
 
 func TestItemKindHandler_DELETE_NotFound(t *testing.T) {
-	r := SetupRouter()
+	r := SetupKindRouter()
 
 	req, _ := http.NewRequest("DELETE", "/item/kind/1234", nil)
 	w := httptest.NewRecorder()

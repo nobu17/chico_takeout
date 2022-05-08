@@ -60,10 +60,10 @@ type FoodItemUpdateRequest struct {
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
 }
 
-func (s *FoodItemUpdateRequest) toModel() *usecase.FoodItemUpdateModel {
+func (s *FoodItemUpdateRequest) toModel(id string) *usecase.FoodItemUpdateModel {
 	return &usecase.FoodItemUpdateModel{
 		CommonItemUpdateModel: usecase.CommonItemUpdateModel{
-			Id:     s.Id,
+			Id:     id,
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
 				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description,
@@ -108,8 +108,9 @@ func (i *foodItemHandler) Get(c *gin.Context) {
 
 func (i *foodItemHandler) Post(c *gin.Context) {
 	var req FoodItemCreateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !i.ShouldBind(c, &req) {
+		return
+	}
 	id, err := i.usecase.Create(req.toModel())
 	if err != nil {
 		i.HandleError(c, err)
@@ -119,10 +120,12 @@ func (i *foodItemHandler) Post(c *gin.Context) {
 }
 
 func (i *foodItemHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req FoodItemUpdateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := i.usecase.Update(req.toModel())
+	if !i.ShouldBind(c, &req) {
+		return
+	}
+	err := i.usecase.Update(req.toModel(id))
 	if err != nil {
 		i.HandleError(c, err)
 		return

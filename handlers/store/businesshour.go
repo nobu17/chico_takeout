@@ -22,16 +22,15 @@ func newBusinessHoursData(model usecases.BusinessHoursModel) *BusinessHoursData 
 }
 
 type BusinessHoursUpdateData struct {
-	Id       string             `json:"id" binding:"required"`
 	Name     string             `json:"name" binding:"required"`
 	Start    string             `json:"start" binding:"required"`
 	End      string             `json:"end" binding:"required"`
 	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
 }
 
-func (b *BusinessHoursUpdateData) toModel() *usecases.BusinessHoursUpdateModel {
+func (b *BusinessHoursUpdateData) toModel(id string) *usecases.BusinessHoursUpdateModel {
 	return &usecases.BusinessHoursUpdateModel{
-		Id:       b.Id,
+		Id:       id,
 		Name:     b.Name,
 		Start:    b.Start,
 		End:      b.End,
@@ -78,10 +77,12 @@ func (b *businessHoursHandler) Get(c *gin.Context) {
 }
 
 func (b *businessHoursHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req BusinessHoursUpdateData
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := b.usecase.Update(req.toModel())
+	if !b.ShouldBind(c, &req) {
+		return
+	}
+	err := b.usecase.Update(req.toModel(id))
 	if err != nil {
 		b.HandleError(c, err)
 		return

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	offsetMinutes = 60
+	offsetMinutes = 59
 )
 
 type TimeRange struct {

@@ -3,6 +3,8 @@ package tests
 import (
 	"crypto/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func AssertMaps(t *testing.T, got map[string]interface{}, want map[string]interface{}) {
@@ -17,10 +19,26 @@ func AssertMap(t *testing.T, maps map[string]interface{}, key string, want inter
 		t.Errorf("failed to get data from map. key=%s", key)
 		return
 	}
+	// fmt.Printf("%T\n", value)
 	var got interface{}
 	switch a := value.(type) {
 	case float64:
 		got = int(a)
+	case []interface{}:
+		got := []int{}
+		for _, val := range a {
+			elem, ok := val.(float64)
+			if ok {
+				got = append(got, int(elem))
+			}
+		}
+		// fmt.Println("comp", want, got)
+		if len(got) == 0 {
+			assert.ElementsMatch(t, want, a)
+		} else {
+			assert.ElementsMatch(t, want, got)
+		}
+		return
 	case map[string]interface{}:
 		val, ok := want.(map[string]interface{})
 		if !ok {

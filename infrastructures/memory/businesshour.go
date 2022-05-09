@@ -17,15 +17,27 @@ type BusinessHoursMemoryRepository struct {
 func NewBusinessHoursMemoryRepository() *BusinessHoursMemoryRepository {
 	businessMux.Lock()
 	if businessHoursMemory == nil {
-		mem, err := domains.NewDefaultBusinessHours()
-		if err != nil {
-			fmt.Println("%w", err)
-			panic("failed to init businessHoursMemory")
-		}
-		businessHoursMemory = mem
+		resetBusinessHoursMemory()
 	}
 	businessMux.Unlock()
 	return &BusinessHoursMemoryRepository{inMemory: businessHoursMemory}
+}
+
+func resetBusinessHoursMemory() {
+	mem, err := domains.NewDefaultBusinessHours()
+	if err != nil {
+		fmt.Println("%w", err)
+		panic("failed to init businessHoursMemory")
+	}
+	businessHoursMemory = mem
+}
+
+func (b *BusinessHoursMemoryRepository) Reset() {
+	resetBusinessHoursMemory()
+}
+
+func (s *BusinessHoursMemoryRepository) GetMemory() *domains.BusinessHours {
+	return s.inMemory
 }
 
 func (b *BusinessHoursMemoryRepository) Fetch() (*domains.BusinessHours, error) {

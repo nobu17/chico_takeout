@@ -73,7 +73,7 @@ func setupRouter() *gin.Engine {
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
 		handler := storeHandler.NewbusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
-		hour.PUT("/", handler.Put)
+		hour.PUT("/:id", handler.Put)
 	}
 	specialHour := r.Group("/store/special_hour")
 	{

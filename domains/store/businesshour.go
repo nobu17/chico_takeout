@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	BusinessHoursMaxSchedules = 5
+	BusinessHoursMaxSchedules = 3
 )
 
 type BusinessHoursRepository interface {
@@ -23,9 +23,9 @@ type BusinessHours struct {
 
 func NewDefaultBusinessHours() (*BusinessHours, error) {
 	// create default
-	morning, _ := NewBusinessHour("morning", "07:00", "10:00", []Weekday{Monday})
-	lunch, _ := NewBusinessHour("lunch", "11:00", "15:00", []Weekday{Monday})
-	dinner, _ := NewBusinessHour("diner", "18:00", "21:00", []Weekday{Friday, Saturday})
+	morning, _ := NewBusinessHour("morning", "07:00", "09:30", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday})
+	lunch, _ := NewBusinessHour("lunch", "11:30", "15:00", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday})
+	dinner, _ := NewBusinessHour("dinner", "18:00", "21:00", []Weekday{Wednesday, Saturday})
 
 	schedules := []BusinessHour{}
 	schedules = append(schedules, *morning)
@@ -58,12 +58,12 @@ func (b *BusinessHours) GetSchedules() []BusinessHour {
 	return tmp
 }
 
-
 func (b *BusinessHours) FindById(id string) (*BusinessHour, error) {
 	_, item := b.findSchedule(id)
 	if item == nil {
 		return nil, common.NewNotFoundError(fmt.Sprintf("not found:%s", id))
 	}
+	// return copy for immutable
 	newItem := item
 	return newItem, nil
 }
@@ -86,22 +86,33 @@ func (b *BusinessHours) FindById(id string) (*BusinessHour, error) {
 // 	return nil
 // }
 
-func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) error {
-	_, target := b.findSchedule(id)
-	if target == nil {
-		return common.NewValidationError("schedules", fmt.Sprintf("update target not found:%s", id))
-	}
-	err := target.Set(name, start, end, weekdays)
+func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) (*BusinessHours, error) {
+	selfCopy, err := b.Copy()
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("unexpected error at copy:%s", err)
 	}
-	return nil
+
+	_, target := selfCopy.findSchedule(id)
+	if target == nil {
+		return nil, common.NewNotFoundError("id")
+	}
+	err = target.Set(name, start, end, weekdays)
+	if err != nil {
+		return nil, err
+	}
+	// check overwrap
+	err = selfCopy.validateSchedules()
+	if err != nil {
+		return nil, err
+	}
+	return selfCopy, nil
 }
 
 func (b *BusinessHours) findSchedule(id string) (int, *BusinessHour) {
-	for index, schedule := range b.schedules {
-		if schedule.id == id {
-			return index, &schedule
+	// return pointer, so it is not immutable
+	for i := 0; i < len(b.schedules); i++ {
+		if b.schedules[i].id == id {
+			return i, &b.schedules[i]
 		}
 	}
 	return -1, nil
@@ -132,6 +143,14 @@ func (b *BusinessHours) validateDuplicate() error {
 	return nil
 }
 
+func (b *BusinessHours) Copy() (*BusinessHours, error) {
+	hours := []BusinessHour{}
+	for _, sc := range b.schedules {
+		hours = append(hours, *sc.Copy())
+	}
+	return NewBusinessHours(hours)
+}
+
 const (
 	BusinessHourNameMaxLength = 10
 )
@@ -151,6 +170,12 @@ func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour
 		return nil, err
 	}
 	return businessHour, nil
+}
+
+func (b *BusinessHour) Copy() *BusinessHour {
+	businessHour, _ := NewBusinessHour(b.name, b.shift.start, b.shift.end, b.weekdays)
+	businessHour.id = b.id
+	return businessHour
 }
 
 func (b *BusinessHour) Equals(other BusinessHour) bool {

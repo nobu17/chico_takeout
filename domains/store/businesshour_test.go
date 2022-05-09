@@ -1,0 +1,294 @@
+package store_test
+
+import (
+	"fmt"
+	"testing"
+
+	"chico/takeout/common"
+	"chico/takeout/domains/store"
+
+	"github.com/stretchr/testify/assert"
+)
+
+type busHoursArgs struct {
+	id       string
+	idIndex  int
+	name     string
+	start    string
+	end      string
+	weekdays []store.Weekday
+}
+type busHoursInput struct {
+	name             string
+	args             []busHoursArgs
+	want             []busHoursArgs
+	hasValidationErr bool
+	hasNotFoundErr   bool
+}
+
+func assertBusinessHoursRoot(t *testing.T, tt busHoursInput, got *store.BusinessHours, err error) {
+	if tt.hasValidationErr {
+		fmt.Println("err:", err)
+		assert.Error(t, err, "should have error")
+		assert.IsType(t, common.NewValidationError("", ""), err)
+		return
+	}
+	if tt.hasNotFoundErr {
+		fmt.Println("err:", err)
+		assert.Error(t, err, "should have error")
+		assert.IsType(t, common.NewNotFoundError(""), err)
+		return
+	}
+	assert.NoError(t, err, "Update() failed")
+	assertBusinessHours(t, tt.want, *got)
+}
+
+func assertBusinessHours(t *testing.T, want []busHoursArgs, got store.BusinessHours) {
+	assert.Equal(t, len(want), len(got.GetSchedules()))
+	gotsch := got.GetSchedules()
+	for index, wantsch := range want {
+		assertBusinessHour(t, wantsch, gotsch[index])
+	}
+}
+
+func assertBusinessHour(t *testing.T, want busHoursArgs, got store.BusinessHour) {
+	assert.Equal(t, want.name, got.GetName())
+	assert.Equal(t, want.start, got.GetStart())
+	assert.Equal(t, want.end, got.GetEnd())
+	assert.ElementsMatch(t, want.weekdays, got.GetWeekdays())
+}
+
+func TestNewDefaultBusinessHours(t *testing.T) {
+	inputs := []busHoursInput{
+		{name: "normal check",
+			args: []busHoursArgs{},
+			want: []busHoursArgs{
+				{name: "morning", start: "07:00", end: "09:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+	}
+
+	for _, tt := range inputs {
+		fmt.Println("name:", tt.name)
+		got, err := store.NewDefaultBusinessHours()
+		assertBusinessHoursRoot(t, tt, got, err)
+	}
+}
+
+func TestBusinessHours_FindById(t *testing.T) {
+	inputs := []busHoursInput{
+		{name: "normal check",
+			args: []busHoursArgs{},
+			want: []busHoursArgs{
+				{name: "morning", start: "07:00", end: "09:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+	}
+
+	for _, tt := range inputs {
+		fmt.Println("name:", tt.name)
+		bus, err := store.NewDefaultBusinessHours()
+		assert.NoError(t, err, "should not got error at NewDefaultBusinessHours()")
+
+		schedules := bus.GetSchedules()
+		for i, sch := range schedules {
+			got, err := bus.FindById(sch.GetId())
+			assert.NoError(t, err, "should not got error at FindById()")
+			assertBusinessHour(t, tt.want[i], *got)
+		}
+	}
+}
+
+func TestBusinessHours_FindById_NotFound(t *testing.T) {
+	inputs := []busHoursInput{
+		{name: "not found",
+			args: []busHoursArgs{
+				{id: "1234"},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: false,
+			hasNotFoundErr:   true,
+		},
+	}
+
+	for _, tt := range inputs {
+		fmt.Println("name:", tt.name)
+		bus, err := store.NewDefaultBusinessHours()
+		assert.NoError(t, err, "test initialize failed")
+
+		upInfo := tt.args[0]
+
+		got, err := bus.Update(upInfo.id, upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays)
+		assertBusinessHoursRoot(t, tt, got, err)
+	}
+}
+
+func TestBusinessHours_Update(t *testing.T) {
+	inputs := []busHoursInput{
+		{name: "morning update",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning2", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday}},
+			},
+			want: []busHoursArgs{
+				{name: "morning2", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "lunch update",
+			args: []busHoursArgs{
+				{idIndex: 1, name: "lunch2", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+			},
+			want: []busHoursArgs{
+				{name: "morning", start: "07:00", end: "09:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "lunch2", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "dinner update",
+			args: []busHoursArgs{
+				{idIndex: 2, name: "dinner2", start: "19:00", end: "23:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+			},
+			want: []busHoursArgs{
+				{name: "morning", start: "07:00", end: "09:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner2", start: "19:00", end: "23:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "duplicate weekdays",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "07:00", end: "09:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "irregular time(start < end)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "07:30", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "irregular time(start < end + 59)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "08:59", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "edge time(start < end + 60)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+			},
+			want: []busHoursArgs{
+				{name: "morning", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "overlap time1(morning end is overlap lunch)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "10:00", end: "12:00", weekdays: []store.Weekday{store.Tuesday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "overlap time2(morning is include lunch)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "10:00", end: "16:00", weekdays: []store.Weekday{store.Tuesday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "overlap time3(morning is inside lunch",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Tuesday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "overlap time4(morning end is overlap lunch",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "10:00", end: "17:00", weekdays: []store.Weekday{store.Tuesday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "time is overlap but weekday is not match",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{store.Monday}},
+			},
+			want: []busHoursArgs{
+				{name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{store.Monday}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "irregular time format(start)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "0800", end: "13:00", weekdays: []store.Weekday{store.Monday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "irregular time format(end)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:a0", weekdays: []store.Weekday{store.Monday}},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "no weekdays (allowed)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{}},
+			},
+			want: []busHoursArgs{
+				{name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{}},
+				{name: "lunch", start: "11:30", end: "15:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{name: "dinner", start: "18:00", end: "21:00", weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+	}
+
+	for _, tt := range inputs {
+
+		fmt.Println("name:", tt.name)
+		bus, err := store.NewDefaultBusinessHours()
+		assert.NoError(t, err, "test initialize failed")
+
+		schedules := bus.GetSchedules()
+		upInfo := tt.args[0]
+
+		got, err := bus.Update(schedules[upInfo.idIndex].GetId(), upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays)
+		assertBusinessHoursRoot(t, tt, got, err)
+	}
+}

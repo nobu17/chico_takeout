@@ -140,12 +140,12 @@ func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {
 		return err
 	}
 
-	err = businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays))
+	new, err := businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays))
 	if err != nil {
 		return err
 	}
 
-	err = b.businessHoursRepository.Update(businessHours)
+	err = b.businessHoursRepository.Update(new)
 	if err != nil {
 		return err
 	}

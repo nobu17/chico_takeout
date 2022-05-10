@@ -24,12 +24,12 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 	// r.LoadHTMLGlob("templates/**/*")
 	// r.Static("/static", "./static")
-
+	itemKindRepo := memory.NewItemKindMemoryRepository()
 	// itemkind
 	kind := r.Group("/item/kind")
 	{
-		repo := memory.NewItemKindMemoryRepository()
-		useCase := itemUseCase.NewItemKindUseCase(repo)
+
+		useCase := itemUseCase.NewItemKindUseCase(itemKindRepo)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
@@ -52,11 +52,12 @@ func setupRouter() *gin.Engine {
 		stock.DELETE("/:id", handler.Delete)
 	}
 	// food
+	businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
 	// todo idのGET紐付け
 	food := r.Group("/item/food")
 	{
 		foodRepo := memory.NewFoodItemMemoryRepository()
-		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, kindRepo)
+		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, itemKindRepo, businessHoursRepo)
 		handler := itemHandler.NewFoodItemHandler(useCase)
 		food.GET("/:id", handler.Get)
 		food.GET("/", handler.GetAll)
@@ -66,18 +67,17 @@ func setupRouter() *gin.Engine {
 	}
 
 	// hour
-	businessHourRepo := memory.NewBusinessHoursMemoryRepository()
 	spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
 	hour := r.Group("/store/hour")
 	{
-		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
+		useCase := storeUseCase.NewBusinessHoursUseCase(businessHoursRepo, spBusinessHourRepo)
 		handler := storeHandler.NewbusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/:id", handler.Put)
 	}
 	specialHour := r.Group("/store/special_hour")
 	{
-		useCase := storeUseCase.NewSpecialBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
+		useCase := storeUseCase.NewSpecialBusinessHoursUseCase(businessHoursRepo, spBusinessHourRepo)
 		handler := storeHandler.NewSpecialBusinessHourHandler(useCase)
 		specialHour.GET("/:id", handler.Get)
 		specialHour.GET("/", handler.GetAll)

@@ -5,6 +5,7 @@ import (
 
 	"chico/takeout/common"
 	domains "chico/takeout/domains/item"
+	storeDomains "chico/takeout/domains/store"
 )
 
 type FoodItemModel struct {
@@ -53,16 +54,20 @@ type FoodItemUseCase interface {
 }
 
 type foodItemUseCase struct {
-	foodItemRepository domains.FoodItemRepository
-	itemKindRepository domains.ItemKindRepository
+	foodItemRepository   domains.FoodItemRepository
+	itemKindRepository   domains.ItemKindRepository
+	businessHoursService storeDomains.BusinessHoursService
 	commonItemUseCase
 }
 
-func NewFoodItemUseCase(foodItemRepository domains.FoodItemRepository, itemKindRepository domains.ItemKindRepository) FoodItemUseCase {
+func NewFoodItemUseCase(foodRepos domains.FoodItemRepository,
+	itemKindRepos domains.ItemKindRepository,
+	businessHoursRepos storeDomains.BusinessHoursRepository) FoodItemUseCase {
 	return &foodItemUseCase{
-		foodItemRepository: foodItemRepository,
-		itemKindRepository: itemKindRepository,
-		commonItemUseCase:  *newCommonItemUseCase(itemKindRepository),
+		foodItemRepository:   foodRepos,
+		itemKindRepository:   itemKindRepos,
+		businessHoursService: *storeDomains.NewBussinessHoursService(businessHoursRepos),
+		commonItemUseCase:    *newCommonItemUseCase(itemKindRepos),
 	}
 }
 
@@ -115,6 +120,16 @@ func (f *foodItemUseCase) Create(model *FoodItemCreateModel) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// check schedule is exists
+	for _, id := range item.GetScheduleIds() {
+		ok, err := f.businessHoursService.ExistsBusinessHour(id)
+		if err != nil {
+			return "", err
+		}
+		if !ok {
+			return "", common.NewUpdateTargetRelatedNotFoundError(id)
+		}
+	}
 
 	return f.foodItemRepository.Create(item)
 }
@@ -129,15 +144,27 @@ func (i *foodItemUseCase) Update(model *FoodItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled)
+	if err != nil {
+		return err
+	}
+
+	// check schedule is exists
+	for _, id := range item.GetScheduleIds() {
+		ok, err := i.businessHoursService.ExistsBusinessHour(id)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return common.NewUpdateTargetRelatedNotFoundError(id)
+		}
+	}
+
 	err = i.ExistsKind(item)
 	if err != nil {
 		return err
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
-	if err != nil {
-		return err
-	}
 	return i.foodItemRepository.Update(item)
 }
 

@@ -58,14 +58,14 @@ func (b *BusinessHours) GetSchedules() []BusinessHour {
 	return tmp
 }
 
-func (b *BusinessHours) FindById(id string) (*BusinessHour, error) {
+func (b *BusinessHours) FindById(id string) (*BusinessHour) {
 	_, item := b.findSchedule(id)
 	if item == nil {
-		return nil, common.NewNotFoundError(fmt.Sprintf("not found:%s", id))
+		return nil
 	}
 	// return copy for immutable
 	newItem := item
-	return newItem, nil
+	return newItem
 }
 
 // currently add is not needed.

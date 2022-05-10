@@ -145,7 +145,7 @@ func TestSetStockItem(t *testing.T) {
 		got, err := item.NewStockItem("test", "desc", 4, 4, 12, "123", false)
 		if err != nil {
 			t.Errorf("init test is failed")
-			return
+			continue
 		}
 		err = got.Set(tt.args.name, tt.args.description, tt.args.priority, tt.args.maxOrder, tt.args.price, tt.args.kindId, tt.args.enabled)
 		if err != nil {
@@ -156,11 +156,11 @@ func TestSetStockItem(t *testing.T) {
 				}
 			}
 			t.Errorf("NewStockItem() error = %v, hasValidationErr %v", err, tt.hasValidationErr)
-			return
+			continue
 		}
 		if tt.hasValidationErr {
 			t.Errorf("New() should have error")
-			return
+			continue
 		}
 		expect := tt.want
 		assert.Equal(t, expect.name, got.GetName())
@@ -203,7 +203,7 @@ func TestSetRemain(t *testing.T) {
 		if tt.hasValidationErr {
 			assert.Error(t, err)
 			assert.IsType(t, err, common.NewValidationError("", ""))
-			return
+			continue
 		}
 		assert.NoError(t, err)
 		assert.Equal(t, tt.want.remain, got.GetRemain())
@@ -249,7 +249,7 @@ func TestConsumeRemain(t *testing.T) {
 		if tt.hasValidationErr {
 			assert.Error(t, err)
 			assert.IsType(t, err, common.NewValidationError("", ""))
-			return
+			continue
 		}
 		assert.NoError(t, err)
 		assert.Equal(t, tt.want.remain, got.GetRemain())
@@ -300,7 +300,7 @@ func TestIncrementRemain(t *testing.T) {
 		if tt.hasValidationErr {
 			assert.Error(t, err)
 			assert.IsType(t, err, common.NewValidationError("", ""))
-			return
+			continue
 		}
 		assert.NoError(t, err)
 		assert.Equal(t, tt.want.remain, got.GetRemain())

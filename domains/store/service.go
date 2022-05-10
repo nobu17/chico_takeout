@@ -1,18 +1,28 @@
 package store
 
-type StoreService struct {
-	businessHoursRepository       BusinessHoursRepository
-	specialBusinessHourRepository SpecialBusinessHourRepository
+type BusinessHoursService struct {
+	businessHoursRepository BusinessHoursRepository
 }
 
-func NewStoreService(businessHoursRepository BusinessHoursRepository, specialBusinessHourRepository SpecialBusinessHourRepository) *StoreService {
-	return &StoreService{
-		businessHoursRepository:       businessHoursRepository,
-		specialBusinessHourRepository: specialBusinessHourRepository,
+func NewBussinessHoursService(businessHoursRepository BusinessHoursRepository) *BusinessHoursService {
+	return &BusinessHoursService{
+		businessHoursRepository: businessHoursRepository,
 	}
 }
 
-func (s *StoreService) FetchBusinessHours() (*BusinessHours, error) {
+func (s *BusinessHoursService) ExistsBusinessHour(businessHourId string) (bool, error) {
+	businessHours, err := s.businessHoursRepository.Fetch()
+	if err != nil {
+		return false, err
+	}
+	item := businessHours.FindById(businessHourId)
+	if item == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (s *BusinessHoursService) FetchBusinessHours() (*BusinessHours, error) {
 	businessHours, err := s.businessHoursRepository.Fetch()
 	if err != nil {
 		return nil, err
@@ -22,18 +32,6 @@ func (s *StoreService) FetchBusinessHours() (*BusinessHours, error) {
 		return NewDefaultBusinessHours()
 	}
 	return businessHours, nil
-}
-
-func (s *StoreService) ExistsBusinessHour(businessHourId string) (bool, error) {
-	businessHours, err := s.businessHoursRepository.Fetch()
-	if err != nil {
-		return false, err
-	}
-	_, err = businessHours.FindById(businessHourId)
-	if err != nil {
-		return false, nil
-	}
-	return true, nil
 }
 
 type HolidayService struct {

@@ -94,7 +94,7 @@ func (p *StockRemain) Increase(request int) (*StockRemain, error) {
 }
 
 const (
-	MaxOrderPerDayMaxValue = 30
+	MaxOrderPerDayMaxValue = 100
 )
 
 type MaxOrderPerDay struct {
@@ -103,9 +103,12 @@ type MaxOrderPerDay struct {
 
 var maxOrderPerDayValidator = validator.NewRangeInteger("MaxOrderPerDay", 1, MaxOrderPerDayMaxValue)
 
-func NewMaxOrderPerDay(value int) (*MaxOrderPerDay, error) {
+func NewMaxOrderPerDay(value int, maxOrder MaxOrder) (*MaxOrderPerDay, error) {
 	if err := maxOrderPerDayValidator.Validate(value); err != nil {
 		return nil, err
+	}
+	if value < maxOrder.GetValue() {
+		return nil, common.NewValidationError("MaxOrderPerDay", fmt.Sprintf("need less than maxOrderPerday:%d maxOrder:%d", value, maxOrder.GetValue()))
 	}
 
 	return &MaxOrderPerDay{IntValue: shared.NewIntValue(value)}, nil

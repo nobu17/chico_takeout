@@ -100,8 +100,8 @@ func TestBusinessHours_FindById(t *testing.T) {
 
 		schedules := bus.GetSchedules()
 		for i, sch := range schedules {
-			got, err := bus.FindById(sch.GetId())
-			assert.NoError(t, err, "should not got error at FindById()")
+			got := bus.FindById(sch.GetId())
+			assert.NotNil(t, got, "should not be nil")
 			assertBusinessHour(t, tt.want[i], *got)
 		}
 	}

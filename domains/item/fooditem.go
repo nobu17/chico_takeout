@@ -24,19 +24,47 @@ func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, p
 	if err != nil {
 		return nil, err
 	}
-	maxOrderPValue, err := NewMaxOrderPerDay(maxOrderPerDay)
+
+	item := FoodItem{commonItem: *common }
+	err = item.set(maxOrderPerDay, scheduleIds)
 	if err != nil {
 		return nil, err
 	}
-	err = validateScheduleIds(scheduleIds)
-	if err != nil {
-		return nil, err
-	}
-	item := FoodItem{commonItem: *common, maxOrderPerDay: *maxOrderPValue, scheduleIds: scheduleIds}
 	return &item, nil
 }
 
+func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) error {
+	err := f.commonItem.Set(name, description, priority, maxOrder, price, kindId, enabled)
+	// common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
+	if err != nil {
+		return err
+	}
+	err = f.set(maxOrderPerDay, scheduleIds)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *FoodItem) set(maxOrderPerDay int, scheduleIds []string) error {
+	maxOrderPValue, err := NewMaxOrderPerDay(maxOrderPerDay, f.maxOrder)
+	if err != nil {
+		return err
+	}
+	err = validateScheduleIds(scheduleIds)
+	if err != nil {
+		return err
+	}
+	f.maxOrderPerDay = *maxOrderPValue
+	f.scheduleIds = scheduleIds
+	return nil
+}
+
 func validateScheduleIds(scheduleIds []string) error {
+	if len(scheduleIds) == 0 {
+		return common.NewValidationError("scheduleIds", "empty")
+	}
+
 	duplicated := false
 	duplicatedId := ""
 	encountered := map[string]bool{}

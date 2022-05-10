@@ -114,7 +114,7 @@ type BusinessHoursUseCase interface {
 
 type businessHoursUseCase struct {
 	businessHoursRepository domains.BusinessHoursRepository
-	storeService            domains.StoreService
+	businessHoursService    domains.BusinessHoursService
 }
 
 func NewBusinessHoursUseCase(
@@ -122,12 +122,12 @@ func NewBusinessHoursUseCase(
 	specialBusinessHourRepository domains.SpecialBusinessHourRepository) BusinessHoursUseCase {
 	return &businessHoursUseCase{
 		businessHoursRepository: businessHoursRepository,
-		storeService:            *domains.NewStoreService(businessHoursRepository, specialBusinessHourRepository),
+		businessHoursService:    *domains.NewBussinessHoursService(businessHoursRepository),
 	}
 }
 
 func (b *businessHoursUseCase) GetAll() (*BusinessHoursModel, error) {
-	data, err := b.storeService.FetchBusinessHours()
+	data, err := b.businessHoursService.FetchBusinessHours()
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (b *businessHoursUseCase) GetAll() (*BusinessHoursModel, error) {
 }
 
 func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {
-	businessHours, err := b.storeService.FetchBusinessHours()
+	businessHours, err := b.businessHoursService.FetchBusinessHours()
 	if err != nil {
 		return err
 	}

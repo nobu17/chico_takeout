@@ -53,7 +53,7 @@ type SpecialBusinessHoursUseCase interface {
 
 type specialBusinessHoursUseCase struct {
 	repository   domains.SpecialBusinessHourRepository
-	storeService domains.StoreService
+	bussinesHoursService domains.BusinessHoursService
 }
 
 func NewSpecialBusinessHoursUseCase(
@@ -61,7 +61,7 @@ func NewSpecialBusinessHoursUseCase(
 	specialBusinessHourRepository domains.SpecialBusinessHourRepository) SpecialBusinessHoursUseCase {
 	return &specialBusinessHoursUseCase{
 		repository:   specialBusinessHourRepository,
-		storeService: *domains.NewStoreService(businessHoursRepository, specialBusinessHourRepository),
+		bussinesHoursService: *domains.NewBussinessHoursService(businessHoursRepository),
 	}
 }
 
@@ -139,7 +139,7 @@ func (i *specialBusinessHoursUseCase) Delete(id string) error {
 
 func (s *specialBusinessHoursUseCase) validate(item *domains.SpecialBusinessHour) error {
 	// check business hour id exists
-	exists, err := s.storeService.ExistsBusinessHour(item.GetBusinessHourId())
+	exists, err := s.bussinesHoursService.ExistsBusinessHour(item.GetBusinessHourId())
 	if err != nil {
 		return err
 	}

@@ -44,7 +44,7 @@ type SpecialBusinessHourUpdateModel struct {
 }
 
 type SpecialBusinessHoursUseCase interface {
-	Find(id string) (*SpecialBusinessHourModel, error) 
+	Find(id string) (*SpecialBusinessHourModel, error)
 	FindAll() ([]SpecialBusinessHourModel, error)
 	Create(model *SpecialBusinessHourCreateModel) (string, error)
 	Update(model *SpecialBusinessHourUpdateModel) error
@@ -52,7 +52,7 @@ type SpecialBusinessHoursUseCase interface {
 }
 
 type specialBusinessHoursUseCase struct {
-	repository   domains.SpecialBusinessHourRepository
+	repository           domains.SpecialBusinessHourRepository
 	bussinesHoursService domains.BusinessHoursService
 }
 
@@ -60,7 +60,7 @@ func NewSpecialBusinessHoursUseCase(
 	businessHoursRepository domains.BusinessHoursRepository,
 	specialBusinessHourRepository domains.SpecialBusinessHourRepository) SpecialBusinessHoursUseCase {
 	return &specialBusinessHoursUseCase{
-		repository:   specialBusinessHourRepository,
+		repository:           specialBusinessHourRepository,
 		bussinesHoursService: *domains.NewBussinessHoursService(businessHoursRepository),
 	}
 }
@@ -69,6 +69,10 @@ func (s *specialBusinessHoursUseCase) Find(id string) (*SpecialBusinessHourModel
 	item, err := s.repository.Find(id)
 	if err != nil {
 		return nil, err
+	}
+
+	if item == nil {
+		return nil, common.NewNotFoundError(id)
 	}
 
 	return newSpecialBusinessHourModel(item), nil

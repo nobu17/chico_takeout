@@ -50,7 +50,6 @@ type SpecialBusinessHourCreateResponse struct {
 }
 
 type SpecialBusinessHourUpdateRequest struct {
-	Id             string `json:"id" binding:"required"`
 	Name           string `json:"name" binding:"required"`
 	Date           string `json:"date" binding:"required"`
 	Start          string `json:"start" binding:"required"`
@@ -58,9 +57,9 @@ type SpecialBusinessHourUpdateRequest struct {
 	BusinessHourId string `json:"businessHourId" binding:"required"`
 }
 
-func (b *SpecialBusinessHourUpdateRequest) toModel() *usecases.SpecialBusinessHourUpdateModel {
+func (b *SpecialBusinessHourUpdateRequest) toModel(id string) *usecases.SpecialBusinessHourUpdateModel {
 	return &usecases.SpecialBusinessHourUpdateModel{
-		Id:             b.Id,
+		Id:             id,
 		Name:           b.Name,
 		Date:           b.Date,
 		Start:          b.Start,
@@ -105,8 +104,9 @@ func (s *specialBusinessHourHandler) GetAll(c *gin.Context) {
 
 func (s *specialBusinessHourHandler) Post(c *gin.Context) {
 	var req SpecialBusinessHourCreateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !s.ShouldBind(c, &req) {
+		return
+	}
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
@@ -116,10 +116,12 @@ func (s *specialBusinessHourHandler) Post(c *gin.Context) {
 }
 
 func (s *specialBusinessHourHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req SpecialBusinessHourUpdateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := s.usecase.Update(req.toModel())
+	if !s.ShouldBind(c, &req) {
+		return
+	}
+	err := s.usecase.Update(req.toModel(id))
 	if err != nil {
 		s.HandleError(c, err)
 		return

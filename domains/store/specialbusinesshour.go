@@ -126,3 +126,7 @@ func (s *SpecialBusinessHour) HaveSameBusinessHourId(other SpecialBusinessHour) 
 func (s *SpecialBusinessHour) HaveSameDate(other SpecialBusinessHour) bool {
 	return s.date == other.date
 }
+
+func (s *SpecialBusinessHour) IsSameDateAndHourId(other SpecialBusinessHour) bool {
+	return s.HaveSameBusinessHourId(other) && s.HaveSameDate(other)
+}

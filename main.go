@@ -51,7 +51,7 @@ func setupRouter() *gin.Engine {
 		stock.PUT("/:id/remain", handler.PutRemain)
 		stock.DELETE("/:id", handler.Delete)
 	}
-	// food
+	
 	businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
 	// todo idのGET紐付け
 	food := r.Group("/item/food")

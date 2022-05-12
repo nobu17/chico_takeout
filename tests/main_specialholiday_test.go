@@ -23,6 +23,9 @@ const holidayUrl = "/store/holiday"
 
 func SetupSpecialHolidayRouter() *gin.Engine {
 	r := gin.Default()
+	businessHourRepo := memory.NewBusinessHoursMemoryRepository()
+	businessHoursMemory = businessHourRepo.GetMemory()
+
 	holidayRepo := memory.NewSpecialHolidayMemoryRepository()
 	holidayRepo.Reset()
 	spHolidayMemory = holidayRepo.GetMemory()
@@ -40,6 +43,7 @@ func SetupSpecialHolidayRouter() *gin.Engine {
 }
 
 func TestSpecialHolidayHandler_GETALL(t *testing.T) {
+
 	wants := []map[string]interface{}{
 		{"name": "おやすみ１", "start": "2022/05/06", "end": "2022/06/03"},
 		{"name": "おやすみ2", "start": "2022/07/06", "end": "2022/08/01"},
@@ -182,17 +186,6 @@ func getSpecilaHolidayItemPostErrorData() []specilaHolidayItemErrorData {
 	var commonError = getspecilaHolidayItemCommonErrorData()
 	var items = []specilaHolidayItemErrorData{
 		{name: "overlap date(1)", args: map[string]interface{}{
-			"name": "1234", "start": "2022/07/10", "end": "2022/10/07",
-		}, want: 2},
-	}
-	commonError = append(commonError, items...)
-	return commonError
-}
-
-func getSpecilaHolidayItemPutErrorData() []specilaHolidayItemErrorData {
-	var commonError = getspecilaHolidayItemCommonErrorData()
-	var items = []specilaHolidayItemErrorData{
-		{name: "overlap date(1)", args: map[string]interface{}{
 			"name": "1234", "start": "2022/05/01", "end": "2022/05/07",
 		}, want: 2},
 		{name: "overlap date(2)", args: map[string]interface{}{
@@ -203,6 +196,17 @@ func getSpecilaHolidayItemPutErrorData() []specilaHolidayItemErrorData {
 		}, want: 2},
 		{name: "overlap date(4)", args: map[string]interface{}{
 			"name": "1234", "start": "2022/05/06", "end": "2022/06/17",
+		}, want: 2},
+	}
+	commonError = append(commonError, items...)
+	return commonError
+}
+
+func getSpecilaHolidayItemPutErrorData() []specilaHolidayItemErrorData {
+	var commonError = getspecilaHolidayItemCommonErrorData()
+	var items = []specilaHolidayItemErrorData{
+		{name: "overlap date(1)", args: map[string]interface{}{
+			"name": "1234", "start": "2022/07/10", "end": "2022/10/07",
 		}, want: 2},
 	}
 	commonError = append(commonError, items...)
@@ -313,7 +317,7 @@ func TestSpecialHolidayHandler_PUT_BadRequest(t *testing.T) {
 		spIds = append(spIds, id)
 	}
 
-	inputs := getSpecilaHolidayItemPostErrorData()
+	inputs := getSpecilaHolidayItemPutErrorData()
 	assert.NotEqual(t, 0, len(inputs), "input data is empty")
 
 	for _, tt := range inputs {

@@ -16,20 +16,22 @@ func NewSpecialBusinessHourSpecification(specialHours []SpecialBusinessHour) *Sp
 }
 
 func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) error {
+	// check same hour id is assigned at samedate
 	exists, err := s.businessHourIdIsAssigned(item)
 	if err != nil {
 		return err
 	}
-	if !exists {
-		return common.NewValidationError("businessHourId", fmt.Sprintf("business hour id is already assigned. only 1 assign is allowed:%s", item.GetBusinessHourId()))
+	if exists {
+		return common.NewValidationError("businessHourId", fmt.Sprintf("business hour id at same date is already assigned. only 1 assign is allowed. id:%s, date=%s", item.GetBusinessHourId(), item.GetDate()))
 	}
 
-	overWrapped, err := s.dateIsOverwarped(item)
+	// check time is overlapped at samedate
+	overLapped, err := s.dateAndTimeIsOverLapped(item)
 	if err != nil {
 		return err
 	}
-	if !overWrapped {
-		return common.NewValidationError("Date", fmt.Sprintf("date is overwrapped:%s", item.GetDate()))
+	if overLapped {
+		return common.NewValidationError("Date", fmt.Sprintf("time is overwrapped:date=%s, start=%s, end=%s", item.GetDate(), item.GetStart(), item.GetEnd()))
 	}
 
 	return nil
@@ -37,14 +39,18 @@ func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) e
 
 func (s *SpecialBusinessHourSpecification) businessHourIdIsAssigned(item *SpecialBusinessHour) (bool, error) {
 	for _, hour := range s.specialHours {
-		if item.HaveSameBusinessHourId(hour) {
+		// skip self
+		if item.Equals(hour) {
+			continue
+		}
+		if item.IsSameDateAndHourId(hour) {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func (s *SpecialBusinessHourSpecification) dateIsOverwarped(item *SpecialBusinessHour) (bool, error) {
+func (s *SpecialBusinessHourSpecification) dateAndTimeIsOverLapped(item *SpecialBusinessHour) (bool, error) {
 	for _, hour := range s.specialHours {
 		// skip self
 		if item.Equals(hour) {

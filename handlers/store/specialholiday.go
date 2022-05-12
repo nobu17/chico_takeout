@@ -42,15 +42,14 @@ type SpecialHolidayCreateResponse struct {
 }
 
 type SpecialHolidayUpdateData struct {
-	Id    string `json:"id" binding:"required"`
 	Name  string `json:"name" binding:"required"`
 	Start string `json:"start" binding:"required"`
 	End   string `json:"end" binding:"required"`
 }
 
-func (b *SpecialHolidayUpdateData) toModel() *usecases.SpecialHolidayUpdateModel {
+func (b *SpecialHolidayUpdateData) toModel(id string) *usecases.SpecialHolidayUpdateModel {
 	return &usecases.SpecialHolidayUpdateModel{
-		Id:    b.Id,
+		Id:    id,
 		Name:  b.Name,
 		Start: b.Start,
 		End:   b.End,
@@ -93,8 +92,9 @@ func (s *specialHolidayHandler) GetAll(c *gin.Context) {
 
 func (s *specialHolidayHandler) Post(c *gin.Context) {
 	var req SpecialHolidayCreateData
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !s.ShouldBind(c, &req) {
+		return
+	}
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
@@ -104,10 +104,12 @@ func (s *specialHolidayHandler) Post(c *gin.Context) {
 }
 
 func (s *specialHolidayHandler) Put(c *gin.Context) {
+	id := c.Param("id")
 	var req SpecialHolidayUpdateData
-	// validation is executed model
-	c.ShouldBind(&req)
-	err := s.usecase.Update(req.toModel())
+	if !s.ShouldBind(c, &req) {
+		return
+	}
+	err := s.usecase.Update(req.toModel(id))
 	if err != nil {
 		s.HandleError(c, err)
 		return

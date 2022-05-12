@@ -60,6 +60,10 @@ func (i *specialHolidayUseCase) Find(id string) (*SpecialHolidayModel, error) {
 		return nil, err
 	}
 
+	if item == nil {
+		return nil, common.NewNotFoundError(id)
+	}
+
 	return newSpecialHolidayModel(item), nil
 }
 

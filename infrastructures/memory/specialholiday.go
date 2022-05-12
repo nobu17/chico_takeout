@@ -16,20 +16,32 @@ type SpecialHolidayMemoryRepository struct {
 
 func NewSpecialHolidayMemoryRepository() *SpecialHolidayMemoryRepository {
 	if specialHolidayMemory == nil {
-		specialHolidayMemory = map[string]*domains.SpecialHoliday{}
-		item1, err := domains.NewSpecialHoliday("おやすみ１", "2022/05/06", "2022/06/03")
-		if err != nil {
-			fmt.Println(err)
-			panic("failed to create special holiday")
-		}
-		specialHolidayMemory[item1.GetId()] = item1
-		item2, err := domains.NewSpecialHoliday("おやすみ2", "2022/07/06", "2022/08/01")
-		if err != nil {
-			panic("failed to create special holiday")
-		}
-		specialHolidayMemory[item2.GetId()] = item2
+		resetSpecialHolidayMemory()
 	}
 	return &SpecialHolidayMemoryRepository{specialHolidayMemory}
+}
+
+func resetSpecialHolidayMemory() {
+	specialHolidayMemory = map[string]*domains.SpecialHoliday{}
+	item1, err := domains.NewSpecialHoliday("おやすみ１", "2022/05/06", "2022/06/03")
+	if err != nil {
+		fmt.Println(err)
+		panic("failed to create special holiday")
+	}
+	specialHolidayMemory[item1.GetId()] = item1
+	item2, err := domains.NewSpecialHoliday("おやすみ2", "2022/07/06", "2022/08/01")
+	if err != nil {
+		panic("failed to create special holiday")
+	}
+	specialHolidayMemory[item2.GetId()] = item2
+}
+
+func (i *SpecialHolidayMemoryRepository) GetMemory() map[string]*domains.SpecialHoliday {
+	return i.inMemory
+}
+
+func (i *SpecialHolidayMemoryRepository) Reset() {
+	resetSpecialHolidayMemory()
 }
 
 func (i *SpecialHolidayMemoryRepository) Find(id string) (*domains.SpecialHoliday, error) {

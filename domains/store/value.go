@@ -76,9 +76,10 @@ func NewDateRange(start, end string) (*DateRange, error) {
 	}
 	endDate, err := common.ConvertStrToDate(end)
 	if err != nil {
-		return nil, common.NewValidationError("end", fmt.Sprintf("can not convert date:%s", start))
+		return nil, common.NewValidationError("end", fmt.Sprintf("can not convert date:%s", end))
 	}
-	if !common.StartIsBeforeEnd(*startDate, *endDate, 0) {
+	// allow start == end (-1)
+	if !common.StartIsBeforeEnd(*startDate, *endDate, -1) {
 		return nil, common.NewValidationError("start end end", fmt.Sprintf("start date(%s) should be greater than end date(%s)", start, end))
 	}
 	return &DateRange{start: start, end: end}, nil

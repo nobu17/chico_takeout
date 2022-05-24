@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"chico/takeout/common"
 
@@ -130,3 +131,17 @@ func (s *SpecialBusinessHour) HaveSameDate(other SpecialBusinessHour) bool {
 func (s *SpecialBusinessHour) IsSameDateAndHourId(other SpecialBusinessHour) bool {
 	return s.HaveSameBusinessHourId(other) && s.HaveSameDate(other)
 }
+
+func (s *SpecialBusinessHour) IsSameDate(datetime time.Time) bool {
+	return s.date.IsSameDate(datetime)
+}
+
+func (s *SpecialBusinessHour) IsInRange(datetime time.Time) bool {
+	// same date and within range time
+	if s.date.IsSameDate(datetime) {
+		return s.shift.IsInRange(datetime)
+	}
+	return false
+}
+
+

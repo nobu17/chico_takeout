@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"time"
 
 	"chico/takeout/common"
 	"chico/takeout/domains/shared"
@@ -40,6 +41,13 @@ func (t *TimeRange) IsOverlap(other TimeRange) bool {
 	oEnd, _ := common.ConvertStrToTime(other.end)
 
 	return common.IsOverlap(*tStart, *tEnd, *oStart, *oEnd)
+}
+
+func (t *TimeRange) IsInRange(target time.Time) bool {
+	tStart, _ := common.ConvertStrToTime(t.start)
+	tEnd, _ := common.ConvertStrToTime(t.end)
+
+	return common.IsInRangeTime(*tStart, *tEnd, target)
 }
 
 func (t *TimeRange) GetStart() string {
@@ -103,6 +111,13 @@ func (d *DateRange) IsOverlap(other DateRange) bool {
 	return common.IsOverlap(*tStart, *tEnd, *oStart, *oEnd)
 }
 
+func (d *DateRange) InRangeDate(datetime time.Time) bool {
+	tStart, _ := common.ConvertStrToDate(d.start)
+	tEnd, _ := common.ConvertStrToDate(d.end)
+
+    return common.IsInRange(*tStart, *tEnd, datetime)	
+}
+
 type Date struct {
 	shared.StringValue
 }
@@ -113,4 +128,9 @@ func NewDate(value string) (*Date, error) {
 		return nil, common.NewValidationError("date", fmt.Sprintf("can not convert date:%s", value))
 	}
 	return &Date{StringValue: shared.NewStringValue(value)}, nil
+}
+
+func (d *Date) IsSameDate(datetime time.Time) bool {
+    dateStr := common.ConvertTimeToDateStr(datetime)
+	return d.StringValue.GetValue() == dateStr
 }

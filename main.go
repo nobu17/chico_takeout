@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	itemHandler "chico/takeout/handlers/item"
+	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
 	"chico/takeout/infrastructures/memory"
 	itemUseCase "chico/takeout/usecase/item"
+	orderUseCase "chico/takeout/usecase/order"
 	storeUseCase "chico/takeout/usecase/store"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +30,6 @@ func setupRouter() *gin.Engine {
 	// itemkind
 	kind := r.Group("/item/kind")
 	{
-
 		useCase := itemUseCase.NewItemKindUseCase(itemKindRepo)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
@@ -38,10 +39,10 @@ func setupRouter() *gin.Engine {
 		kind.DELETE("/:id", handler.Delete)
 	}
 	kindRepo := memory.NewItemKindMemoryRepository()
+	stockRepo := memory.NewStockItemMemoryRepository()
 	// stock
 	stock := r.Group("/item/stock")
 	{
-		stockRepo := memory.NewStockItemMemoryRepository()
 		useCase := itemUseCase.NewStockItemUseCase(stockRepo, kindRepo)
 		handler := itemHandler.NewStockItemHandler(useCase)
 		stock.GET("/:id", handler.Get)
@@ -51,12 +52,12 @@ func setupRouter() *gin.Engine {
 		stock.PUT("/:id/remain", handler.PutRemain)
 		stock.DELETE("/:id", handler.Delete)
 	}
-	
+
 	businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
+	foodRepo := memory.NewFoodItemMemoryRepository()
 	// todo idのGET紐付け
 	food := r.Group("/item/food")
 	{
-		foodRepo := memory.NewFoodItemMemoryRepository()
 		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, itemKindRepo, businessHoursRepo)
 		handler := itemHandler.NewFoodItemHandler(useCase)
 		food.GET("/:id", handler.Get)
@@ -97,6 +98,17 @@ func setupRouter() *gin.Engine {
 		holiday.POST("/", handler.Post)
 		holiday.PUT("/:id", handler.Put)
 		holiday.DELETE("/:id", handler.Delete)
+	}
+
+	// order
+	order := r.Group("/order")
+	{
+		orderRepo := memory.NewOrderInfoMemoryRepository()
+		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
+		handler := orderHandler.NewOrderInfoHandler(useCase)
+		order.GET("/:id", handler.Get)
+		order.POST("/", handler.PostCreate)
+		order.PUT("/:id", handler.PutCancel)
 	}
 
 	// Ping test

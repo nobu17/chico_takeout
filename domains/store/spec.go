@@ -62,3 +62,58 @@ func (s *SpecialBusinessHourSpecification) dateAndTimeIsOverLapped(item *Special
 	}
 	return false, nil
 }
+
+type HolidaySpecification struct {
+	normalSchedules  BusinessHours
+	specialSchedules []SpecialBusinessHour
+	specialHolidays  []SpecialHoliday
+}
+
+func NewHolidaySpecification(normalSchedules BusinessHours,
+	specialSchedules []SpecialBusinessHour,
+	specialHolidays []SpecialHoliday) *HolidaySpecification {
+	return &HolidaySpecification{
+		normalSchedules:  normalSchedules,
+		specialSchedules: specialSchedules,
+		specialHolidays:  specialHolidays,
+	}
+}
+
+func (h *HolidaySpecification) IsStoreInBusiness(datetime string) (bool, error) {
+	time, err := common.ConvertStrToDateTime(datetime)
+	if err != nil {
+		return false, err
+	}
+	// step1 :specific date is available
+
+	// check special holiday (most high priority)
+	for _, sh := range h.specialHolidays {
+		if sh.shift.InRangeDate(*time) {
+			// store is holiday. can not reserve
+			return false, nil
+		}
+	}
+
+	// get specific date schedule by day of week
+	// first: special schedule
+	// second: if not exists, check normal
+
+	hasSameDate := false
+	for _, ss := range h.specialSchedules {
+		if ss.IsSameDate(*time) {
+			hasSameDate = true
+			// check time is overlap
+			if ss.IsInRange(*time) {
+				// can reserve
+				return true, nil
+			}
+		}
+	}
+	// if same date's special schedule has, other normal schedule is ignored (can not reserve)
+	if hasSameDate {
+		return false, nil
+	}
+
+	// get normal schedules by day of week
+	return h.normalSchedules.IsInBusiness(*time), nil
+}

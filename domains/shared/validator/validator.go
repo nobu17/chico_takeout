@@ -25,10 +25,30 @@ func (s *StingLength) Validate(val string) error {
 		return common.NewValidationError(s.name, "required")
 	}
 	if utf8.RuneCountInString(val) > s.maxLength {
-		return common.NewValidationError("name", fmt.Sprintf("MaxLength:%d", s.maxLength))
+		return common.NewValidationError(s.name, fmt.Sprintf("MaxLength:%d", s.maxLength))
 	}
 	return nil
 }
+
+type AllowEmptyString struct {
+	name      string
+	maxLength int
+}
+
+func NewAllowEmptyStingLength(name string, maxLength int) *AllowEmptyString {
+	return &AllowEmptyString{
+		name:      name,
+		maxLength: maxLength,
+	}
+}
+
+func (s *AllowEmptyString) Validate(val string) error {
+	if utf8.RuneCountInString(val) > s.maxLength {
+		return common.NewValidationError(s.name, fmt.Sprintf("MaxLength:%d", s.maxLength))
+	}
+	return nil
+}
+
 
 type IntValidator interface {
 	Validate(value int) error
@@ -77,3 +97,4 @@ func (r *RangeInteger) Validate(val int) error {
 	}
 	return nil
 }
+

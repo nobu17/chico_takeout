@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"chico/takeout/common"
+	"chico/takeout/domains/shared"
+	"chico/takeout/domains/shared/validator"
 )
 
 type Price struct {
@@ -91,9 +93,22 @@ func NewPickupDateTime(value string) (*PickupDateTime, error) {
 		return nil, err
 	}
 	date, _ := common.ConvertStrToDateTime(value)
-	// pick up time should be before now + offset
-	if common.StartIsBeforeEnd(now(), *date, OrderableOffsetMinutes) {
-		return nil, common.NewValidationError("PickupDateTime", "not allowed datetime set.")
+	// pick up time should be future from now + offset
+	now := now()
+	if !common.StartIsBeforeEnd(now, *date, OrderableOffsetMinutes) {
+		return nil, common.NewValidationError("PickupDateTime", fmt.Sprintf("not allowed set(%s) before now(%s).", value, now))
 	}
 	return &PickupDateTime{DateTime: *item}, nil
+}
+
+type Memo struct {
+	shared.StringValue
+}
+func NewMemo(value string, maxLength int) (*Memo, error) {
+	validator := validator.NewAllowEmptyStingLength("Memo", maxLength)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Memo{StringValue: shared.NewStringValue(value)}, nil
 }

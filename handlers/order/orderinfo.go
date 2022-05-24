@@ -7,22 +7,70 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type OrderInfoData struct {
+	Id             string                `json:"id" binding:"required"`
+	UserId         string                `json:"userId" binding:"required"`
+	Memo           string                `json:"memo" binding:"required"`
+	PickupDateTime string                `json:"pickupDateTime" binding:"required"`
+	OrderDateTime  string                `json:"orderDateTime" binding:"required"`
+	StockItems     []CommonItemOrderData `json:"stockItems" binding:"required"`
+	FoodItems      []CommonItemOrderData `json:"foodItems" binding:"required"`
+	Canceled       bool                  `json:"canceled" binding:"required"`
+}
+
+type CommonItemOrderData struct {
+	ItemId   string `json:"itemId" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Price    int    `json:"price" binding:"required"`
+	Quantity int    `json:"quantity" binding:"required"`
+}
+
+func newCommonItemOrderData(itemId, name string, price, quantity int) *CommonItemOrderData {
+	return &CommonItemOrderData{
+		ItemId:   itemId,
+		Name:     name,
+		Price:    price,
+		Quantity: quantity,
+	}
+}
+
+func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
+	stocks := []CommonItemOrderData{}
+	for _, stock := range item.StockItems {
+		stocks = append(stocks, *newCommonItemOrderData(stock.ItemId, stock.Name, stock.Price, stock.Quantity))
+	}
+	foods := []CommonItemOrderData{}
+	for _, stock := range item.FoodItems {
+		foods = append(foods, *newCommonItemOrderData(stock.ItemId, stock.Name, stock.Price, stock.Quantity))
+	}
+	return &OrderInfoData{
+		Id:             item.Id,
+		UserId:         item.UserId,
+		Memo:           item.Memo,
+		OrderDateTime:  item.OrderDateTime,
+		PickupDateTime: item.PickupDateTime,
+		Canceled:       item.Canceled,
+		StockItems:     stocks,
+		FoodItems:      foods,
+	}
+}
+
 type OrderInfoCreateRequest struct {
 	UserId         string                   `json:"userId" binding:"required"`
-	Memo           string                   `json:"memo" binding:"required"`
+	Memo           string                   `json:"memo"`
 	PickupDateTime string                   `json:"pickupDateTime" binding:"required"`
 	StockItems     []CommonItemOrderRequest `json:"stockItems" binding:"required"`
 	FoodItems      []CommonItemOrderRequest `json:"foodItems" binding:"required"`
 }
 
 func (o *OrderInfoCreateRequest) toModel() *usecases.OrderInfoCreateModel {
-	stocks := []usecases.CommonItemOrderModel{}
+	stocks := []usecases.CommonItemOrderCreateModel{}
 	for _, stock := range o.StockItems {
 		stocks = append(stocks, *stock.toModel())
 	}
-	foods := []usecases.CommonItemOrderModel{}
+	foods := []usecases.CommonItemOrderCreateModel{}
 	for _, food := range o.FoodItems {
-		foods = append(stocks, *food.toModel())
+		foods = append(foods, *food.toModel())
 	}
 	return &usecases.OrderInfoCreateModel{
 		UserId:         o.UserId,
@@ -46,8 +94,8 @@ type OrderInfoCancelRequest struct {
 	Id string `json:"id" binding:"required"`
 }
 
-func (c *CommonItemOrderRequest) toModel() *usecases.CommonItemOrderModel {
-	return &usecases.CommonItemOrderModel{
+func (c *CommonItemOrderRequest) toModel() *usecases.CommonItemOrderCreateModel {
+	return &usecases.CommonItemOrderCreateModel{
 		ItemId:   c.ItemId,
 		Quantity: c.Quantity,
 	}
@@ -58,16 +106,27 @@ type orderInfoHandler struct {
 	usecase usecases.OrderInfoUseCase
 }
 
-func NewSpecialHolidayHandler(usecase usecases.OrderInfoUseCase) *orderInfoHandler {
+func NewOrderInfoHandler(usecase usecases.OrderInfoUseCase) *orderInfoHandler {
 	return &orderInfoHandler{
 		usecase: usecase,
 	}
 }
 
+func (s *orderInfoHandler) Get(c *gin.Context) {
+	id := c.Param("id")
+	model, err := s.usecase.Find(id)
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	s.HandleOK(c, newOrderInfoData(model))
+}
+
 func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 	var req OrderInfoCreateRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !s.ShouldBind(c, &req) {
+		return
+	}
 	id, err := s.usecase.Create(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
@@ -76,10 +135,11 @@ func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 	s.HandleOK(c, OrderInfoCreateResponce{Id: id})
 }
 
-func (s *orderInfoHandler) PostCancel(c *gin.Context) {
+func (s *orderInfoHandler) PutCancel(c *gin.Context) {
 	var req OrderInfoCancelRequest
-	// validation is executed model
-	c.ShouldBind(&req)
+	if !s.ShouldBind(c, &req) {
+		return
+	}
 	err := s.usecase.Cancel(req.Id)
 	if err != nil {
 		s.HandleError(c, err)

@@ -52,11 +52,11 @@ func (o *OrderInfoFactory) createOrderStockItems(stockOrders []ItemOrder) ([]Ord
 		for _, stock := range stocks {
 			if stock.HasSameId(stockOrder.id) {
 				// check order max at first
-				err = stock.WithInMaxOrder( stockOrder.quantity)
+				err = stock.WithInMaxOrder(stockOrder.quantity)
 				if err != nil {
 					return nil, err
 				}
-				item, err := newOrderStockItem(stock.GetId(), stock.GetName(), stock.GetPrice(), stockOrder.quantity)
+				item, err := NewOrderStockItem(stock.GetId(), stock.GetName(), stock.GetPrice(), stockOrder.quantity)
 				if err != nil {
 					return nil, err
 				}
@@ -85,7 +85,12 @@ func (o *OrderInfoFactory) createOrderFoodItems(foodOrders []ItemOrder) ([]Order
 	for _, foodOrder := range foodOrders {
 		for _, food := range foods {
 			if food.HasSameId(foodOrder.id) {
-				item, err := newOrderFoodItem(food.GetId(), food.GetName(), food.GetPrice(), foodOrder.quantity)
+				// check order max at first
+				err = food.WithInMaxOrder(foodOrder.quantity)
+				if err != nil {
+					return nil, err
+				}
+				item, err := NewOrderFoodItem(food.GetId(), food.GetName(), food.GetPrice(), foodOrder.quantity)
 				if err != nil {
 					return nil, err
 				}
@@ -96,7 +101,7 @@ func (o *OrderInfoFactory) createOrderFoodItems(foodOrders []ItemOrder) ([]Order
 	}
 	// check all items are existed
 	if len(foodItems) != len(foodOrders) {
-		return nil, common.NewValidationError("foodOrders", "there is not match stock item from id.")
+		return nil, common.NewValidationError("foodOrders", "there is not match food item from id.")
 	}
 	return foodItems, nil
 }

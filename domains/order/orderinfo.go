@@ -1,9 +1,10 @@
 package order
 
 import (
-	"chico/takeout/common"
-	"fmt"
 	"strings"
+
+	"chico/takeout/common"
+	"chico/takeout/domains/item"
 
 	"github.com/google/uuid"
 )
@@ -16,10 +17,14 @@ type OrderInfoRepository interface {
 	UpdateOrderStatus(item *OrderInfo) error
 }
 
+const (
+	OrderInfoMaxMemoLength = 500
+)
+
 type OrderInfo struct {
 	id             string
 	userId         string
-	memo           string
+	memo           Memo
 	orderDateTime  OrderDateTime
 	pickupDateTime PickupDateTime
 	stockItems     []OrderStockItem
@@ -32,7 +37,8 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 	if err := order.validateUserId(userId); err != nil {
 		return nil, err
 	}
-	if err := order.validateMemo(memo); err != nil {
+	memoV, err := NewMemo(memo, OrderInfoMaxMemoLength)
+	if err != nil {
 		return nil, err
 	}
 	// order date is current time
@@ -50,7 +56,7 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 	}
 
 	order.userId = userId
-	order.memo = memo
+	order.memo = *memoV
 	order.orderDateTime = *orderDate
 	order.pickupDateTime = *pickupDate
 	order.stockItems = stockItems
@@ -62,12 +68,24 @@ func (o *OrderInfo) GetId() string {
 	return o.id
 }
 
+func (o *OrderInfo) GetUserId() string {
+	return o.userId
+}
+
+func (o *OrderInfo) GetMemo() string {
+	return o.memo.GetValue()
+}
+
 func (o *OrderInfo) GetCanceled() bool {
 	return o.canceled
 }
 
-func (o *OrderInfo) GetPickupDateTune() string {
+func (o *OrderInfo) GetPickupDateTime() string {
 	return o.pickupDateTime.value
+}
+
+func (o *OrderInfo) GetOrderDateTime() string {
+	return o.orderDateTime.value
 }
 
 func (o *OrderInfo) GetPickupDate() string {
@@ -102,22 +120,11 @@ func (o *OrderInfo) validateUserId(userId string) error {
 	return nil
 }
 
-const (
-	OrderInfoMaxMemo = 580
-)
-
-func (o *OrderInfo) validateMemo(memo string) error {
-	if len(memo) > OrderInfoMaxMemo {
-		return common.NewValidationError("memo", fmt.Sprintf("MaxLength:%d", OrderInfoMaxMemo))
-	}
-	return nil
-}
-
 type OrderStockItem struct {
 	commonItemInfo
 }
 
-func newOrderStockItem(itemId, name string, price, quantity int) (*OrderStockItem, error) {
+func NewOrderStockItem(itemId, name string, price, quantity int) (*OrderStockItem, error) {
 	item, err := newCommonItemInfo(itemId, name, price, quantity)
 	if err != nil {
 		return nil, err
@@ -131,7 +138,7 @@ type OrderFoodItem struct {
 	commonItemInfo
 }
 
-func newOrderFoodItem(itemId, name string, price, quantity int) (*OrderFoodItem, error) {
+func NewOrderFoodItem(itemId, name string, price, quantity int) (*OrderFoodItem, error) {
 	item, err := newCommonItemInfo(itemId, name, price, quantity)
 	if err != nil {
 		return nil, err
@@ -143,32 +150,39 @@ func newOrderFoodItem(itemId, name string, price, quantity int) (*OrderFoodItem,
 
 type commonItemInfo struct {
 	itemId   string
-	name     string
+	name     item.Name
 	price    Price
 	quantity Quantity
 }
 
 func (c *commonItemInfo) HasSameId(id string) bool {
-	if c.itemId == id {
-		return true
-	}
-	return false
+	return c.itemId == id
 }
 
 func (c *commonItemInfo) GetItemId() string {
 	return c.itemId
 }
 
+func (c *commonItemInfo) GetName() string {
+	return c.name.GetValue()
+}
+
 func (c *commonItemInfo) GetQuantity() int {
 	return c.quantity.value
+}
+
+func (c *commonItemInfo) GetPrice() int {
+	return c.price.value
 }
 
 func newCommonItemInfo(itemId, name string, price, quantity int) (*commonItemInfo, error) {
 	if strings.TrimSpace(itemId) == "" {
 		return nil, common.NewValidationError("itemId", "required")
 	}
-	if strings.TrimSpace(name) == "" {
-		return nil, common.NewValidationError("name", "required")
+
+	nameV, err := item.NewName(name, item.CommonItemNameMaxLength)
+	if err != nil {
+		return nil, err
 	}
 	priceV, err := NewPrice(price)
 	if err != nil {
@@ -180,6 +194,7 @@ func newCommonItemInfo(itemId, name string, price, quantity int) (*commonItemInf
 	}
 	return &commonItemInfo{
 		itemId:   itemId,
+		name:     *nameV,
 		price:    *priceV,
 		quantity: *quantityV,
 	}, nil

@@ -78,9 +78,10 @@ func (p *StockRemain) Consume(request int) (*StockRemain, error) {
 	if request < 1 {
 		return nil, common.NewValidationError("stock remain", fmt.Sprintf("request is needed more than 1. request:%d", request))
 	}
-	remain := p.GetValue() - request
+	current := p.GetValue()
+	remain := current - request
 	if remain < 0 {
-		return nil, common.NewValidationError("stock remain", fmt.Sprintf("remain count is insufficient. remain:%d, request:%d", p.GetValue(), request))
+		return nil, common.NewValidationError("stock remain", fmt.Sprintf("remain count is insufficient. remain:%d , request:%d", current, request))
 	}
 	return NewStockRemain(remain, p.maxValue)
 }

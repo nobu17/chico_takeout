@@ -4,6 +4,7 @@ import (
 	"chico/takeout/common"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -66,6 +67,17 @@ func (b *BusinessHours) FindById(id string) (*BusinessHour) {
 	// return copy for immutable
 	newItem := item
 	return newItem
+}
+
+func (b *BusinessHours) IsInBusiness(targetDateTime time.Time) bool {
+	// check each schedule
+	for _, bs := range b.schedules {
+		isIn := bs.IsInSchedule(targetDateTime)
+		if isIn {
+			return true
+		}
+	}
+	return false
 }
 
 // currently add is not needed.
@@ -247,6 +259,18 @@ func (b *BusinessHour) IsOverlap(other BusinessHour) bool {
 		}
 	}
 	return isOverlap
+}
+
+func (b *BusinessHour) IsInSchedule(targetDateTime time.Time) bool {
+	targetWk := targetDateTime.Weekday()
+	// check week day
+	for _, wk := range b.weekdays {
+		if int(wk) == int(targetWk) {
+			// check time shift is in range
+			return b.shift.IsInRange(targetDateTime)
+		}
+	}
+	return false
 }
 
 func (b *BusinessHour) GetId() string {

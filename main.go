@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	itemHandler "chico/takeout/handlers/item"
 	orderHandler "chico/takeout/handlers/order"
@@ -11,21 +12,56 @@ import (
 	orderUseCase "chico/takeout/usecase/order"
 	storeUseCase "chico/takeout/usecase/store"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
-	r.Run(":8089")
+	r.Run(":8086")
 }
 
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
-	// r.LoadHTMLGlob("templates/**/*")
-	// r.Static("/static", "./static")
+
+	// Setting Cors
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"*",
+			// "http://localhost:3000/",
+		},
+		AllowMethods: []string{
+			"POST",
+			"GET",
+			"PUT",
+			"DELETE",
+			"OPTIONS",
+		},
+		// 許可したいHTTPリクエストヘッダ
+		AllowHeaders: []string{
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"Authorization",
+			"X-Requested-With",
+		},
+		// cookieなどの情報を必要とするかどうか
+		AllowCredentials: true,
+		// preflightリクエストの結果をキャッシュする時間
+		MaxAge: 24 * time.Hour,
+	}))
+
+	r.LoadHTMLGlob("frontend/build/*.html")
+	r.Static("/static", "./frontend/build/static")
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+
 	itemKindRepo := memory.NewItemKindMemoryRepository()
 	// itemkind
 	kind := r.Group("/item/kind")

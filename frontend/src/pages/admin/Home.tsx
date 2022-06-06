@@ -7,7 +7,7 @@ const itemMenu = {
   icon: "coffee",
   pageInfos: [
     { title: "アイテム種別編集", url: "/admin/items/kind" },
-    { title: "link2", url: "http://aaa" },
+    { title: "アイテム編集(在庫タイプ)", url: "/admin/items/stock"  },
   ],
 };
 

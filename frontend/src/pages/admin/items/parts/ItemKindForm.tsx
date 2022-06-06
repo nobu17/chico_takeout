@@ -9,7 +9,7 @@ type ItemKindFormProps = {
   onCancel: callbackCancel;
 };
 interface callbackSubmit {
-  (stageInfo: ItemKind): void;
+  (itemKind: ItemKind): void;
 }
 interface callbackCancel {
   (): void;
@@ -50,7 +50,6 @@ export default function ItemKindForm(props: ItemKindFormProps) {
     formState: { errors },
   } = useForm<ItemKind>({ defaultValues: props.editItem });
   const onSubmit: SubmitHandler<ItemKind> = (data) => {
-    console.log("on sub", data);
     props.onSubmit(data);
   };
   const onCancel = () => {

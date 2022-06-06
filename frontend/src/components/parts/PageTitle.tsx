@@ -13,6 +13,7 @@ export default function PageTitle(props: PageTitleProps) {
         align="center"
         color="text.primary"
         gutterBottom
+        sx={{ mt: 3 }}
       >
         {props.title}
       </Typography>

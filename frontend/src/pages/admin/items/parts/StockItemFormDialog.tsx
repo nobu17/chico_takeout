@@ -4,17 +4,19 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 
-import ItemKindForm from "./ItemKindForm";
+import StockItemForm from "./StockItemForm";
 import { ItemKind } from "../../../../libs/ItemKind";
+import { StockItem } from "../../../../libs/StockItem";
 
-type ItemKindFormDialogProps = {
-  editItem: ItemKind;
+type StockItemFormDialogProps = {
+  editItem: StockItem;
+  itemKinds: ItemKind[],
   open: boolean;
-  onClose: (item: ItemKind | null) => void;
+  onClose: (item: StockItem | null) => void;
 };
 
-export default function ItemKindFormDialog(props: ItemKindFormDialogProps) {
-  const onSubmit = (data: ItemKind) => {
+export default function StockItemFormDialog(props: StockItemFormDialogProps) {
+  const onSubmit = (data: StockItem) => {
     props.onClose(data);
   };
   const onCancel = () => {
@@ -25,11 +27,12 @@ export default function ItemKindFormDialog(props: ItemKindFormDialogProps) {
     <>
       <Dialog open={props.open} fullWidth maxWidth="sm">
         <DialogContent>
-          <ItemKindForm
+          <StockItemForm
+            itemKinds={props.itemKinds}
             editItem={props.editItem}
             onSubmit={onSubmit}
             onCancel={onCancel}
-          ></ItemKindForm>
+          ></StockItemForm>
         </DialogContent>
         <DialogActions></DialogActions>
       </Dialog>

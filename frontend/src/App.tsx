@@ -10,6 +10,7 @@ import Container from "@mui/material/Container";
 import Header from "./components/layouts/Header";
 import AdminHome from "./pages/admin/Home";
 import ItemKind from "./pages/admin/items/ItemKind";
+import StockItem from "./pages/admin/items/StockItem";
 import "./App.css";
 
 let theme = createTheme();
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/admin" element={<AdminHome />} />
             <Route path="/admin/items/kind" element={<ItemKind />} /> 
+            <Route path="/admin/items/stock" element={<StockItem />} /> 
           </Routes>
         </Container>
       </BrowserRouter>

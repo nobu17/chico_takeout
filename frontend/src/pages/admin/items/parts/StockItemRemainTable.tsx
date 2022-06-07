@@ -2,29 +2,27 @@ import * as React from "react";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Button, Alert } from "@mui/material";
 
-import StockItemFormDialog from "./StockItemFormDialog";
+import StockItemRemainFormDialog from "./StockItemRemainFormDialog";
 import { StockItem } from "../../../../libs/StockItem";
 import useStockItem from "../../../../hooks/UseStockItem";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 
-export default function StockItemTable() {
-  const {
-    stockItems,
-    defaultStockItem,
-    addStockItem,
-    updateStockItem,
-    deleteStockItem,
-    itemKinds,
-    loading,
-    error,
-  } = useStockItem();
+type StockItemRemain = {
+  id: string;
+  name: string;
+  remain: number;
+};
+
+export default function StockItemRemainTable() {
+  const { stockItems, defaultStockItem, updateRemain, loading, error } =
+    useStockItem();
   const [open, setOpen] = React.useState(false);
   const [item, setItem] = React.useState(defaultStockItem);
 
   const columns: GridColDef[] = [
     {
       field: "id",
-      width: 180,
+      width: 90,
       headerName: "",
       sortable: false,
       renderCell: (params: GridRenderCellParams<string>) => {
@@ -37,19 +35,13 @@ export default function StockItemTable() {
             >
               編集
             </Button>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={(e) => handleRemove(params.row)}
-            >
-              削除
-            </Button>
           </>
         );
       },
     },
     { field: "priority", headerName: "表示順序", width: 100 },
     { field: "name", headerName: "アイテム名", width: 200 },
+    { field: "remain", headerName: "在庫数", width: 120 },
     {
       field: "kind",
       headerName: "種別",
@@ -64,21 +56,7 @@ export default function StockItemTable() {
     { field: "maxOrder", headerName: "最大注文数", width: 120 },
     { field: "price", headerName: "価格(税込)", width: 120 },
     { field: "enabled", headerName: "有効", width: 120 },
-    { field: "remain", headerName: "在庫数", width: 120 },
   ];
-
-  const handleRemove = (item: StockItem) => {
-    const result = window.confirm("削除してもよろしいですか？");
-    if (result) {
-      deleteStockItem(item);
-    }
-  };
-
-  const handleNew = () => {
-    const editItem = JSON.parse(JSON.stringify(defaultStockItem));
-    setItem(editItem);
-    setOpen(true);
-  };
 
   const handleEdit = (item: StockItem) => {
     const editItem = JSON.parse(JSON.stringify(item));
@@ -86,14 +64,10 @@ export default function StockItemTable() {
     setOpen(true);
   };
 
-  const onClose = (data: StockItem | null) => {
+  const onClose = (data: StockItemRemain | null) => {
     setOpen(false);
     if (data) {
-      if (data.id === "") {
-        addStockItem(data);
-      } else {
-        updateStockItem(data);
-      }
+      updateRemain({ ...data });
     }
   };
 
@@ -112,9 +86,6 @@ export default function StockItemTable() {
   return (
     <>
       {errorMessage(error)}
-      <Button sx={{ my: 2 }} fullWidth variant="contained" onClick={handleNew}>
-        新規作成
-      </Button>
       <div style={{ height: 600 }}>
         <DataGrid
           sx={styles.grid}
@@ -131,10 +102,9 @@ export default function StockItemTable() {
             `table-row-enabled--${params.row.enabled}`
           }
         />
-        <StockItemFormDialog
+        <StockItemRemainFormDialog
           open={open}
           editItem={item}
-          itemKinds={itemKinds}
           onClose={onClose}
         />
       </div>

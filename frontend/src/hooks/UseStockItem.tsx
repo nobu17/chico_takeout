@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ItemKind } from "../libs/ItemKind";
 import { StockItem } from "../libs/StockItem";
-import StockItemApi from "../libs/apis/stockItem";
+import StockItemApi, { StockItemRemainUpdateRequest } from "../libs/apis/stockItem";
 import ItemKindApi from "../libs/apis/itemKind";
 
 const defaultStockItem: StockItem = {
@@ -72,6 +72,20 @@ export default function useStockItem() {
       }
   };
 
+  const updateRemain = async (request: StockItemRemainUpdateRequest) => {
+    try {
+        setError(undefined);
+        setLoading(true);
+        await stockApi.updateRemain(request);
+        // reload
+        await getForReload();
+      } catch (e: any) {
+        setError(e);
+      } finally {
+        setLoading(false);
+      }
+  };
+
   const deletes = async (item: StockItem) => {
     try {
         setError(undefined);
@@ -114,6 +128,7 @@ export default function useStockItem() {
     addStockItem,
     updateStockItem,
     deleteStockItem,
+    updateRemain,
     error,
     loading,
   };

@@ -2,18 +2,24 @@ import * as React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import StockItemRemainForm from "./StockItemRemainForm";
 
-import ItemKindForm from "./ItemKindForm";
-import { ItemKind } from "../../../../libs/ItemKind";
-
-type ItemKindFormDialogProps = {
-  editItem: ItemKind;
+type StockItemRemainFormDialogProps = {
+  editItem: StockItemRemain;
   open: boolean;
-  onClose: (item: ItemKind | null) => void;
+  onClose: (item: StockItemRemain | null) => void;
 };
 
-export default function ItemKindFormDialog(props: ItemKindFormDialogProps) {
-  const onSubmit = (data: ItemKind) => {
+type StockItemRemain = {
+  id: string;
+  name: string;
+  remain: number;
+};
+
+export default function StockItemRemainFormDialog(
+  props: StockItemRemainFormDialogProps
+) {
+  const onSubmit = (data: StockItemRemain) => {
     props.onClose(data);
   };
   const onCancel = () => {
@@ -24,11 +30,11 @@ export default function ItemKindFormDialog(props: ItemKindFormDialogProps) {
     <>
       <Dialog open={props.open} fullWidth maxWidth="sm">
         <DialogContent>
-          <ItemKindForm
+          <StockItemRemainForm
             editItem={props.editItem}
             onSubmit={onSubmit}
             onCancel={onCancel}
-          ></ItemKindForm>
+          ></StockItemRemainForm>
         </DialogContent>
         <DialogActions></DialogActions>
       </Dialog>

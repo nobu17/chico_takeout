@@ -11,6 +11,7 @@ import Header from "./components/layouts/Header";
 import AdminHome from "./pages/admin/Home";
 import ItemKind from "./pages/admin/items/ItemKind";
 import StockItem from "./pages/admin/items/StockItem";
+import StockItemRemain from "./pages/admin/items/StockItemRemain";
 import "./App.css";
 
 let theme = createTheme();
@@ -24,8 +25,12 @@ function App() {
         <Container maxWidth="lg">
           <Routes>
             <Route path="/admin" element={<AdminHome />} />
-            <Route path="/admin/items/kind" element={<ItemKind />} /> 
-            <Route path="/admin/items/stock" element={<StockItem />} /> 
+            <Route path="/admin/items/kind" element={<ItemKind />} />
+            <Route path="/admin/items/stock" element={<StockItem />} />
+            <Route
+              path="/admin/items/stock/remain"
+              element={<StockItemRemain />}
+            />
           </Routes>
         </Container>
       </BrowserRouter>

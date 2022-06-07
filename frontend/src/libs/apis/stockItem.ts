@@ -15,11 +15,20 @@ export default class StockItemApi extends ApiBase {
   async update(item: StockItem): Promise<void> {
     await this.putAsync("/item/stock/" + item.id, convertRequest(item));
   }
+  
+  async updateRemain(request: StockItemRemainUpdateRequest): Promise<void> {
+    await this.putAsync(`/item/stock/${request.id}/remain`, request);
+  }
 
   async delete(item: StockItem): Promise<void> {
     await this.deleteAsync("/item/stock/" + item.id);
   }
 }
+
+export type StockItemRemainUpdateRequest = {
+  id: string;
+  remain: number;
+};
 
 type StockItemUpdateRequest = {
   id: string;
@@ -30,7 +39,7 @@ type StockItemUpdateRequest = {
   maxOrder: number;
   enabled: boolean;
   kindId: string;
-}
+};
 
 const convertRequest = (item: StockItem): StockItemUpdateRequest => {
   const kindId = item.kind ? item.kind.id : "";

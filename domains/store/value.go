@@ -6,6 +6,7 @@ import (
 
 	"chico/takeout/common"
 	"chico/takeout/domains/shared"
+	"chico/takeout/domains/shared/validator"
 )
 
 const (
@@ -133,4 +134,16 @@ func NewDate(value string) (*Date, error) {
 func (d *Date) IsSameDate(datetime time.Time) bool {
     dateStr := common.ConvertTimeToDateStr(datetime)
 	return d.StringValue.GetValue() == dateStr
+}
+
+type Name struct {
+	shared.StringValue
+}
+func NewName(value string, maxLength int) (*Name, error) {
+	validator := validator.NewStingLength("Name", maxLength)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Name{StringValue: shared.NewStringValue(value)}, nil
 }

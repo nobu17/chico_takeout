@@ -112,7 +112,7 @@ func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) 
 	if err != nil {
 		return nil, err
 	}
-	// check overwrap
+	// check overWrap
 	err = selfCopy.validateSchedules()
 	if err != nil {
 		return nil, err
@@ -169,7 +169,7 @@ const (
 
 type BusinessHour struct {
 	id       string
-	name     string
+	name     Name
 	shift    TimeRange
 	weekdays []Weekday
 }
@@ -185,7 +185,7 @@ func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour
 }
 
 func (b *BusinessHour) Copy() *BusinessHour {
-	businessHour, _ := NewBusinessHour(b.name, b.shift.start, b.shift.end, b.weekdays)
+	businessHour, _ := NewBusinessHour(b.name.GetValue(), b.shift.start, b.shift.end, b.weekdays)
 	businessHour.id = b.id
 	return businessHour
 }
@@ -195,7 +195,7 @@ func (b *BusinessHour) Equals(other BusinessHour) bool {
 }
 
 func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
-	err := validateBusinessHourName(name)
+	nameVal, err := NewName(name, BusinessHourNameMaxLength)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
 		return common.NewValidationError("weekdays", "duplicated value exists")
 	}
 
-	b.name = name
+	b.name = *nameVal
 	b.shift = *shift
 	b.weekdays = weekdays
 
@@ -278,7 +278,7 @@ func (b *BusinessHour) GetId() string {
 }
 
 func (b *BusinessHour) GetName() string {
-	return b.name
+	return b.name.GetValue()
 }
 
 func (b *BusinessHour) GetStart() string {

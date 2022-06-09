@@ -1,6 +1,5 @@
-const { createProxyMiddleware } = require("http-proxy-middleware");
-
-module.exports = function (app) {
+import { createProxyMiddleware } from "http-proxy-middleware";
+module.exports = function (app: any) {
   app.use(
     ["/store/*", "/item/*"],
     createProxyMiddleware({

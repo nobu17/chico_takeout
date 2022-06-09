@@ -1,7 +1,25 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosError } from "axios";
 
 export interface ApiResponse<T> {
   data: T;
+}
+
+interface ApiErrorImpl {
+  error: Error;
+  code: number;
+  message: string;
+  isBadRequest: () => boolean;
+}
+
+export class ApiError implements ApiErrorImpl {
+  public name: string;
+  constructor(public error: Error, public code: number, public message: string) {
+    this.name = "ApiError";
+  }
+
+  isBadRequest(): boolean {
+    return this.code === 400;
+  }
 }
 
 export default class ApiBase {
@@ -31,7 +49,7 @@ export default class ApiBase {
           resolve(res);
         })
         .catch((error) => {
-          reject(error);
+          reject(convertError(error));
         });
     });
   }
@@ -46,7 +64,7 @@ export default class ApiBase {
           resolve();
         })
         .catch((error) => {
-          reject(error);
+          reject(convertError(error));
         });
     });
   }
@@ -61,7 +79,7 @@ export default class ApiBase {
           resolve();
         })
         .catch((error) => {
-          reject(error);
+          reject(convertError(error));
         });
     });
   }
@@ -75,8 +93,29 @@ export default class ApiBase {
           resolve();
         })
         .catch((error) => {
-          reject(error);
+          reject(convertError(error));
         });
     });
   }
 }
+
+const convertError = (error: any): ApiError => {
+  if (isAxiosError(error)) {
+    const message =
+      typeof error.response?.data === "string" ? error.response?.data : "";
+    return new ApiError(
+      error,
+      error.response?.status != null ? error.response?.status : 0,
+      message,
+    );
+  }
+  return new ApiError(
+    error,
+    0,
+    "",
+  );
+};
+
+const isAxiosError = (error: any): error is AxiosError => {
+  return !!error.isAxiosError;
+};

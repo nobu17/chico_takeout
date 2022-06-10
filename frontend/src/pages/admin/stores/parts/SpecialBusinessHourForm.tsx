@@ -1,24 +1,76 @@
 import * as React from "react";
 import { Button, Container, Stack, TextField } from "@mui/material";
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { RhfTimeSelect } from "../../../../components/parts/Rhf/RhfTimeSelect";
-import { RhfDayOfWeekSelect } from "../../../../components/parts/Rhf/RhfDayOfWeekSelect";
+import { SpecialBusinessHour } from "../../../../libs/SpecialBusinessHour";
 import { BusinessHour } from "../../../../libs/BusinessHour";
 import { StoreTimeList } from "../../../../libs/Constant";
-import { SubmitHandler, useForm, FieldError } from "react-hook-form";
+import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
+import {
+  SubmitHandler,
+  useForm,
+  FieldError,
+  Controller,
+} from "react-hook-form";
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
+import { ToDate, ToDateString } from "../../../../libs/util/DateUtil";
 
-type BusinessHourFormProps = {
-  editItem: BusinessHour;
+type SpecialBusinessHourFormProps = {
+  editItem: SpecialBusinessHour;
+  hours: BusinessHour[];
   onSubmit: callbackSubmit;
   onCancel: callbackCancel;
 };
 interface callbackSubmit {
-  (itemKind: BusinessHour): void;
+  (item: SpecialBusinessHour): void;
 }
 interface callbackCancel {
   (): void;
 }
+
+type SpecialBusinessHourInput = {
+  id: string;
+  name: string;
+  date: Date;
+  start: string;
+  end: string;
+  businessHourId: string;
+};
+
+const convertInput = (item: SpecialBusinessHour): SpecialBusinessHourInput => {
+  return {
+    id: item.id,
+    name: item.name,
+    date: ToDate(item.date),
+    start: item.start,
+    end: item.end,
+    businessHourId: item.businessHourId,
+  };
+};
+
+const reverseInput = (item: SpecialBusinessHourInput): SpecialBusinessHour => {
+  return {
+    id: item.id,
+    name: item.name,
+    date: ToDateString(item.date),
+    start: item.start,
+    end: item.end,
+    businessHourId: item.businessHourId,
+  };
+};
+
+type HourSelects = {
+  name: string;
+  value: string;
+};
+
+const convertHoursList = (hours: BusinessHour[]): HourSelects[] => {
+  return hours.map((val) => ({
+    name: val.name,
+    value: val.id,
+  }));
+};
 
 const errorMessage = ({
   name,
@@ -48,21 +100,27 @@ const errorMessage = ({
   return "";
 };
 
-export default function BusinessHourForm(props: BusinessHourFormProps) {
+export default function SpecialBusinessHourForm(
+  props: SpecialBusinessHourFormProps
+) {
   const {
     register,
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
-  } = useForm<BusinessHour>({ defaultValues: props.editItem });
-  const onSubmit: SubmitHandler<BusinessHour> = (data) => {
+  } = useForm<SpecialBusinessHourInput>({
+    defaultValues: convertInput(props.editItem),
+  });
+  const onSubmit: SubmitHandler<SpecialBusinessHourInput> = (data) => {
     if (!startIsLessThanEnd(data.start, data.end)) {
       setError(`start`, { message: "開始時刻が終了時刻よりも大きいです。" });
       setError(`end`, { message: "開始時刻が終了時刻よりも大きいです。" });
       return;
     }
-    props.onSubmit(data);
+    const converted = reverseInput(data);
+    props.onSubmit(converted);
   };
   const onCancel = () => {
     props.onCancel();
@@ -81,6 +139,33 @@ export default function BusinessHourForm(props: BusinessHourFormProps) {
               maxLength: "10",
             })}
           />
+          <RhfSelects
+            label="販売時間"
+            name="businessHourId"
+            multiple={false}
+            itemList={convertHoursList(props.hours)}
+            control={control}
+          />
+          <Controller
+            name="date"
+            control={control}
+            render={({ field }) => {
+              return (
+                <MobileDatePicker
+                  {...field}
+                  label="営業時間"
+                  mask="____/__/__ __:__:__"
+                  inputFormat="yyyy/MM/dd"
+                  renderInput={(props) => <TextField {...props} />}
+                  onChange={(newValue) => {
+                    if (newValue != null) {
+                      setValue("date", newValue);
+                    }
+                  }}
+                />
+              );
+            }}
+          />
           <RhfTimeSelect
             label="開始時間"
             timeList={timeList}
@@ -91,11 +176,6 @@ export default function BusinessHourForm(props: BusinessHourFormProps) {
             label="終了時間"
             timeList={timeList}
             name="end"
-            control={control}
-          />
-          <RhfDayOfWeekSelect
-            label="曜日"
-            name="weekdays"
             control={control}
           />
           <Button

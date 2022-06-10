@@ -18,6 +18,7 @@ const storeMenu = {
   icon: "coffee",
   pageInfos: [
     { title: "営業時間 編集", url: "/admin/store/hour" },
+    { title: "特別営業時間 編集", url: "/admin/store/special_hour" },
   ],
 };
 

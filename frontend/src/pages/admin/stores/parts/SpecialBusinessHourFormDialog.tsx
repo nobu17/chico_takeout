@@ -3,17 +3,19 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 
-import BusinessHourForm from "./BusinessHourForm";
+import SpecialBusinessHourForm from "./SpecialBusinessHourForm";
+import { SpecialBusinessHour } from "../../../../libs/SpecialBusinessHour";
 import { BusinessHour } from "../../../../libs/BusinessHour";
 
-type BusinessHourFormDialogProps = {
-  editItem: BusinessHour;
+type SpecialBusinessHourFormDialogProps = {
+  editItem: SpecialBusinessHour;
+  hours: BusinessHour[];
   open: boolean;
-  onClose: (item: BusinessHour | null) => void;
+  onClose: (item: SpecialBusinessHour | null) => void;
 };
 
-export default function BusinessHourFormDialog(props: BusinessHourFormDialogProps) {
-  const onSubmit = (data: BusinessHour) => {
+export default function SpecialBusinessHourFormDialog(props: SpecialBusinessHourFormDialogProps) {
+  const onSubmit = (data: SpecialBusinessHour) => {
     props.onClose(data);
   };
   const onCancel = () => {
@@ -24,11 +26,12 @@ export default function BusinessHourFormDialog(props: BusinessHourFormDialogProp
     <>
       <Dialog open={props.open} fullWidth maxWidth="sm">
         <DialogContent>
-          <BusinessHourForm
+        <SpecialBusinessHourForm
             editItem={props.editItem}
+            hours={props.hours}
             onSubmit={onSubmit}
             onCancel={onCancel}
-          ></BusinessHourForm>
+          ></SpecialBusinessHourForm>
         </DialogContent>
         <DialogActions></DialogActions>
       </Dialog>

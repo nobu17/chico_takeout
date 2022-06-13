@@ -2,12 +2,12 @@ import * as React from "react";
 import { Button, Container, Stack, TextField } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { SpecialHoliday } from "../../../../libs/SpecialHoliday";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
+
 import {
-  SubmitHandler,
-  useForm,
-  FieldError,
-  Controller,
-} from "react-hook-form";
+  RequiredErrorMessage,
+  MaxLengthErrorMessage,
+} from "../../../../libs/ErrorMessages";
 
 import { startDateIsLessThanEndDate } from "../../../../libs/util/TimeCompare";
 import { ToDate, ToDateString } from "../../../../libs/util/DateUtil";
@@ -49,34 +49,6 @@ const reverseInput = (item: SpecialHolidayInput): SpecialHoliday => {
   };
 };
 
-const errorMessage = ({
-  name,
-  error,
-  maxLength,
-  min,
-  max,
-}: {
-  name: string;
-  error: FieldError | undefined;
-  maxLength?: string;
-  min?: string;
-  max?: string;
-}): string => {
-  if (error?.type === "required") {
-    return "入力が必要です。";
-  }
-  if (error?.type === "maxLength") {
-    return maxLength + "文字以下にしてください。";
-  }
-  if (error?.type === "min") {
-    return min + "以上にしてください。";
-  }
-  if (error?.type === "max") {
-    return max + "以下にしてください。";
-  }
-  return "";
-};
-
 export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
   const {
     register,
@@ -106,13 +78,12 @@ export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
         <Stack spacing={3}>
           <TextField
             label="名称"
-            {...register("name", { required: true, maxLength: 10 })}
-            error={Boolean(errors.name)}
-            helperText={errorMessage({
-              name: "名称",
-              error: errors.name,
-              maxLength: "10",
+            {...register("name", {
+              required: { value: true, message: RequiredErrorMessage },
+              maxLength: { value: 10, message: MaxLengthErrorMessage(10) },
             })}
+            error={Boolean(errors.name)}
+            helperText={errors.name && errors.name.message}
           />
           <Controller
             name="start"
@@ -128,10 +99,7 @@ export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
                     <TextField
                       {...props}
                       error={Boolean(errors.start)}
-                      helperText={errorMessage({
-                        name: "開始日",
-                        error: errors.start,
-                      })}
+                      helperText={errors.start && errors.start.message}
                     />
                   )}
                   onChange={(newValue) => {
@@ -153,7 +121,13 @@ export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
                   label="終了日"
                   mask="____/__/__ __:__:__"
                   inputFormat="yyyy/MM/dd"
-                  renderInput={(props) => <TextField {...props} />}
+                  renderInput={(props) => (
+                    <TextField
+                      {...props}
+                      error={Boolean(errors.end)}
+                      helperText={errors.end && errors.end.message}
+                    />
+                  )}
                   onChange={(newValue) => {
                     if (newValue != null) {
                       setValue("end", newValue);

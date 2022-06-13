@@ -7,6 +7,10 @@ import { StoreTimeList } from "../../../../libs/Constant";
 import { SubmitHandler, useForm, FieldError } from "react-hook-form";
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
+import {
+  RequiredErrorMessage,
+  MaxLengthErrorMessage,
+} from "../../../../libs/ErrorMessages";
 
 type BusinessHourFormProps = {
   editItem: BusinessHour;
@@ -19,34 +23,6 @@ interface callbackSubmit {
 interface callbackCancel {
   (): void;
 }
-
-const errorMessage = ({
-  name,
-  error,
-  maxLength,
-  min,
-  max,
-}: {
-  name: string;
-  error: FieldError | undefined;
-  maxLength?: string;
-  min?: string;
-  max?: string;
-}): string => {
-  if (error?.type === "required") {
-    return "入力が必要です。";
-  }
-  if (error?.type === "maxLength") {
-    return maxLength + "文字以下にしてください。";
-  }
-  if (error?.type === "min") {
-    return min + "以上にしてください。";
-  }
-  if (error?.type === "max") {
-    return max + "以下にしてください。";
-  }
-  return "";
-};
 
 export default function BusinessHourForm(props: BusinessHourFormProps) {
   const {
@@ -73,13 +49,12 @@ export default function BusinessHourForm(props: BusinessHourFormProps) {
         <Stack spacing={3}>
           <TextField
             label="名称"
-            {...register("name", { required: true, maxLength: 10 })}
-            error={Boolean(errors.name)}
-            helperText={errorMessage({
-              name: "名称",
-              error: errors.name,
-              maxLength: "10",
+            {...register("name", {
+              required: { value: true, message: RequiredErrorMessage },
+              maxLength: { value: 10, message: MaxLengthErrorMessage(10) },
             })}
+            error={Boolean(errors.name)}
+            helperText={errors.name && errors.name.message}
           />
           <RhfTimeSelect
             label="開始時間"
@@ -93,11 +68,7 @@ export default function BusinessHourForm(props: BusinessHourFormProps) {
             name="end"
             control={control}
           />
-          <RhfDayOfWeekSelect
-            label="曜日"
-            name="weekdays"
-            control={control}
-          />
+          <RhfDayOfWeekSelect label="曜日" name="weekdays" control={control} />
           <Button
             color="primary"
             variant="contained"

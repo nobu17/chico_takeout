@@ -10,12 +10,14 @@ import {
 } from "@mui/material";
 import { ItemKind } from "../../../../libs/ItemKind";
 import { StockItem } from "../../../../libs/StockItem";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
+
 import {
-  SubmitHandler,
-  useForm,
-  FieldError,
-  Controller,
-} from "react-hook-form";
+  RequiredErrorMessage,
+  MaxLengthErrorMessage,
+  MaxErrorMessage,
+  MinErrorMessage,
+} from "../../../../libs/ErrorMessages";
 
 type StockItemFormProps = {
   editItem: StockItem;
@@ -40,33 +42,6 @@ export type StockItemInput = {
   enabled: boolean;
   remain: number;
   kindId: string; // for select only using kindId
-};
-
-const errorMessage = ({
-  error,
-  maxLength,
-  min,
-  max,
-}: {
-  name: string;
-  error: FieldError | undefined;
-  maxLength?: string;
-  min?: string;
-  max?: string;
-}): string => {
-  if (error?.type === "required") {
-    return "入力が必要です。";
-  }
-  if (error?.type === "maxLength") {
-    return maxLength + "文字以下にしてください。";
-  }
-  if (error?.type === "min") {
-    return min + "以上にしてください。";
-  }
-  if (error?.type === "max") {
-    return max + "以下にしてください。";
-  }
-  return "";
 };
 
 const convertInput = (item: StockItem): StockItemInput => {
@@ -123,25 +98,23 @@ export default function StockItemForm(props: StockItemFormProps) {
         <Stack spacing={3}>
           <TextField
             label="名称"
-            {...register("name", { required: true, maxLength: 15 })}
-            error={Boolean(errors.name)}
-            helperText={errorMessage({
-              name: "名称",
-              error: errors.name,
-              maxLength: "15",
+            {...register("name", {
+              required: { value: true, message: RequiredErrorMessage },
+              maxLength: { value: 15, message: MaxLengthErrorMessage(15) },
             })}
+            error={Boolean(errors.name)}
+            helperText={errors.name && errors.name.message}
           />
           <TextField
             label="説明"
             multiline
             rows={5}
-            {...register("description", { required: true, maxLength: 500 })}
-            error={Boolean(errors.description)}
-            helperText={errorMessage({
-              name: "説明",
-              error: errors.description,
-              maxLength: "500",
+            {...register("description", {
+              required: { value: true, message: RequiredErrorMessage },
+              maxLength: { value: 500, message: MaxLengthErrorMessage(500) },
             })}
+            error={Boolean(errors.description)}
+            helperText={errors.description && errors.description.message}
           />
           <Controller
             name="kindId"
@@ -158,10 +131,7 @@ export default function StockItemForm(props: StockItemFormProps) {
                 fullWidth
                 label="アイテム種別"
                 error={Boolean(errors.kindId)}
-                helperText={errorMessage({
-                  name: "アイテム種別",
-                  error: errors.kindId,
-                })}
+                helperText={errors.kindId && errors.kindId.message}
               >
                 {props.itemKinds.map((kind, index) => (
                   <MenuItem key={index} value={kind.id}>
@@ -176,51 +146,36 @@ export default function StockItemForm(props: StockItemFormProps) {
             label="表示順序"
             {...register("priority", {
               valueAsNumber: true,
-              required: true,
-              min: 1,
-              max: 10,
+              required: { value: true, message: RequiredErrorMessage },
+              min: { value: 1, message: MinErrorMessage(1) },
+              max: { value: 10, message: MaxErrorMessage(10) },
             })}
             error={Boolean(errors.priority)}
-            helperText={errorMessage({
-              name: "表示順序",
-              error: errors.priority,
-              min: "1",
-              max: "15",
-            })}
+            helperText={errors.priority && errors.priority.message}
           />
           <TextField
             type="number"
             label="価格"
             {...register("price", {
               valueAsNumber: true,
-              required: true,
-              min: 1,
-              max: 20000,
+              required: { value: true, message: RequiredErrorMessage },
+              min: { value: 1, message: MinErrorMessage(1) },
+              max: { value: 20000, message: MaxErrorMessage(20000) },
             })}
             error={Boolean(errors.price)}
-            helperText={errorMessage({
-              name: "価格",
-              error: errors.price,
-              min: "1",
-              max: "20000",
-            })}
+            helperText={errors.price && errors.price.message}
           />
           <TextField
             type="number"
             label="最大注文可能数"
             {...register("maxOrder", {
               valueAsNumber: true,
-              required: true,
-              min: 1,
-              max: 30,
+              required: { value: true, message: RequiredErrorMessage },
+              min: { value: 1, message: MinErrorMessage(1) },
+              max: { value: 30, message: MaxErrorMessage(30) },
             })}
             error={Boolean(errors.maxOrder)}
-            helperText={errorMessage({
-              name: "最大注文可能数",
-              error: errors.maxOrder,
-              min: "1",
-              max: "30",
-            })}
+            helperText={errors.maxOrder && errors.maxOrder.message}
           />
           <FormControlLabel
             control={
@@ -229,7 +184,11 @@ export default function StockItemForm(props: StockItemFormProps) {
                 name="enabled"
                 control={control}
                 render={({ field: { onChange, value, ref } }) => (
-                  <Checkbox inputRef={ref} checked={value} onChange={onChange} />
+                  <Checkbox
+                    inputRef={ref}
+                    checked={value}
+                    onChange={onChange}
+                  />
                 )}
               />
             }

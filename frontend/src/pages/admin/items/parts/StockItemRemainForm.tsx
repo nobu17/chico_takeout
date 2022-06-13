@@ -1,6 +1,11 @@
 import * as React from "react";
 import { Button, Container, Stack, TextField } from "@mui/material";
-import { SubmitHandler, useForm, FieldError } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import {
+  RequiredErrorMessage,
+  MaxErrorMessage,
+  MinErrorMessage,
+} from "../../../../libs/ErrorMessages";
 
 type StockItemRemainFormProps = {
   editItem: StockItemRemain;
@@ -18,33 +23,6 @@ type StockItemRemain = {
   id: string;
   name: string;
   remain: number;
-};
-
-const errorMessage = ({
-  error,
-  maxLength,
-  min,
-  max,
-}: {
-  name: string;
-  error: FieldError | undefined;
-  maxLength?: string;
-  min?: string;
-  max?: string;
-}): string => {
-  if (error?.type === "required") {
-    return "入力が必要です。";
-  }
-  if (error?.type === "maxLength") {
-    return maxLength + "文字以下にしてください。";
-  }
-  if (error?.type === "min") {
-    return min + "以上にしてください。";
-  }
-  if (error?.type === "max") {
-    return max + "以下にしてください。";
-  }
-  return "";
 };
 
 export default function StockItemRemainForm(props: StockItemRemainFormProps) {
@@ -72,17 +50,12 @@ export default function StockItemRemainForm(props: StockItemRemainFormProps) {
             label="在庫数"
             {...register("remain", {
               valueAsNumber: true,
-              required: true,
-              min: 1,
-              max: 999,
+              required: { value: true, message: RequiredErrorMessage },
+              min: { value: 1, message: MinErrorMessage(1) },
+              max: { value: 999, message: MaxErrorMessage(10) },
             })}
             error={Boolean(errors.remain)}
-            helperText={errorMessage({
-              name: "在庫数",
-              error: errors.remain,
-              min: "1",
-              max: "999",
-            })}
+            helperText={errors.remain && errors.remain.message}
           />
           <Button
             color="primary"

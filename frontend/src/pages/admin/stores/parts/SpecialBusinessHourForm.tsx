@@ -6,12 +6,12 @@ import { SpecialBusinessHour } from "../../../../libs/SpecialBusinessHour";
 import { BusinessHour } from "../../../../libs/BusinessHour";
 import { StoreTimeList } from "../../../../libs/Constant";
 import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
+
 import {
-  SubmitHandler,
-  useForm,
-  FieldError,
-  Controller,
-} from "react-hook-form";
+  RequiredErrorMessage,
+  MaxLengthErrorMessage,
+} from "../../../../libs/ErrorMessages";
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
 import { ToDate, ToDateString } from "../../../../libs/util/DateUtil";
@@ -72,34 +72,6 @@ const convertHoursList = (hours: BusinessHour[]): HourSelects[] => {
   }));
 };
 
-const errorMessage = ({
-  name,
-  error,
-  maxLength,
-  min,
-  max,
-}: {
-  name: string;
-  error: FieldError | undefined;
-  maxLength?: string;
-  min?: string;
-  max?: string;
-}): string => {
-  if (error?.type === "required") {
-    return "入力が必要です。";
-  }
-  if (error?.type === "maxLength") {
-    return maxLength + "文字以下にしてください。";
-  }
-  if (error?.type === "min") {
-    return min + "以上にしてください。";
-  }
-  if (error?.type === "max") {
-    return max + "以下にしてください。";
-  }
-  return "";
-};
-
 export default function SpecialBusinessHourForm(
   props: SpecialBusinessHourFormProps
 ) {
@@ -131,13 +103,12 @@ export default function SpecialBusinessHourForm(
         <Stack spacing={3}>
           <TextField
             label="名称"
-            {...register("name", { required: true, maxLength: 10 })}
-            error={Boolean(errors.name)}
-            helperText={errorMessage({
-              name: "名称",
-              error: errors.name,
-              maxLength: "10",
+            {...register("name", {
+              required: { value: true, message: RequiredErrorMessage },
+              maxLength: { value: 10, message: MaxLengthErrorMessage(10) },
             })}
+            error={Boolean(errors.name)}
+            helperText={errors.name && errors.name.message}
           />
           <RhfSelects
             label="販売時間"

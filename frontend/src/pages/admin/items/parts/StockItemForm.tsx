@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  Button,
   Container,
   MenuItem,
   Stack,
@@ -11,6 +10,7 @@ import {
 import { ItemKind } from "../../../../libs/ItemKind";
 import { StockItem } from "../../../../libs/StockItem";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
 import {
   RequiredErrorMessage,
@@ -194,22 +194,10 @@ export default function StockItemForm(props: StockItemFormProps) {
             }
             label="有効"
           />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  Button,
   Container,
   MenuItem,
   Stack,
@@ -13,6 +12,7 @@ import { FoodItem } from "../../../../libs/FoodItem";
 import { BusinessHour } from "../../../../libs/BusinessHour";
 import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
 import {
   RequiredErrorMessage,
@@ -232,22 +232,10 @@ export default function FoodItemForm(props: FoodItemFormProps) {
             }
             label="有効"
           />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

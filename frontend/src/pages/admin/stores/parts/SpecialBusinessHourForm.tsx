@@ -7,6 +7,7 @@ import { BusinessHour } from "../../../../libs/BusinessHour";
 import { StoreTimeList } from "../../../../libs/Constant";
 import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
 import {
   RequiredErrorMessage,
@@ -149,22 +150,10 @@ export default function SpecialBusinessHourForm(
             name="end"
             control={control}
           />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

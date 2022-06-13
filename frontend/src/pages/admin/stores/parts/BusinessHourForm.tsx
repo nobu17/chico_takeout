@@ -1,10 +1,11 @@
 import * as React from "react";
-import { Button, Container, Stack, TextField } from "@mui/material";
+import { Container, Stack, TextField } from "@mui/material";
 import { RhfTimeSelect } from "../../../../components/parts/Rhf/RhfTimeSelect";
 import { RhfDayOfWeekSelect } from "../../../../components/parts/Rhf/RhfDayOfWeekSelect";
 import { BusinessHour } from "../../../../libs/BusinessHour";
 import { StoreTimeList } from "../../../../libs/Constant";
-import { SubmitHandler, useForm, FieldError } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
 import {
@@ -69,22 +70,10 @@ export default function BusinessHourForm(props: BusinessHourFormProps) {
             control={control}
           />
           <RhfDayOfWeekSelect label="曜日" name="weekdays" control={control} />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

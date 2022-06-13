@@ -1,8 +1,9 @@
 import * as React from "react";
-import { Button, Container, Stack, TextField } from "@mui/material";
+import { Container, Stack, TextField } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { SpecialHoliday } from "../../../../libs/SpecialHoliday";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
 import {
   RequiredErrorMessage,
@@ -137,22 +138,10 @@ export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
               );
             }}
           />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

@@ -1,6 +1,8 @@
 import * as React from "react";
-import { Button, Container, Stack, TextField } from "@mui/material";
+import { Container, Stack, TextField } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
+import SubmitButtons from "../../../../components/parts/SubmitButtons";
+
 import {
   RequiredErrorMessage,
   MaxErrorMessage,
@@ -57,22 +59,10 @@ export default function StockItemRemainForm(props: StockItemRemainFormProps) {
             error={Boolean(errors.remain)}
             helperText={errors.remain && errors.remain.message}
           />
-          <Button
-            color="primary"
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-          >
-            確定
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            size="large"
-            onClick={onCancel}
-          >
-            キャンセル
-          </Button>
+          <SubmitButtons
+            onSubmit={handleSubmit(onSubmit)}
+            onCancel={onCancel}
+          />
         </Stack>
       </Container>
     </>

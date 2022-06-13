@@ -12,14 +12,43 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
+import { useNavigate } from "react-router-dom";
+import { useAdminAuth } from "../contexts/AdminAuthContext";
 
 const title = "CHICO SPICE";
-const pages = ["Products", "Pricing", "Blog"];
+const pages: NavItem[] = [
+  { label: "Products", link: "" },
+  { label: "管理者ログアウト", link: "/admin/sign_out", isAdmin: true },
+];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
+type NavItem = {
+  label: string;
+  link: string;
+  isAdmin?: boolean;
+  isUser?: boolean;
+};
+
 const Header = () => {
+  const navigate = useNavigate();
+  const { state } = useAdminAuth();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  const getFilteredNaviItem = (): NavItem[] => {
+    const menus = Array<NavItem>();
+
+    for (const item of pages) {
+      if (!item.isAdmin) {
+        menus.push(item);
+        continue;
+      }
+      if (state.isAuthorized) {
+        menus.push(item);
+      }
+    }
+    return menus;
+  };
 
   const handleOpenNavMenu = (event: any) => {
     setAnchorElNav(event.currentTarget);
@@ -32,12 +61,17 @@ const Header = () => {
     setAnchorElNav(null);
   };
 
+  const handleLinkClick = (url: string) => {
+    setAnchorElNav(null);
+    navigate(url);
+  };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
 
   return (
-    <AppBar position="static" sx={{ mb:2 }}>
+    <AppBar position="static" sx={{ mb: 2 }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -88,9 +122,12 @@ const Header = () => {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{page}</Typography>
+              {getFilteredNaviItem().map((page) => (
+                <MenuItem
+                  key={page.label}
+                  onClick={() => handleLinkClick(page.link)}
+                >
+                  <Typography textAlign="center">{page.label}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -115,13 +152,13 @@ const Header = () => {
             {title}
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            {getFilteredNaviItem().map((page) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                key={page.label}
+                onClick={() => handleLinkClick(page.link)}
                 sx={{ my: 2, color: "white", display: "block" }}
               >
-                {page}
+                {page.label}
               </Button>
             ))}
           </Box>

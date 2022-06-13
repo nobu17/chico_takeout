@@ -2,35 +2,28 @@ import * as React from "react";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { Button, Alert, Snackbar } from "@mui/material";
 
-import SpecialBusinessHourFormDialog from "./SpecialBusinessHourFormDialog";
-import { SpecialBusinessHour } from "../../../../libs/SpecialBusinessHour";
-import useSpecialBusinessHour from "../../../../hooks/UseSpecialBusinessHour";
-import useBusinessHour from "../../../../hooks/UseBusinessHour";
+import SpecialHolidayFromDialog from "./SpecialHolidayFromDialog";
+import { SpecialHoliday } from "../../../../libs/SpecialHoliday";
+import useSpecialHoliday from "../../../../hooks/UseSpecialHoliday";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { ApiError } from "../../../../libs/apis/apibase";
 
-export default function SpecialBusinessHourTable() {
+export default function SpecialHolidayTable() {
   const {
-    specialBusinessHours,
-    defaultSpecialBusinessHour,
-    addSpecialBusinessHour,
-    updateSpecialBusinessHour,
-    deleteSpecialBusinessHour,
-    loading: spHoursLoading,
-    error: spHoursError,
-  } = useSpecialBusinessHour();
-
-  const {
-    businessHours,
-    loading: hoursLoading,
-    error: hoursError,
-  } = useBusinessHour();
+    specialHolidays,
+    addSpecialHoliday,
+    updateSpecialHoliday,
+    deleteSpecialHoliday,
+    defaultSpecialHoliday,
+    loading,
+    error,
+  } = useSpecialHoliday();
 
   const [open, setOpen] = React.useState(false);
-  const [item, setItem] = React.useState(defaultSpecialBusinessHour);
+  const [item, setItem] = React.useState(defaultSpecialHoliday);
   const [openSnack, setOpenSnack] = React.useState(false);
   const [snackMessage, setSnackMessage] = React.useState("");
-  const [uiErrorMessage, setUIErrorMessage] = React.useState("");
+  const [uiErrorMessage, setUiErrorMessage] = React.useState("");
 
   const columns: GridColDef[] = [
     {
@@ -60,63 +53,46 @@ export default function SpecialBusinessHourTable() {
       },
     },
     { field: "name", headerName: "名称", width: 120 },
-    { field: "date", headerName: "日付", width: 120 },
-    { field: "start", headerName: "開始時刻", width: 120 },
-    { field: "end", headerName: "終了時刻", width: 120 },
-    {
-      field: "schedules",
-      headerName: "販売時間",
-      width: 190,
-      valueGetter: (params) => {
-        if (params.row.businessHourId) {
-          return getScheduleName(params.row.businessHourId);
-        }
-        return "";
-      },
-    },
+    { field: "start", headerName: "開始日", width: 120 },
+    { field: "end", headerName: "終了日", width: 120 },
   ];
-
-  const getScheduleName = (id: string): string => {
-    const hour = businessHours.find((f) => f.id === id);
-    return hour ? hour.name : "";
-  };
 
   const handleNew = () => {
     // check max records
-    setUIErrorMessage("");
-    if (specialBusinessHours.length >= 10) {
-      setUIErrorMessage(
+    setUiErrorMessage("");
+    if (specialHolidays.length >= 10) {
+        setUiErrorMessage(
         "最大10件まで作成可能です。不要データを削除して下さい。"
       );
       return;
     }
-    const editItem = JSON.parse(JSON.stringify(defaultSpecialBusinessHour));
+    const editItem = JSON.parse(JSON.stringify(defaultSpecialHoliday));
     setItem(editItem);
     setOpen(true);
   };
 
-  const handleEdit = (item: SpecialBusinessHour) => {
-    setUIErrorMessage("");
+  const handleEdit = (item: SpecialHoliday) => {
+    setUiErrorMessage("");
     const editItem = JSON.parse(JSON.stringify(item));
     setItem(editItem);
     setOpen(true);
   };
 
-  const handleRemove = (item: SpecialBusinessHour) => {
-    setUIErrorMessage("");
+  const handleRemove = (item: SpecialHoliday) => {
+    //setUIErrorMessage("");
     const result = window.confirm("削除してもよろしいですか？");
     if (result) {
-      deleteSpecialBusinessHour(item);
+      deleteSpecialHoliday(item);
     }
   };
 
-  const onClose = async (data: SpecialBusinessHour | null) => {
+  const onClose = async (data: SpecialHoliday | null) => {
     if (data) {
       let result: ApiError | null = null;
       if (data.id !== "") {
-        result = await updateSpecialBusinessHour(data);
+        result = await updateSpecialHoliday(data);
       } else {
-        result = await addSpecialBusinessHour(data);
+        result = await addSpecialHoliday(data);
       }
       if (result) {
         if (result.isBadRequest()) {
@@ -156,8 +132,7 @@ export default function SpecialBusinessHourTable() {
   return (
     <>
       {errorMessageStr(uiErrorMessage)}
-      {errorMessage(spHoursError)}
-      {errorMessage(hoursError)}
+      {errorMessage(error)}
       <div style={{ height: 600 }}>
         <Button
           sx={{ my: 2 }}
@@ -169,7 +144,7 @@ export default function SpecialBusinessHourTable() {
         </Button>
         <DataGrid
           sx={styles.grid}
-          rows={specialBusinessHours}
+          rows={specialHolidays}
           columns={columns}
           disableColumnFilter={true}
           disableColumnMenu={true}
@@ -178,9 +153,8 @@ export default function SpecialBusinessHourTable() {
           editMode="row"
           hideFooter
         />
-        <SpecialBusinessHourFormDialog
+        <SpecialHolidayFromDialog
           open={open}
-          hours={businessHours}
           editItem={item}
           onClose={onClose}
         />
@@ -191,14 +165,11 @@ export default function SpecialBusinessHourTable() {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error" sx={{ width: "100%" }}>
-          入力に問題があります。(営業時間の重複 or 既に同一日に設定済み。)
+          入力に問題があります。(休日の重複)
           {snackMessage}
         </Alert>
       </Snackbar>
-      <LoadingSpinner
-        message="Loading..."
-        isLoading={spHoursLoading || hoursLoading}
-      />
+      <LoadingSpinner message="Loading..." isLoading={loading} />
     </>
   );
 }

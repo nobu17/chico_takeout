@@ -3,11 +3,11 @@ import PageTitle from "../../components/parts/PageTitle";
 import LoadingSpinner from "../../components/parts/LoadingSpinner";
 import LoginForm, { LoginInput } from "./parts/LoginForm";
 import { useNavigate } from "react-router-dom";
-import { useAdminAuth } from "../../components/contexts/AdminAuthContext";
+import { useAuth } from "../../components/contexts/AuthContext";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const { signIn, loading } = useAdminAuth();
+  const { signIn, loading } = useAuth();
   const handleSignIn = async (input: LoginInput) => {
     const result = await signIn(input.email, input.password);
     console.log(result);

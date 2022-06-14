@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdminAuth } from "../../components/contexts/AdminAuthContext";
+import { useAuth } from "../../components/contexts/AuthContext";
 import { useEffect } from "react";
 
-export default function AdminLogout() {
+export default function Logout() {
   const navigate = useNavigate();
-  const { signOut } = useAdminAuth();
+  const { signOut } = useAuth();
 
   useEffect(() => {
     const f = async () => {

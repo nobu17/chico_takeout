@@ -1,30 +1,31 @@
 import * as React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 import {
-  AdminAuthService,
-  AdminAuthResult,
-} from "../../libs/firebase/AdminAuthService";
-import LoadingSpinner from "../../components/parts/LoadingSpinner";
+  AuthService,
+  AuthResult,
+} from "../../libs/firebase/AuthService";
+import LoadingSpinner from "../parts/LoadingSpinner";
 
-type AdminAuthState = {
+type AuthState = {
   isAuthorized: boolean;
+  isAdmin: boolean;
   uid: string;
 };
 
 type ContextType = {
-  state: AdminAuthState;
+  state: AuthState;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<AdminAuthResult>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
-const service = new AdminAuthService();
-const initialState = { isAuthorized: false, uid: "" };
+const service = new AuthService();
+const initialState = { isAuthorized: false, isAdmin: false,  uid: "" };
 
-const AdminAuthContext = createContext({} as ContextType);
+const AuthContext = createContext({} as ContextType);
 
-export function useAdminAuth(): ContextType {
-  return useContext(AdminAuthContext);
+export function useAuth(): ContextType {
+  return useContext(AuthContext);
 }
 
 export const AdminAuthProvider = ({ children }: any) => {
@@ -35,10 +36,10 @@ export const AdminAuthProvider = ({ children }: any) => {
   async function signIn(
     email: string,
     password: string
-  ): Promise<AdminAuthResult> {
+  ): Promise<AuthResult> {
     setLoading(true);
     const result = await service.signIn(email, password);
-    setState({ isAuthorized: result.isSuccessful, uid: result.uid });
+    setState({ isAuthorized: result.isSuccessful, isAdmin: result.isAdmin, uid: result.uid });
     setLoading(false);
     return result;
   }
@@ -55,7 +56,7 @@ export const AdminAuthProvider = ({ children }: any) => {
   useEffect(() => {
     service.onAuthStateChange((result) => {
       setInitializing(false);
-      setState({ isAuthorized: result.isSuccessful, uid: result.uid });
+      setState({ isAuthorized: result.isSuccessful, isAdmin: result.isAdmin, uid: result.uid });
     });
   }, []);
 
@@ -71,8 +72,8 @@ export const AdminAuthProvider = ({ children }: any) => {
   }
 
   return (
-    <AdminAuthContext.Provider value={values}>
+    <AuthContext.Provider value={values}>
       {!initializing && children}
-    </AdminAuthContext.Provider>
+    </AuthContext.Provider>
   );
 };

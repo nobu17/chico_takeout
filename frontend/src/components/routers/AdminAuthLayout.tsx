@@ -1,9 +1,14 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useAdminAuth } from "../contexts/AdminAuthContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AdminAuthLayout() {
-  const { state } = useAdminAuth();
-
-  return state.isAuthorized ? <Outlet /> : <Navigate to="/admin/sign_in" />;
+  const { state } = useAuth();
+  if (state.isAuthorized && state.isAdmin) {
+    return <Outlet />;
+  }
+  if (state.isAuthorized) {
+    return <Navigate to="/" />;
+  }
+  return <Navigate to="/admin/sign_in" />;
 }

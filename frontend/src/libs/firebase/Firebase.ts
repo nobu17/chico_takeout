@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, EmailAuthProvider, sendEmailVerification, getAdditionalUserInfo } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL, updateMetadata, listAll } from "firebase/storage";
 
 const firebaseConfig = {
@@ -12,13 +12,16 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
   measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
-
 const firebase = initializeApp(firebaseConfig);
+
 const auth_obj = getAuth();
 const storage_obj = getStorage();
 
+
 export default firebase;
 export const auth = auth_obj;
+export const sendMail = sendEmailVerification;
+export const getAdditionalUser = getAdditionalUserInfo;
 export const signIn = signInWithEmailAndPassword;
 export const storage = storage_obj;
 export const storageRef = ref;

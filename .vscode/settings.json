@@ -2,5 +2,12 @@
   "go.formatTool": "gofmt",
   "editor.guides.bracketPairs": true,
   "editor.bracketPairColorization.enabled": true,
-  "cSpell.words": ["apibase", "gonic", "jinzhu", "sdomains", "stretchr"]
+  "cSpell.words": [
+    "apibase",
+    "firebaseui",
+    "gonic",
+    "jinzhu",
+    "sdomains",
+    "stretchr"
+  ]
 }

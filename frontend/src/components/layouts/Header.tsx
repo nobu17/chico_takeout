@@ -13,12 +13,14 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router-dom";
-import { useAdminAuth } from "../contexts/AdminAuthContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const title = "CHICO SPICE";
 const pages: NavItem[] = [
   { label: "Products", link: "" },
-  { label: "管理者ログアウト", link: "/admin/sign_out", isAdmin: true },
+  { label: "マイページ", link: "/my_page", isUser: true },
+  { label: "管理ページ", link: "/admin", isAdmin: true },
+  { label: "ログアウト", link: "/auth/sign_out", isUser: true },
 ];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
@@ -31,7 +33,7 @@ type NavItem = {
 
 const Header = () => {
   const navigate = useNavigate();
-  const { state } = useAdminAuth();
+  const { state } = useAuth();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -39,13 +41,19 @@ const Header = () => {
     const menus = Array<NavItem>();
 
     for (const item of pages) {
-      if (!item.isAdmin) {
-        menus.push(item);
+      if (item.isAdmin) {
+        if (state.isAdmin && state.isAuthorized) {
+          menus.push(item);
+        }
         continue;
       }
-      if (state.isAuthorized) {
-        menus.push(item);
+      if (item.isUser) {
+        if (state.isAuthorized) {
+          menus.push(item);
+        }
+        continue;
       }
+      menus.push(item);
     }
     return menus;
   };

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -8,21 +9,32 @@ import (
 	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
 	"chico/takeout/infrastructures/memory"
+	itemRDBMS "chico/takeout/infrastructures/rdbms/items"
+	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
 	itemUseCase "chico/takeout/usecase/item"
 	orderUseCase "chico/takeout/usecase/order"
 	storeUseCase "chico/takeout/usecase/store"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
-	r := setupRouter()
+	db := setUpDb()
+	sqlDb, err := db.DB()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer sqlDb.Close()
+
+	r := setupRouter(db)
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8086")
 }
 
-func setupRouter() *gin.Engine {
+func setupRouter(db *gorm.DB) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
@@ -62,11 +74,12 @@ func setupRouter() *gin.Engine {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
-	itemKindRepo := memory.NewItemKindMemoryRepository()
+	kindRepo := itemRDBMS.NewItemKindRepository(db)
+	//itemKindRepo := memory.NewItemKindMemoryRepository()
 	// itemkind
 	kind := r.Group("/item/kind")
 	{
-		useCase := itemUseCase.NewItemKindUseCase(itemKindRepo)
+		useCase := itemUseCase.NewItemKindUseCase(kindRepo)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
@@ -74,8 +87,9 @@ func setupRouter() *gin.Engine {
 		kind.PUT("/:id", handler.Put)
 		kind.DELETE("/:id", handler.Delete)
 	}
-	kindRepo := memory.NewItemKindMemoryRepository()
-	stockRepo := memory.NewStockItemMemoryRepository()
+	// kindRepo := memory.NewItemKindMemoryRepository()
+	//stockRepo := memory.NewStockItemMemoryRepository()
+	stockRepo := itemRDBMS.NewStockItemRepository(db)
 	// stock
 	stock := r.Group("/item/stock")
 	{
@@ -89,12 +103,14 @@ func setupRouter() *gin.Engine {
 		stock.DELETE("/:id", handler.Delete)
 	}
 
-	businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
-	foodRepo := memory.NewFoodItemMemoryRepository()
+	//businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
+	businessHoursRepo := storeRDBMS.NewBusinessHoursRepository(db)
+	foodRepo := itemRDBMS.NewFoodItemRepository(db)
+	// foodRepo := memory.NewFoodItemMemoryRepository()
 	// todo idのGET紐付け
 	food := r.Group("/item/food")
 	{
-		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, itemKindRepo, businessHoursRepo)
+		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, kindRepo, businessHoursRepo)
 		handler := itemHandler.NewFoodItemHandler(useCase)
 		food.GET("/:id", handler.Get)
 		food.GET("/", handler.GetAll)
@@ -104,11 +120,17 @@ func setupRouter() *gin.Engine {
 	}
 
 	// hour
-	spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
+	// spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
+	spBusinessHourRepo := storeRDBMS.NewSpecialBusinessHoursRepository(db)
 	hour := r.Group("/store/hour")
 	{
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHoursRepo, spBusinessHourRepo)
-		handler := storeHandler.NewbusinessHoursHandler(useCase)
+		// init
+		err := useCase.InitIfNotExists()
+		if err != nil {
+			panic(err)
+		}
+		handler := storeHandler.BusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/:id", handler.Put)
 	}
@@ -124,7 +146,8 @@ func setupRouter() *gin.Engine {
 	}
 
 	//holiday
-	holidayRepo := memory.NewSpecialHolidayMemoryRepository()
+	// holidayRepo := memory.NewSpecialHolidayMemoryRepository()
+	holidayRepo := storeRDBMS.NewSpecialHolidayRepository(db)
 	holiday := r.Group("/store/holiday")
 	{
 		useCase := storeUseCase.NewSpecialHolidayUseCase(holidayRepo)
@@ -153,4 +176,59 @@ func setupRouter() *gin.Engine {
 	})
 
 	return r
+}
+
+func setUpDb() *gorm.DB {
+	user := "test"
+	pass := "password"
+	server := "localhost"
+	port := "15432"
+	dbName := "chicoDB"
+
+	dsn := "host=" + server + " user=" + user + " password=" + pass + " dbname=" + dbName + " port=" + port + " sslmode=disable"
+	// dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println("db connected: ", &db)
+
+	migrateDb(db)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return db
+}
+
+func migrateDb(db *gorm.DB) {
+	err := db.AutoMigrate(&itemRDBMS.ItemKindModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&itemRDBMS.StockItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&storeRDBMS.BusinessHourModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&storeRDBMS.SpecialBusinessHourModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&storeRDBMS.SpecialHolidayModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&storeRDBMS.WeekDaysModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&itemRDBMS.FoodItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
 }

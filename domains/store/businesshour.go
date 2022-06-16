@@ -16,6 +16,7 @@ const (
 type BusinessHoursRepository interface {
 	Fetch() (*BusinessHours, error)
 	Update(target *BusinessHours) error
+	Create(target *BusinessHours) error
 }
 
 type BusinessHours struct {
@@ -176,6 +177,16 @@ type BusinessHour struct {
 
 func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
 	businessHour := &BusinessHour{id: uuid.NewString()}
+
+	err := businessHour.Set(name, start, end, weekdays)
+	if err != nil {
+		return nil, err
+	}
+	return businessHour, nil
+}
+
+func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
+	businessHour := &BusinessHour{id: id}
 
 	err := businessHour.Set(name, start, end, weekdays)
 	if err != nil {

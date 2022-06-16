@@ -4,7 +4,7 @@ type BusinessHoursService struct {
 	businessHoursRepository BusinessHoursRepository
 }
 
-func NewBussinessHoursService(businessHoursRepository BusinessHoursRepository) *BusinessHoursService {
+func NewBusinessHoursService(businessHoursRepository BusinessHoursRepository) *BusinessHoursService {
 	return &BusinessHoursService{
 		businessHoursRepository: businessHoursRepository,
 	}
@@ -29,9 +29,39 @@ func (s *BusinessHoursService) FetchBusinessHours() (*BusinessHours, error) {
 	}
 	// create default
 	if businessHours == nil {
-		return NewDefaultBusinessHours()
+		hours, err := NewDefaultBusinessHours()
+		if err != nil {
+			return nil, err
+		}
+		err = s.businessHoursRepository.Create(hours)
+		if err != nil {
+			return nil, err
+		}
+		businessHours, err = s.businessHoursRepository.Fetch()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return businessHours, nil
+}
+
+func (s *BusinessHoursService) InitDataIfNotExists() error {
+	businessHours, err := s.businessHoursRepository.Fetch()
+	if err != nil {
+		return err
+	}
+	// create default
+	if businessHours == nil {
+		hours, err := NewDefaultBusinessHours()
+		if err != nil {
+			return err
+		}
+		err = s.businessHoursRepository.Create(hours)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type HolidayService struct {

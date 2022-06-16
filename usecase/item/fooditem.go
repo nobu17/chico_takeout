@@ -66,7 +66,7 @@ func NewFoodItemUseCase(foodRepos domains.FoodItemRepository,
 	return &foodItemUseCase{
 		foodItemRepository:   foodRepos,
 		itemKindRepository:   itemKindRepos,
-		businessHoursService: *storeDomains.NewBussinessHoursService(businessHoursRepos),
+		businessHoursService: *storeDomains.NewBusinessHoursService(businessHoursRepos),
 		commonItemUseCase:    *newCommonItemUseCase(itemKindRepos),
 	}
 }

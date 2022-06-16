@@ -6,8 +6,12 @@
     "apibase",
     "firebaseui",
     "gonic",
+    "gorm",
     "jinzhu",
+    "Preload",
+    "rdbms",
     "sdomains",
-    "stretchr"
+    "stretchr",
+    "Unscoped"
   ]
 }

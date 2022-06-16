@@ -110,6 +110,7 @@ func toDomainWeekday(weekdays []Weekday) []domains.Weekday {
 type BusinessHoursUseCase interface {
 	GetAll() (*BusinessHoursModel, error)
 	Update(model *BusinessHoursUpdateModel) error
+	InitIfNotExists() error
 }
 
 type businessHoursUseCase struct {
@@ -122,7 +123,7 @@ func NewBusinessHoursUseCase(
 	specialBusinessHourRepository domains.SpecialBusinessHourRepository) BusinessHoursUseCase {
 	return &businessHoursUseCase{
 		businessHoursRepository: businessHoursRepository,
-		businessHoursService:    *domains.NewBussinessHoursService(businessHoursRepository),
+		businessHoursService:    *domains.NewBusinessHoursService(businessHoursRepository),
 	}
 }
 
@@ -132,6 +133,14 @@ func (b *businessHoursUseCase) GetAll() (*BusinessHoursModel, error) {
 		return nil, err
 	}
 	return newBusinessHoursModel(data), nil
+}
+
+func (b *businessHoursUseCase) InitIfNotExists() error {
+	err := b.businessHoursService.InitDataIfNotExists()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {

@@ -48,3 +48,8 @@ func (b *BusinessHoursMemoryRepository) Update(target *domains.BusinessHours) er
 	*b.inMemory = *target
 	return nil
 }
+
+func (b *BusinessHoursMemoryRepository) Create(target *domains.BusinessHours) error {
+	*b.inMemory = *target
+	return nil
+}

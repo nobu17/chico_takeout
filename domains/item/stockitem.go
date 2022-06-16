@@ -30,6 +30,22 @@ func NewStockItem(name, description string, priority, maxOrder, price int, kindI
 	return &StockItem{commonItem: *common, remain: *remain}, nil
 }
 
+// only for orm
+func NewStockItemForOrm(id, name, description string, priority, maxOrder, price, remain int, kindId string, enabled bool) (*StockItem, error) {		
+	item, err := NewStockItem(name, description, priority, maxOrder, price, kindId, enabled)
+	if err != nil {
+		return nil, err
+	}
+	item.id = id
+	
+	item.SetRemain(remain);
+	if err != nil {
+		return nil, err
+	}
+	return item, nil
+}
+
+
 func (s *StockItem) GetRemain() int {
 	return s.remain.GetValue()
 }

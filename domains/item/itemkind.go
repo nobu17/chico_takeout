@@ -26,6 +26,16 @@ const (
 
 var nameValidator = validator.NewStingLength("ItemKind", ItemNameMaxLength)
 
+// only for orm
+func NewItemKindForOrm(id string, name string, priority int) (*ItemKind, error) {
+	item := &ItemKind{id: id}
+	if err := item.Set(name, priority); err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 func NewItemKind(name string, priority int) (*ItemKind, error) {
 	item := &ItemKind{id: uuid.NewString()}
 	if err := item.Set(name, priority); err != nil {

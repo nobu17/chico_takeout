@@ -38,6 +38,14 @@ func NewSpecialBusinessHour(name, date, start, end, businessHourId string) (*Spe
 	return hour, nil
 }
 
+func NewSpecialBusinessHourForOrm(id, name, date, start, end, businessHourId string) (*SpecialBusinessHour, error) {
+	hour := &SpecialBusinessHour{id: id}
+	if err := hour.Set(name, date, start, end, businessHourId); err != nil {
+		return nil, err
+	}
+	return hour, nil
+}
+
 func (s *SpecialBusinessHour) Set(name, date, start, end, businessHourId string) error {
 	if err := s.validateName(name); err != nil {
 		return err

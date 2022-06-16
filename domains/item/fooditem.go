@@ -25,12 +25,21 @@ func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, p
 		return nil, err
 	}
 
-	item := FoodItem{commonItem: *common }
+	item := FoodItem{commonItem: *common}
 	err = item.set(maxOrderPerDay, scheduleIds)
 	if err != nil {
 		return nil, err
 	}
 	return &item, nil
+}
+
+func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) (*FoodItem, error) {
+	item, err := NewFoodItem(name, description, priority, maxOrder, maxOrderPerDay, price, kindId, scheduleIds, enabled)
+	if err != nil {
+		return nil, err
+	}
+	item.id = id
+	return item, nil
 }
 
 func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) error {

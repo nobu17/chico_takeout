@@ -47,7 +47,7 @@ func (s *FoodItemMemoryRepository) GetMemory() map[string]*domains.FoodItem {
 	return s.inMemory
 }
 
-func (s *FoodItemMemoryRepository) GetBusinsHoursMemory() *store.BusinessHours {
+func (s *FoodItemMemoryRepository) GetBusinessHoursMemory() *store.BusinessHours {
 	return s.allHours
 }
 

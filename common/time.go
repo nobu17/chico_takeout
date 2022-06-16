@@ -8,6 +8,7 @@ var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
 
 const dateLayout = "2006/01/02"
 const dateTimeLayout = "2006/01/02 15:04"
+const timeLayout = "15:04";
 
 func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	timeLayout := "2006/01/02T15:04"
@@ -21,6 +22,10 @@ func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	}
 
 	return &actualTime, nil
+}
+
+func ConvertTimeToTimeStr(target time.Time) string {
+	return target.Format(timeLayout)
 }
 
 func ConvertStrToDate(dateStr string) (*time.Time, error) {

@@ -38,6 +38,17 @@ func NewSpecialHoliday(name, start, end string) (*SpecialHoliday, error) {
 	return holiday, nil
 }
 
+func NewSpecialHolidayForOrm(id, name, start, end string) (*SpecialHoliday, error) {
+	holiday := &SpecialHoliday{
+		id: id,
+	}
+	err := holiday.Set(name, start, end)
+	if err != nil {
+		return nil, err
+	}
+	return holiday, nil
+}
+
 func (h *SpecialHoliday) validateHolidayInfoName(name string) error {
 	if strings.TrimSpace(name) == "" {
 		return common.NewValidationError("name", "required")

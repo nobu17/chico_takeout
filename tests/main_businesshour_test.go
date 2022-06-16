@@ -31,7 +31,7 @@ func SetupHourRouter() *gin.Engine {
 		businessHourRepo.Reset()
 		businessHoursMemory = businessHourRepo.GetMemory()
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHourRepo, spBusinessHourRepo)
-		handler := storeHandler.NewbusinessHoursHandler(useCase)
+		handler := storeHandler.BusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/:id", handler.Put)
 	}

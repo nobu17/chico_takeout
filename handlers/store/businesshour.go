@@ -61,7 +61,7 @@ type businessHoursHandler struct {
 	usecase usecases.BusinessHoursUseCase
 }
 
-func NewbusinessHoursHandler(usecase usecases.BusinessHoursUseCase) *businessHoursHandler {
+func BusinessHoursHandler(usecase usecases.BusinessHoursUseCase) *businessHoursHandler {
 	return &businessHoursHandler{
 		usecase: usecase,
 	}

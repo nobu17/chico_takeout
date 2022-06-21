@@ -81,7 +81,7 @@ func (o *OrderInfoCreateRequest) toModel() *usecases.OrderInfoCreateModel {
 	}
 }
 
-type OrderInfoCreateResponce struct {
+type OrderInfoCreateResponse struct {
 	Id string `json:"id" binding:"required"`
 }
 
@@ -132,7 +132,7 @@ func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 		s.HandleError(c, err)
 		return
 	}
-	s.HandleOK(c, OrderInfoCreateResponce{Id: id})
+	s.HandleOK(c, OrderInfoCreateResponse{Id: id})
 }
 
 func (s *orderInfoHandler) PutCancel(c *gin.Context) {

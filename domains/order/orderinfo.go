@@ -15,6 +15,7 @@ type OrderInfoRepository interface {
 	FindAll() ([]OrderInfo, error)
 	Create(item *OrderInfo) (string, error)
 	UpdateOrderStatus(item *OrderInfo) error
+	Transact(fc func() error) (error)
 }
 
 const (
@@ -61,6 +62,25 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 	order.pickupDateTime = *pickupDate
 	order.stockItems = stockItems
 	order.foodItems = foodItems
+	return order, nil
+}
+
+func NewOrderInfoForOrm(id, userId, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
+	memoVal, _ := NewMemo(memo, OrderInfoMaxMemoLength)
+	order := &OrderInfo{
+		id:             id,
+		userId:         userId,
+		memo:           *memoVal,
+		pickupDateTime: PickupDateTime{},
+		orderDateTime:  OrderDateTime{},
+		stockItems:     stockItems,
+		foodItems:      foodItems,
+		canceled:       canceled,
+	}
+
+	order.pickupDateTime.value = pickupDateTime
+	order.orderDateTime.value = orderDateTime
+
 	return order, nil
 }
 

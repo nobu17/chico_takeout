@@ -8,11 +8,13 @@ import (
 	itemHandler "chico/takeout/handlers/item"
 	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
-	"chico/takeout/infrastructures/memory"
 	itemRDBMS "chico/takeout/infrastructures/rdbms/items"
+	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
 	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
+	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
 	itemUseCase "chico/takeout/usecase/item"
 	orderUseCase "chico/takeout/usecase/order"
+	orderQueryUseCase "chico/takeout/usecase/order/query"
 	storeUseCase "chico/takeout/usecase/store"
 
 	"github.com/gin-contrib/cors"
@@ -160,14 +162,26 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	}
 
 	// order
+	orderRepo, err := orderRDBMS.NewOrderInfoRepository(db)
+	if err != nil {
+		panic(err)
+	}
 	order := r.Group("/order")
 	{
-		orderRepo := memory.NewOrderInfoMemoryRepository()
+		// orderRepo := memory.NewOrderInfoMemoryRepository()
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 		order.GET("/:id", handler.Get)
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
+	}
+	orderable := r.Group("/orderable")
+	{
+		// orderRepo := memory.NewOrderInfoMemoryRepository()
+		qService := orderQueryRDBMS.NewOrderableInfoRdbmsQueryService(db)
+		useCase := orderQueryUseCase.NewOrderQueryUseCase(qService)
+		handler := orderHandler.NewOrderableInfoHandler(useCase)
+		orderable.GET("/", handler.Get)
 	}
 
 	// Ping test
@@ -228,6 +242,28 @@ func migrateDb(db *gorm.DB) {
 		panic(err.Error())
 	}
 	err = db.AutoMigrate(&itemRDBMS.FoodItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	err = db.AutoMigrate(&orderRDBMS.OrderedStockItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&orderRDBMS.OrderedFoodItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	// create join define
+	err = db.SetupJoinTable(&orderRDBMS.OrderInfoModel{}, "StockItemModels", &orderRDBMS.OrderedStockItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.SetupJoinTable(&orderRDBMS.OrderInfoModel{}, "FoodItemModels", &orderRDBMS.OrderedFoodItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&orderRDBMS.OrderInfoModel{})
 	if err != nil {
 		panic(err.Error())
 	}

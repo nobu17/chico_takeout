@@ -130,7 +130,7 @@ func (o *orderInfoUseCase) Find(id string) (*OrderInfoModel, error) {
 }
 
 func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
-    // todo: currently food item schedule id and pickup date time relation is not checking
+	// todo: currently food item schedule id and pickup date time relation is not checking
 
 	stockOrders := []domains.ItemOrder{}
 	for _, item := range model.StockItems {
@@ -146,41 +146,63 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 		return "", err
 	}
 
-	schedules, err := o.busRepo.Fetch()
-	if err != nil {
-		return "", err
-	}
-	spSchedules, err := o.spBusRepo.FindAll()
-	if err != nil {
-		return "", err
-	}
-	spHoliday, err := o.spHolidayRepo.FindAll()
-	if err != nil {
-		return "", err
-	}
-	// check pickup time is instore business time
-	holidaySpec := sdomains.NewHolidaySpecification(*schedules, spSchedules, spHoliday)
-	isInBusiness, err := holidaySpec.IsStoreInBusiness(model.PickupDateTime)
-	if err != nil {
-		return "", err
+	var gError error = nil
+	var id = ""
+	o.orderInfoRepository.Transact(func() error {
+		schedules, err := o.busRepo.Fetch()
+		if err != nil {
+			gError = err
+			return err
+		}
+		spSchedules, err := o.spBusRepo.FindAll()
+		if err != nil {
+			gError = err
+			return err
+		}
+		spHoliday, err := o.spHolidayRepo.FindAll()
+		if err != nil {
+			gError = err
+			return err
+		}
+		// check pickup time is in store business time
+		holidaySpec := sdomains.NewHolidaySpecification(*schedules, spSchedules, spHoliday)
+		isInBusiness, err := holidaySpec.IsStoreInBusiness(model.PickupDateTime)
+		if err != nil {
+			gError = err
+			return err
+		}
+
+		if !isInBusiness {
+			gError = common.NewValidationError("PickupDateTime", "pickup time is not in store business")
+			return gError
+		}
+
+		// check and update stock remain
+		err = o.stockConsumer.ConsumeRemainStock(stockOrders)
+		if err != nil {
+			gError = err
+			return err
+		}
+		// check food remain
+		err = o.foodRemainChecker.CheckRemain(order.GetPickupDate(), order.GetFoodItems())
+		if err != nil {
+			gError = err
+			return err
+		}
+		// create order
+		id, err = o.orderInfoRepository.Create(order)
+		if err != nil {
+			gError = err
+			return err
+		}
+		return nil
+	})
+
+	if gError != nil {
+		return "", gError
 	}
 
-	if !isInBusiness {
-		return "", common.NewValidationError("PickupDateTime", "pickup time is not in store business")
-	}
-
-	// check and update stock remain
-	err = o.stockConsumer.ConsumeRemainStock(stockOrders)
-	if err != nil {
-		return "", err
-	}
-	// check food remain
-	err = o.foodRemainChecker.CheckRemain(order.GetPickupDate(), order.GetFoodItems())
-	if err != nil {
-		return "", err
-	}
-	// create order
-	return o.orderInfoRepository.Create(order)
+	return id, nil
 }
 
 func (o *orderInfoUseCase) Cancel(id string) error {

@@ -117,3 +117,42 @@ func (h *HolidaySpecification) IsStoreInBusiness(datetime string) (bool, error) 
 	// get normal schedules by day of week
 	return h.normalSchedules.IsInBusiness(*time), nil
 }
+
+type BusinessHoursManagementSpecification struct {
+	normalSchedules  BusinessHours
+	specialSchedules []SpecialBusinessHour
+	specialHolidays  []SpecialHoliday
+}
+
+type BusinessHourInfo struct {
+	date   string
+	hours  []HourInfo
+}
+type HourInfo struct {
+	hourId string
+	name   string
+	start  string
+	end    string
+}
+
+// func (b *BusinessHoursManagementSpecification) GetStoreBusinessHours(date string) (*BusinessHourInfo, error) {
+// 	dateTime, err := common.ConvertStrToDateTime(date)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// at first check special holiday
+// 	// check special holiday (most high priority)
+// 	for _, sh := range b.specialHolidays {
+// 		if sh.shift.InRangeDate(*dateTime) {
+// 			// store is holiday. can not reserve
+// 			return nil, nil
+// 		}
+// 	}
+
+// 	// check special schedule
+
+
+// 	// get week of day
+// 	// weekDay := dateTime.Weekday()
+// 	// get match day
+// }

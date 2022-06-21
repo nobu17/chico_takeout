@@ -132,3 +132,7 @@ func (o *OrderInfoMemoryRepository) UpdateOrderStatus(item *domains.OrderInfo) e
 	}
 	return fmt.Errorf("update target not exists")
 }
+
+func (o *OrderInfoMemoryRepository)Transact(fc func() error) (error) {
+	return nil
+}

@@ -24,7 +24,7 @@ import {
     } = useController<T>({
       name,
       control,
-      rules: { required: { value: true, message: "1つ以上の項目を選択してください。" } },
+      rules: { required: { value: true, message: "項目を選択してください。" } },
     });
   
     return (

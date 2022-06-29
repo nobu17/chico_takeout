@@ -1,7 +1,6 @@
 export type SpecialHoliday = {
-    id: string;
-    name: string;
-    start: string;
-    end: string;
-  };
-  
+  id: string;
+  name: string;
+  start: string;
+  end: string;
+};

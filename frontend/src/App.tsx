@@ -6,6 +6,7 @@ import {
   ThemeProvider,
 } from "@mui/material/styles";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import ja from "date-fns/locale/ja";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdminAuthProvider } from "./components/contexts/AuthContext";
 
@@ -22,6 +23,8 @@ import UserLogin from "./pages/auth/Login";
 import Logout from "./pages/auth/Logout";
 
 import MyHome from "./pages/mypage/Home";
+
+import ReserveHome from "./pages/reserve/Home";
 
 import AdminHome from "./pages/admin/Home";
 import AdminLogin from "./pages/admin/Login";
@@ -40,7 +43,7 @@ theme = responsiveFontSizes(theme);
 
 function App() {
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ja}>
       <ThemeProvider theme={theme}>
         <AdminAuthProvider>
           <BrowserRouter>
@@ -80,6 +83,7 @@ function App() {
                     element={<SpecialHoliday />}
                   />
                 </Route>
+                <Route path="/reserve" element={<ReserveHome />} />
                 <Route path="*" element={<Home />} />
               </Routes>
             </Container>

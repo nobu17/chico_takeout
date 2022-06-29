@@ -13,7 +13,7 @@ const timeLayout = "15:04"
 
 func GetNowDate() *time.Time {
 	now := time.Now()
-	t := time.Date(now.Year(), now.Month(), 1, now.Hour(), now.Minute(), 0, 0, jst)
+	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
 	return &t
 }
 

@@ -9,7 +9,7 @@ export type SelectsProps = {
 };
 
 type SelectValue = {
-    name: string
+    name?: string
     value: string
 }
 
@@ -40,7 +40,7 @@ export function Selects(
       >
         {props.itemList.map((item, index) => (
           <MenuItem key={index} value={item.value}>
-            {item.name}
+            { item.name ?? item.value }
           </MenuItem>
         ))}
       </TextField>

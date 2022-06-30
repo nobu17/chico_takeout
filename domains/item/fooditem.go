@@ -19,8 +19,8 @@ type FoodItem struct {
 	maxOrderPerDay MaxOrderPerDay
 }
 
-func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) (*FoodItem, error) {
-	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
+func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) (*FoodItem, error) {
+	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -33,8 +33,8 @@ func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, p
 	return &item, nil
 }
 
-func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) (*FoodItem, error) {
-	item, err := NewFoodItem(name, description, priority, maxOrder, maxOrderPerDay, price, kindId, scheduleIds, enabled)
+func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) (*FoodItem, error) {
+	item, err := NewFoodItem(name, description, priority, maxOrder, maxOrderPerDay, price, kindId, scheduleIds, enabled, imageUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrde
 	return item, nil
 }
 
-func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool) error {
-	err := f.commonItem.Set(name, description, priority, maxOrder, price, kindId, enabled)
+func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) error {
+	err := f.commonItem.Set(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	// common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
 	if err != nil {
 		return err

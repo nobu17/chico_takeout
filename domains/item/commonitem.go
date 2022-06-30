@@ -20,9 +20,10 @@ type commonItem struct {
 	priority    Priority
 	maxOrder    MaxOrder
 	price       Price
-	description Descritpion
+	description Description
 	kindId      string
 	enabled     bool
+	imageUrl    ImageUrl
 }
 
 type CommonItemImpl interface {
@@ -30,9 +31,9 @@ type CommonItemImpl interface {
 	GetKindId() string
 }
 
-func newCommonItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool) (*commonItem, error) {
+func newCommonItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool, imageUrl string) (*commonItem, error) {
 	item := commonItem{id: uuid.NewString()}
-	err := item.Set(name, description, priority, maxOrder, price, kindId, enabled)
+	err := item.Set(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func newCommonItem(name, description string, priority, maxOrder, price int, kind
 	return &item, nil
 }
 
-func (s *commonItem) Set(name, description string, priority, maxOrder, price int, kindId string, enabled bool) error {
+func (s *commonItem) Set(name, description string, priority, maxOrder, price int, kindId string, enabled bool, imageUrl string) error {
 	nameV, err := NewName(name, CommonItemNameMaxLength)
 	if err != nil {
 		return err
@@ -62,12 +63,17 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 		return err
 	}
 
-	desc, err := NewDescritpion(description, CommonItemDescriptionMaxLength)
+	desc, err := NewDescription(description, CommonItemDescriptionMaxLength)
 	if err != nil {
 		return err
 	}
 
 	if err := s.validateKindId(kindId); err != nil {
+		return err
+	}
+
+	image, err := NewImageUrl(imageUrl)
+	if err != nil {
 		return err
 	}
 
@@ -78,6 +84,7 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 	s.description = *desc
 	s.kindId = kindId
 	s.enabled = enabled
+	s.imageUrl = *image
 	return nil
 }
 
@@ -126,6 +133,10 @@ func (s *commonItem) GetKindId() string {
 
 func (s *commonItem) GetEnabled() bool {
 	return s.enabled
+}
+
+func (s *commonItem) GetImageUrl() string {
+	return s.imageUrl.GetValue()
 }
 
 func (s *commonItem) HasKind(kind ItemKind) bool {

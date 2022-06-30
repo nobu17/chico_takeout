@@ -11,6 +11,7 @@ import { ItemKind } from "../../../../libs/ItemKind";
 import { StockItem } from "../../../../libs/StockItem";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import SubmitButtons from "../../../../components/parts/SubmitButtons";
+import { FirebaseImageUpload } from "../../../../components/parts/FirebaseImageUpload";
 
 import {
   RequiredErrorMessage,
@@ -40,6 +41,7 @@ export type StockItemInput = {
   price: number;
   maxOrder: number;
   enabled: boolean;
+  imageUrl: string;
   remain: number;
   kindId: string; // for select only using kindId
 };
@@ -54,6 +56,7 @@ const convertInput = (item: StockItem): StockItemInput => {
     price: item.price,
     maxOrder: item.maxOrder,
     enabled: item.enabled,
+    imageUrl: item.imageUrl,
     remain: item.remain,
     kindId: kindId,
   };
@@ -70,14 +73,18 @@ const reverseInput = (item: StockItemInput, kinds: ItemKind[]): StockItem => {
     price: item.price,
     maxOrder: item.maxOrder,
     enabled: item.enabled,
+    imageUrl: item.imageUrl,
     remain: item.remain,
     kind: kind!,
   };
 };
 
+const baseUrl = "/stocks";
+
 export default function StockItemForm(props: StockItemFormProps) {
   const {
     register,
+    setValue,
     handleSubmit,
     control,
     formState: { errors },
@@ -90,6 +97,10 @@ export default function StockItemForm(props: StockItemFormProps) {
 
   const onCancel = () => {
     props.onCancel();
+  };
+
+  const onImageChanged = (fileUrl: string) => {
+    setValue("imageUrl", fileUrl);
   };
 
   return (
@@ -176,6 +187,17 @@ export default function StockItemForm(props: StockItemFormProps) {
             })}
             error={Boolean(errors.maxOrder)}
             helperText={errors.maxOrder && errors.maxOrder.message}
+          />
+          <Controller
+            name="imageUrl"
+            control={control}
+            render={({ field: { onChange, value, ref } }) => (
+              <FirebaseImageUpload
+                baseUrl={baseUrl}
+                imageUrl={value}
+                onImageUploaded={onImageChanged}
+              ></FirebaseImageUpload>
+            )}
           />
           <FormControlLabel
             control={

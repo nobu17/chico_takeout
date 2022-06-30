@@ -115,17 +115,17 @@ func NewMaxOrderPerDay(value int, maxOrder MaxOrder) (*MaxOrderPerDay, error) {
 	return &MaxOrderPerDay{IntValue: shared.NewIntValue(value)}, nil
 }
 
-type Descritpion struct {
+type Description struct {
 	shared.StringValue
 }
 
-func NewDescritpion(value string, maxLength int) (*Descritpion, error) {
+func NewDescription(value string, maxLength int) (*Description, error) {
 	validator := validator.NewStingLength("Descritpion", maxLength)
 	if err := validator.Validate(value); err != nil {
 		return nil, err
 	}
 
-	return &Descritpion{StringValue: shared.NewStringValue(value)}, nil
+	return &Description{StringValue: shared.NewStringValue(value)}, nil
 }
 
 type Name struct {
@@ -138,4 +138,17 @@ func NewName(value string, maxLength int) (*Name, error) {
 	}
 
 	return &Name{StringValue: shared.NewStringValue(value)}, nil
+}
+
+
+type ImageUrl struct {
+	shared.StringValue
+}
+
+func NewImageUrl(value string) (*ImageUrl, error) {
+	validator := validator.NewUrlValidator("ImageUrl", true)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+	return &ImageUrl{StringValue: shared.NewStringValue(value)}, nil
 }

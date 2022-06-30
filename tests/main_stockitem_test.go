@@ -49,8 +49,8 @@ func TestStockItemHandler_GETALL(t *testing.T) {
 		{"priority": 2, "name": "item2"},
 	}
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0]},
-		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0], "imageUrl": "https://item1.png"},
+		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1], "imageUrl": ""},
 	}
 
 	r := SetupStockItemRouter()
@@ -80,8 +80,8 @@ func TestStockItemHandler_GET(t *testing.T) {
 		{"priority": 2, "name": "item2"},
 	}
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0]},
-		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0], "imageUrl": "https://item1.png"},
+		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1], "imageUrl": ""},
 	}
 
 	index := 0
@@ -129,12 +129,12 @@ func TestStockItemHandler_POST_CREATE(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "remain": 0, "kind": kinds[0]},
-		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "remain": 0, "kind": kinds[0], "imageUrl": "https://hoge.png"},
+		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "remain": 0, "kind": kinds[1], "imageUrl": ""},
 	}
 	bodies := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "kindId": kindIds[0]},
-		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kindId": kindIds[1]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "kindId": kindIds[0], "imageUrl": "https://hoge.png"},
+		{"priority": 2, "name": "stock2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kindId": kindIds[1], "imageUrl": ""},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -152,6 +152,7 @@ func TestStockItemHandler_POST_CREATE(t *testing.T) {
 
 		var idResponse map[string]string
 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &idResponse)
+		fmt.Println("response", w.Body)
 
 		id := idResponse["id"]
 		assert.NotEmpty(t, id, "response id should not be empty.")
@@ -181,79 +182,87 @@ func GetStockItemErrorData(kindIds []string) []stockItemErrorData {
 	var stockItemErrorInputs = []stockItemErrorData{
 		{name: "lack priority", args: map[string]interface{}{
 			"name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error priority(0)", args: map[string]interface{}{
 			"priority": 0, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error priority(-1)", args: map[string]interface{}{
 			"priority": -1, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack name", args: map[string]interface{}{
 			"priority": 1, "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error name(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error name(over limit(16))", args: map[string]interface{}{
 			"priority": 1, "name": MakeRandomStr(16), "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack description", args: map[string]interface{}{
 			"priority": 1, "name": "stock1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error description(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error description(over limit(151))", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": MakeRandomStr(151),
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack maxOrder", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
-			"price": 100, "enabled": true, "kindId": kindIds[0],
+			"price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error maxOrder(0)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 0, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 0, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error maxOrder(31)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 31, "price": 100, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 31, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack price", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 4, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error price(0)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 1, "price": 0, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 1, "price": 0, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error price(20001)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 1, "price": 20001, "enabled": true, "kindId": kindIds[0],
+			"maxOrder": 1, "price": 20001, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack enabled", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "kindId": kindIds[0],
+			"maxOrder": 4, "price": 100, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack kindId", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true,
+			"maxOrder": 4, "price": 100, "enabled": true, "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "error kindId(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 1, "price": 100, "enabled": true, "kindId": "",
+			"maxOrder": 1, "price": 100, "enabled": true, "kindId": "", "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "not exist kindId", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
-			"maxOrder": 4, "price": 100, "enabled": true, "kindId": "abc",
+			"maxOrder": 4, "price": 100, "enabled": true, "kindId": "abc", "imageUrl": "https://image.png",
+		}, want: 2},
+		{name: "lack imageUrl", args: map[string]interface{}{
+			"priority": 1, "name": "stock1", "description": "item1",
+			"maxOrder": 4, "price": 100, "kindId": kindIds[0], "enabled": true,
+		}, want: 2},
+		{name: "incorrect imageUrl format", args: map[string]interface{}{
+			"priority": 1, "name": "stock1", "description": "item1",
+			"maxOrder": 4, "price": 100, "kindId": kindIds[0], "enabled": true, "imageUrl": "image.png",
 		}, want: 2},
 	}
 	return stockItemErrorInputs
@@ -313,12 +322,12 @@ func TestStockItemHandler_PUT(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 3, "name": "change1", "description": "desc123", "maxOrder": 8, "price": 1000, "enabled": true, "remain": 10, "kind": kinds[1]},
-		{"priority": 4, "name": "change2", "description": "desc321", "maxOrder": 9, "price": 2000, "enabled": false, "remain": 10, "kind": kinds[0]},
+		{"priority": 3, "name": "change1", "description": "desc123", "maxOrder": 8, "price": 1000, "enabled": true, "remain": 10, "kind": kinds[1], "imageUrl": "https://image.png"},
+		{"priority": 4, "name": "change2", "description": "desc321", "maxOrder": 9, "price": 2000, "enabled": false, "remain": 10, "kind": kinds[0], "imageUrl": ""},
 	}
 	bodies := []map[string]interface{}{
-		{"priority": 3, "name": "change1", "description": "desc123", "maxOrder": 8, "price": 1000, "enabled": true, "kindId": kindIds[1]},
-		{"priority": 4, "name": "change2", "description": "desc321", "maxOrder": 9, "price": 2000, "enabled": false, "kindId": kindIds[0]},
+		{"priority": 3, "name": "change1", "description": "desc123", "maxOrder": 8, "price": 1000, "enabled": true, "kindId": kindIds[1], "imageUrl": "https://image.png"},
+		{"priority": 4, "name": "change2", "description": "desc321", "maxOrder": 9, "price": 2000, "enabled": false, "kindId": kindIds[0], "imageUrl": ""},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -362,7 +371,7 @@ func TestStockItemHandler_PUT_NotFound(t *testing.T) {
 	}
 
 	bodies := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "kindId": kindIds[0]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": false, "kindId": kindIds[0], "imageUrl": "https://image.png"},
 	}
 
 	jBytes, err := json.Marshal(bodies[0])
@@ -394,7 +403,7 @@ func TestStockItemHandler_PUT_BadRequest(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0]},
+		{"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "remain": 10, "kind": kinds[0], "imageUrl": "https://item1.png"},
 	}
 
 	inputs := GetStockItemErrorData(kindIds)

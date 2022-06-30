@@ -9,6 +9,7 @@ export type FoodItem = {
   maxOrder: number;
   maxOrderPerDay: number;
   enabled: boolean;
+  imageUrl: string;
   kind: ItemKind | null;
   scheduleIds: string[];
 };

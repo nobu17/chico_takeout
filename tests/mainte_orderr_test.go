@@ -54,10 +54,10 @@ func SetupOrderInfoRouter() *gin.Engine {
 	stockRepo.Reset()
 	stockMemoryMaps = stockRepo.GetMemory()
 	// add new stock item
-	newStock1, _ := idomains.NewStockItem("stock3", "item3", 1, 4, 300, kindIds[0], true)
+	newStock1, _ := idomains.NewStockItem("stock3", "item3", 1, 4, 300, kindIds[0], true, "https://stock1.png")
 	newStock1.SetRemain(99)
 	stockRepo.Create(newStock1)
-	newStock2, _ := idomains.NewStockItem("stock4", "item4", 1, 6, 400, kindIds[0], true)
+	newStock2, _ := idomains.NewStockItem("stock4", "item4", 1, 6, 400, kindIds[0], true, "https://stock2.jpg")
 	newStock2.SetRemain(3)
 	stockRepo.Create(newStock2)
 
@@ -66,7 +66,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 	foodMemoryMaps = foodRepo.GetMemory()
 	// add new food item
 	scheduleIds1 := []string{schedule.GetSchedules()[0].GetId(), schedule.GetSchedules()[1].GetId()}
-	food1, _ := idomains.NewFoodItem("food3", "item3", 1, 10, 11, 222, kindIds[0], scheduleIds1, true)
+	food1, _ := idomains.NewFoodItem("food3", "item3", 1, 10, 11, 222, kindIds[0], scheduleIds1, true, "https://food1.jpg")
 	foodRepo.Create(food1)
 
 	orderRepos := memory.NewOrderInfoMemoryRepository()

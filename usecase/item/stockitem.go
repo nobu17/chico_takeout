@@ -37,6 +37,7 @@ func newStockItemModel(item *domains.StockItem, kind *domains.ItemKind) *StockIt
 				Price:       item.GetPrice(),
 				Description: item.GetDescription(),
 				Enabled:     item.GetEnabled(),
+				ImageUrl:    item.GetImageUrl(),
 			},
 		},
 		Remain: item.GetRemain(),
@@ -107,7 +108,7 @@ func (i *stockItemUseCase) FindAll() ([]StockItemModel, error) {
 }
 
 func (i *stockItemUseCase) Create(model *StockItemCreateModel) (string, error) {
-	item, err := domains.NewStockItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
+	item, err := domains.NewStockItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled, model.ImageUrl)
 	if err != nil {
 		return "", err
 	}
@@ -130,7 +131,7 @@ func (i *stockItemUseCase) Update(model *StockItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled)
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.Price, model.KindId, model.Enabled, model.ImageUrl)
 	if err != nil {
 		return err
 	}

@@ -38,9 +38,21 @@ export default function Counter(props: CounterProps) {
     return false;
   };
 
-  return (
-    <>
-      <Stack direction="row" spacing={2}>
+  const getContent = () => {
+    if (props.max !== undefined && props.max <= 0) {
+      return (
+        <Typography
+          align="center"
+          color="error"
+          gutterBottom
+          sx={{ mt: 3, mx: 3 }}
+        >
+          {"在庫なし"}
+        </Typography>
+      );
+    }
+    return (
+      <>
         <IconButton color="primary" onClick={handleRemove}>
           <RemoveIcon />
         </IconButton>
@@ -54,6 +66,27 @@ export default function Counter(props: CounterProps) {
         <IconButton color="error" onClick={handleAdd}>
           <AddIcon />
         </IconButton>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <Stack direction="row" spacing={2}>
+        {getContent()}
+        {/* <IconButton color="primary" onClick={handleRemove}>
+          <RemoveIcon />
+        </IconButton>
+        <Typography
+          sx={{ py: 1, px: 2, border: 1 }}
+          align="justify"
+          textAlign="center"
+        >
+          {count}
+        </Typography>
+        <IconButton color="error" onClick={handleAdd}>
+          <AddIcon />
+        </IconButton> */}
       </Stack>
     </>
   );

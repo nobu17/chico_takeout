@@ -28,7 +28,7 @@ export default function ItemCard(props: ItemCardProps) {
         component="img"
         alt="green iguana"
         height="180"
-        image="https://mui.com/static/images/cards/contemplative-reptile.jpg"
+        image={props.item.imageUrl}
       />
       <CardContent>
         <Typography gutterBottom variant="h6" component="div">

@@ -12,6 +12,7 @@ const defaultStockItem: StockItem = {
   price: 100,
   maxOrder: 5,
   enabled: true,
+  imageUrl: "",
   remain: 0,
   kind: null
 };

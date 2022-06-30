@@ -13,6 +13,7 @@ import { BusinessHour } from "../../../../libs/BusinessHour";
 import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import SubmitButtons from "../../../../components/parts/SubmitButtons";
+import { FirebaseImageUpload } from "../../../../components/parts/FirebaseImageUpload";
 
 import {
   RequiredErrorMessage,
@@ -20,6 +21,8 @@ import {
   MaxErrorMessage,
   MinErrorMessage,
 } from "../../../../libs/ErrorMessages";
+
+const baseUrl = "/foods";
 
 type FoodItemFormProps = {
   editItem: FoodItem;
@@ -44,6 +47,7 @@ export type FoodItemInput = {
   maxOrder: number;
   maxOrderPerDay: number;
   enabled: boolean;
+  imageUrl: string;
   kindId: string; // for select only using kindId
   scheduleIds: string[];
 };
@@ -54,6 +58,7 @@ type HourSelects = {
 };
 
 const convertInput = (item: FoodItem): FoodItemInput => {
+  console.log("convertInput", item);
   const kindId = item.kind ? item.kind.id : "";
   return {
     id: item.id,
@@ -64,6 +69,7 @@ const convertInput = (item: FoodItem): FoodItemInput => {
     maxOrder: item.maxOrder,
     maxOrderPerDay: item.maxOrderPerDay,
     enabled: item.enabled,
+    imageUrl: item.imageUrl,
     kindId: kindId,
     scheduleIds: item.scheduleIds,
   };
@@ -80,6 +86,7 @@ const reverseInput = (item: FoodItemInput, kinds: ItemKind[]): FoodItem => {
     maxOrder: item.maxOrder,
     maxOrderPerDay: item.maxOrderPerDay,
     enabled: item.enabled,
+    imageUrl: item.imageUrl,
     kind: kind!,
     scheduleIds: item.scheduleIds,
   };
@@ -95,6 +102,7 @@ const convertHoursList = (hours: BusinessHour[]): HourSelects[] => {
 export default function FoodItemForm(props: FoodItemFormProps) {
   const {
     register,
+    setValue,
     handleSubmit,
     control,
     formState: { errors },
@@ -107,6 +115,10 @@ export default function FoodItemForm(props: FoodItemFormProps) {
 
   const onCancel = () => {
     props.onCancel();
+  };
+
+  const onImageChanged = (fileUrl: string) => {
+    setValue("imageUrl", fileUrl);
   };
 
   const hoursList = convertHoursList(props.businessHours);
@@ -214,6 +226,17 @@ export default function FoodItemForm(props: FoodItemFormProps) {
             multiple={true}
             itemList={hoursList}
             control={control}
+          />
+          <Controller
+            name="imageUrl"
+            control={control}
+            render={({ field: { onChange, value, ref } }) => (
+              <FirebaseImageUpload
+                baseUrl={baseUrl}
+                imageUrl={value}
+                onImageUploaded={onImageChanged}
+              ></FirebaseImageUpload>
+            )}
           />
           <FormControlLabel
             control={

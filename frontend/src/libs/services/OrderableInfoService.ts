@@ -72,7 +72,7 @@ export default class OrderableInfoService {
             price: foodItem.price,
             max:
               item.remain > foodItem.maxOrder ? foodItem.maxOrder : item.remain,
-            imageUrl: "",
+            imageUrl: foodItem.imageUrl,
           });
         }
       } else if (item.itemType === "stock") {
@@ -91,7 +91,7 @@ export default class OrderableInfoService {
               item.remain > stockItem.maxOrder
                 ? stockItem.maxOrder
                 : item.remain,
-            imageUrl: "",
+            imageUrl: stockItem.imageUrl,
           });
         }
       }

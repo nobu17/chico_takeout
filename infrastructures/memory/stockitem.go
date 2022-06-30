@@ -27,11 +27,11 @@ func resetStockItemMemory() {
 	allKinds, _ := kindRepos.FindAll()
 
 	stockMemory = map[string]*domains.StockItem{}
-	item1, _ := domains.NewStockItem("stock1", "item1", 1, 4, 100, allKinds[0].GetId(), true)
+	item1, _ := domains.NewStockItem("stock1", "item1", 1, 4, 100, allKinds[0].GetId(), true, "https://item1.png")
 	item1.SetRemain(10)
 	stockMemory[item1.GetId()] = item1
 	fmt.Println("stock item1:", item1.GetId(), item1.GetKindId())
-	item2, _ := domains.NewStockItem("stock2", "item2", 2, 5, 200, allKinds[1].GetId(), true)
+	item2, _ := domains.NewStockItem("stock2", "item2", 2, 5, 200, allKinds[1].GetId(), true, "")
 	stockMemory[item2.GetId()] = item2
 }
 

@@ -17,13 +17,13 @@ const (
 	StockItemMaxRemain            = 999
 )
 
-func NewStockItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool) (*StockItem, error) {
+func NewStockItem(name, description string, priority, maxOrder, price int, kindId string, enabled bool, imageUrl string) (*StockItem, error) {
 	// stock first remain is 0
 	remain, err := NewStockRemain(0, StockItemMaxRemain)
 	if err != nil {
 		return nil, err
 	}
-	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
+	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +31,8 @@ func NewStockItem(name, description string, priority, maxOrder, price int, kindI
 }
 
 // only for orm
-func NewStockItemForOrm(id, name, description string, priority, maxOrder, price, remain int, kindId string, enabled bool) (*StockItem, error) {		
-	item, err := NewStockItem(name, description, priority, maxOrder, price, kindId, enabled)
+func NewStockItemForOrm(id, name, description string, priority, maxOrder, price, remain int, kindId string, enabled bool, imageUrl string) (*StockItem, error) {		
+	item, err := NewStockItem(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	if err != nil {
 		return nil, err
 	}

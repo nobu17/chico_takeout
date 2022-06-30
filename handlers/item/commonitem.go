@@ -23,4 +23,5 @@ type CommonItemBaseData struct {
 	Price       int    `json:"price" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	Enabled     *bool  `json:"enabled" binding:"required"`
+	ImageUrl    *string `json:"imageUrl" binding:"required"`
 }

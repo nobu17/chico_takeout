@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
+	"net/url"
 
 	"chico/takeout/common"
 )
@@ -98,3 +99,33 @@ func (r *RangeInteger) Validate(val int) error {
 	return nil
 }
 
+type UrlValidator struct {
+	name string
+	allowEmpty bool
+}
+
+func NewUrlValidator(name string, allowEmpty bool) *UrlValidator {
+	return &UrlValidator{
+		name: name,
+		allowEmpty: allowEmpty,
+	}
+}
+
+func (u *UrlValidator) Validate(url string) error {
+	if !u.allowEmpty && len(strings.TrimSpace(url)) == 0 {
+		return common.NewValidationError(u.name, "Not allowed to be empty.") 
+	}
+	if u.allowEmpty && len(strings.TrimSpace(url)) == 0 {
+		return nil
+	}
+	if !u.isUrl(url) {
+		return common.NewValidationError(u.name, fmt.Sprintf("Incorrect url format:%s", url))	
+	}
+
+	return nil
+}
+
+func (u *UrlValidator) isUrl(str string) bool {
+    url, err := url.Parse(str)
+    return err == nil && url.Scheme != "" && url.Host != ""
+}

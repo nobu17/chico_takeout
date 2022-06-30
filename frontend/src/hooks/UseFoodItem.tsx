@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { ItemKind } from "../libs/ItemKind";
 import { FoodItem } from "../libs/FoodItem";
 import FoodItemApi from "../libs/apis/foodItem";
@@ -15,6 +16,7 @@ const defaultFoodItem: FoodItem = {
   enabled: true,
   kind: null,
   scheduleIds: [],
+  imageUrl: "",
 };
 
 const foodApi = new FoodItemApi("http://localhost:8086");

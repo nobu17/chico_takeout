@@ -34,6 +34,7 @@ type FoodItemModel struct {
 	ItemKindModelID string
 	ItemKindModel   ItemKindModel
 	BusinessHours   []store.BusinessHourModel `gorm:"many2many:foodItem_businessHours;"`
+	ImageUrl        string
 }
 
 func newFoodItemModel(s *domains.FoodItem) *FoodItemModel {
@@ -47,6 +48,7 @@ func newFoodItemModel(s *domains.FoodItem) *FoodItemModel {
 	model.Enabled = s.GetEnabled()
 	model.MaxOrderPerDay = s.GetMaxOrderPerDay()
 	model.ItemKindModelID = s.GetKindId()
+	model.ImageUrl = s.GetImageUrl()
 
 	hours := []store.BusinessHourModel{}
 	for _, hourId := range s.GetScheduleIds() {
@@ -65,7 +67,7 @@ func (s *FoodItemModel) toDomain() (*domains.FoodItem, error) {
 	for _, hour := range s.BusinessHours {
 		ids = append(ids, hour.ID)
 	}
-	model, err := domains.NewFoodItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.MaxOrderPerDay, s.Price, s.ItemKindModelID, ids, s.Enabled)
+	model, err := domains.NewFoodItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.MaxOrderPerDay, s.Price, s.ItemKindModelID, ids, s.Enabled, s.ImageUrl)
 	if err != nil {
 		return nil, err
 	}

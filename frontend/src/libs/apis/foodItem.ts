@@ -30,6 +30,7 @@ type FoodItemUpdateRequest = {
     maxOrder: number;
     maxOrderPerDay: number;
     enabled: boolean;
+    imageUrl: string;
     kindId: string;
     scheduleIds: string[];
   };
@@ -45,6 +46,7 @@ type FoodItemUpdateRequest = {
       maxOrder: item.maxOrder,
       maxOrderPerDay: item.maxOrderPerDay,
       enabled: item.enabled,
+      imageUrl: item.imageUrl,
       kindId: kindId,
       scheduleIds: item.scheduleIds,
     };

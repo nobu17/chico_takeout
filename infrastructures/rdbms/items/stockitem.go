@@ -31,6 +31,7 @@ type StockItemModel struct {
 	Remain          int
 	ItemKindModelID string
 	ItemKindModel   ItemKindModel
+	ImageUrl        string
 }
 
 func newStockItemModel(s *domains.StockItem) *StockItemModel {
@@ -44,12 +45,13 @@ func newStockItemModel(s *domains.StockItem) *StockItemModel {
 	model.Enabled = s.GetEnabled()
 	model.Remain = s.GetRemain()
 	model.ItemKindModelID = s.GetKindId()
+	model.ImageUrl = s.GetImageUrl()
 
 	return &model
 }
 
 func (s *StockItemModel) toDomain() (*domains.StockItem, error) {
-	model, err := domains.NewStockItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.Price, s.Remain, s.ItemKindModelID, s.Enabled)
+	model, err := domains.NewStockItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.Price, s.Remain, s.ItemKindModelID, s.Enabled, s.ImageUrl)
 	if err != nil {
 		return nil, err
 	}

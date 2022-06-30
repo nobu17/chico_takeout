@@ -38,6 +38,7 @@ type StockItemUpdateRequest = {
   price: number;
   maxOrder: number;
   enabled: boolean;
+  imageUrl: string;
   kindId: string;
 };
 
@@ -51,6 +52,7 @@ const convertRequest = (item: StockItem): StockItemUpdateRequest => {
     price: item.price,
     maxOrder: item.maxOrder,
     enabled: item.enabled,
+    imageUrl: item.imageUrl,
     kindId: kindId,
   };
 };

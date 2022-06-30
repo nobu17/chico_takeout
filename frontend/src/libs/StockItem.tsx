@@ -8,6 +8,7 @@ export type StockItem = {
   price: number;
   maxOrder: number;
   enabled: boolean;
+  imageUrl: string;
   remain: number;
   kind: ItemKind | null;
 };

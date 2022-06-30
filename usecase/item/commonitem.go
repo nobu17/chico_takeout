@@ -29,6 +29,7 @@ type CommonItemBaseModel struct {
 	Price       int
 	Description string
 	Enabled     bool
+	ImageUrl    string
 }
 
 type commonItemUseCase struct {

@@ -26,6 +26,7 @@ func newFoodItemModel(item *domains.FoodItem, kind *domains.ItemKind) *FoodItemM
 				Price:       item.GetPrice(),
 				Description: item.GetDescription(),
 				Enabled:     item.GetEnabled(),
+				ImageUrl:    item.GetImageUrl(),
 			},
 		},
 		ScheduleIds:    item.GetScheduleIds(),
@@ -112,7 +113,7 @@ func (f *foodItemUseCase) FindAll() ([]FoodItemModel, error) {
 }
 
 func (f *foodItemUseCase) Create(model *FoodItemCreateModel) (string, error) {
-	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled)
+	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl)
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +145,7 @@ func (i *foodItemUseCase) Update(model *FoodItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled)
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl)
 	if err != nil {
 		return err
 	}

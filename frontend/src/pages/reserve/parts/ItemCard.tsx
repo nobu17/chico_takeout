@@ -7,6 +7,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import{ ItemInfo, ItemRequest } from "../../../hooks/UseItemCart"
+import { getImageUrl } from "../../../libs/util/ImageUtil"
 
 type ItemCardProps = {
   item: ItemInfo;
@@ -28,7 +29,7 @@ export default function ItemCard(props: ItemCardProps) {
         component="img"
         alt="green iguana"
         height="180"
-        image={props.item.imageUrl}
+        image={getImageUrl(props.item.imageUrl)}
       />
       <CardContent>
         <Typography gutterBottom variant="h6" component="div">

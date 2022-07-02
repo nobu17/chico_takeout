@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Stack, TextField, Button } from "@mui/material";
 import { v4 as uuids4 } from "uuid";
+import { getImageUrl } from "../../libs/util/ImageUtil"
 
 export type ImageUploadProps = {
   imageUrl: string;
@@ -38,7 +39,7 @@ export default function ImageUpload(props: ImageUploadProps) {
       <Stack spacing={2}>
         <img
           loading="lazy"
-          src={props.imageUrl}
+          src={getImageUrl(props.imageUrl)}
           style={imageStyle}
           alt="product"
         />

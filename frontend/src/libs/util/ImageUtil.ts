@@ -38,3 +38,12 @@ export const getDataUrlFromFile = async (file: File): Promise<string> => {
     throw error;
   }
 };
+
+export function getImageUrl(url: string): string {
+  // if not exist, display default image
+  if (!url) {
+    return `${process.env.PUBLIC_URL}/images/no_image.png`;
+  } else {
+    return url;
+  }
+}

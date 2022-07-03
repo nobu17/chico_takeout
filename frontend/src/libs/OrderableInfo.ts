@@ -16,7 +16,7 @@ export type CategoryItemInfo = {
 export type OrderableItemInfo = {
   id: string;
   name: string;
-  type: string;
+  type: "food" | "stock";
   imageUrl: string;
   memo: string;
   price: number;

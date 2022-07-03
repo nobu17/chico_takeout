@@ -112,3 +112,29 @@ func NewMemo(value string, maxLength int) (*Memo, error) {
 
 	return &Memo{StringValue: shared.NewStringValue(value)}, nil
 }
+
+type Email struct {
+	shared.StringValue	
+}
+
+func NewEmail(value string) (*Email, error) {
+	validator := validator.NewEmailValidator("Email")
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Email{StringValue: shared.NewStringValue(value)}, nil
+}
+
+type TelNo struct {
+	shared.StringValue	
+}
+
+func NewTelNo(value string) (*TelNo, error) {
+	validator := validator.NewTelNoValidator("TelNo")
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &TelNo{StringValue: shared.NewStringValue(value)}, nil
+}

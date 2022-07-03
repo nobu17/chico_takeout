@@ -25,6 +25,8 @@ const (
 type OrderInfo struct {
 	id             string
 	userId         string
+	userEmail      Email
+	userTelNo      TelNo
 	memo           Memo
 	orderDateTime  OrderDateTime
 	pickupDateTime PickupDateTime
@@ -33,7 +35,7 @@ type OrderInfo struct {
 	canceled       bool
 }
 
-func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem) (*OrderInfo, error) {
+func NewOrderInfo(userId, userEmail, userTelNo, memo, pickupDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem) (*OrderInfo, error) {
 	order := &OrderInfo{id: uuid.NewString(), canceled: false}
 	if err := order.validateUserId(userId); err != nil {
 		return nil, err
@@ -42,6 +44,15 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 	if err != nil {
 		return nil, err
 	}
+	userEmailV, err := NewEmail(userEmail)
+	if err != nil {
+		return nil, err
+	}
+	userTelNoV, err := NewTelNo(userTelNo)
+	if err != nil {
+		return nil, err
+	}
+
 	// order date is current time
 	orderDate, err := NewOrderDateTime()
 	if err != nil {
@@ -58,6 +69,8 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 
 	order.userId = userId
 	order.memo = *memoV
+	order.userEmail = *userEmailV
+	order.userTelNo = *userTelNoV
 	order.orderDateTime = *orderDate
 	order.pickupDateTime = *pickupDate
 	order.stockItems = stockItems
@@ -65,11 +78,15 @@ func NewOrderInfo(userId, memo, pickupDateTime string, stockItems []OrderStockIt
 	return order, nil
 }
 
-func NewOrderInfoForOrm(id, userId, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
+func NewOrderInfoForOrm(id, userId, userEmail, userTelNo, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
 	memoVal, _ := NewMemo(memo, OrderInfoMaxMemoLength)
+	userEmailV, _ := NewEmail(userEmail)
+	userTelNoV, _ := NewTelNo(userTelNo)
 	order := &OrderInfo{
 		id:             id,
 		userId:         userId,
+		userEmail:      *userEmailV,
+		userTelNo:      *userTelNoV,
 		memo:           *memoVal,
 		pickupDateTime: PickupDateTime{},
 		orderDateTime:  OrderDateTime{},
@@ -90,6 +107,14 @@ func (o *OrderInfo) GetId() string {
 
 func (o *OrderInfo) GetUserId() string {
 	return o.userId
+}
+
+func (o *OrderInfo) GetUserEmail() string {
+	return o.userEmail.GetValue()
+}
+
+func (o *OrderInfo) GetUserTelNo() string {
+	return o.userTelNo.GetValue()
 }
 
 func (o *OrderInfo) GetMemo() string {

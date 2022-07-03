@@ -2,9 +2,11 @@ package validator
 
 import (
 	"fmt"
+	"net/mail"
+	"net/url"
+	"regexp"
 	"strings"
 	"unicode/utf8"
-	"net/url"
 
 	"chico/takeout/common"
 )
@@ -128,4 +130,45 @@ func (u *UrlValidator) Validate(url string) error {
 func (u *UrlValidator) isUrl(str string) bool {
     url, err := url.Parse(str)
     return err == nil && url.Scheme != "" && url.Host != ""
+}
+
+type EmailValidator struct {
+	name string
+}
+
+func NewEmailValidator(name string) *EmailValidator {
+	return &EmailValidator{
+		name: name,
+	}
+}
+
+func (e *EmailValidator) Validate(email string) error {
+	if len(strings.TrimSpace(email)) == 0 {
+		return common.NewValidationError(e.name, "Not allowed to be empty.") 
+	}
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return common.NewValidationError(e.name, fmt.Sprintf("Not email style. %s. %s", err, email)) 	
+	}
+
+	return nil
+}
+
+type TelNoValidator struct {
+	name string
+}
+
+func NewTelNoValidator(name string) *TelNoValidator {
+	return &TelNoValidator{
+		name: name,
+	}
+}
+
+func (t *TelNoValidator) Validate(telNo string) error {
+	r := regexp.MustCompile(`^[0-9]+$`)
+	if !r.MatchString(telNo) {
+		return common.NewValidationError(t.name, fmt.Sprintf("Not only number. %s.", telNo)) 
+	}
+
+	return nil
 }

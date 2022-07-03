@@ -10,6 +10,8 @@ import (
 type OrderInfoData struct {
 	Id             string                `json:"id" binding:"required"`
 	UserId         string                `json:"userId" binding:"required"`
+	UserEmail      string                `json:"userEmail" binding:"required"`
+	UserTelNo      string                `json:"userTelNo" binding:"required"`
 	Memo           string                `json:"memo" binding:"required"`
 	PickupDateTime string                `json:"pickupDateTime" binding:"required"`
 	OrderDateTime  string                `json:"orderDateTime" binding:"required"`
@@ -46,6 +48,8 @@ func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
 	return &OrderInfoData{
 		Id:             item.Id,
 		UserId:         item.UserId,
+		UserEmail:      item.UserEmail,
+		UserTelNo:      item.UserTelNo,
 		Memo:           item.Memo,
 		OrderDateTime:  item.OrderDateTime,
 		PickupDateTime: item.PickupDateTime,
@@ -57,6 +61,8 @@ func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
 
 type OrderInfoCreateRequest struct {
 	UserId         string                   `json:"userId" binding:"required"`
+	UserEmail      string                   `json:"userEmail" binding:"required"`
+	UserTelNo      string                   `json:"userTelNo" binding:"required"`
 	Memo           string                   `json:"memo"`
 	PickupDateTime string                   `json:"pickupDateTime" binding:"required"`
 	StockItems     []CommonItemOrderRequest `json:"stockItems" binding:"required"`
@@ -74,6 +80,8 @@ func (o *OrderInfoCreateRequest) toModel() *usecases.OrderInfoCreateModel {
 	}
 	return &usecases.OrderInfoCreateModel{
 		UserId:         o.UserId,
+		UserEmail:      o.UserEmail,
+		UserTelNo:      o.UserTelNo,
 		Memo:           o.Memo,
 		PickupDateTime: o.PickupDateTime,
 		StockItems:     stocks,

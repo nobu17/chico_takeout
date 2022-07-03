@@ -144,36 +144,42 @@ func TestOrderInfoHandler_POST_CREATE(t *testing.T) {
 
 	bodies := []map[string]interface{}{
 		{"userId": "123", "Memo": "めも", "pickupDateTime": "2052/12/10 09:00", // tuesday morning
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "quantity": 1},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "1234", "Memo": "めも2", "pickupDateTime": "2052/12/10 11:30", // tuesday lunch start
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "quantity": 1},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "12345", "Memo": "", "pickupDateTime": "2052/12/11 21:00", // wed dinner end and allow empty memo
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "quantity": 1},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123456", "Memo": "特別日程", "pickupDateTime": "2055/05/08 11:00", // special schedule lunch
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "quantity": 1},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123", "Memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
 				{"itemId": foodIds[0], "quantity": 1},
 			}, // only food item
 		},
 		{"userId": "123", "Memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "quantity": 1},
 			},
@@ -181,49 +187,56 @@ func TestOrderInfoHandler_POST_CREATE(t *testing.T) {
 				{"itemId": foodIds[0], "quantity": 1},
 			}, // both stock and food
 		},
-		{"userId": "123", "Memo": "めも", "pickupDateTime": "2052/12/10 09:00",
-			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds[0], "quantity": 1},
-				{"itemId": stockIds[2], "quantity": 3},
-			},
-			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[0], "quantity": 1},
-				{"itemId": foodIds[1], "quantity": 2},
-			}, // both stock and food
-		},
+		// {"userId": "123", "Memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+		// 	"userEmail": "userx@hoge.com", "userTelNo": "123456789",
+		// 	"stockItems": []map[string]interface{}{
+		// 		{"itemId": stockIds[0], "quantity": 1},
+		// 		{"itemId": stockIds[2], "quantity": 3},
+		// 	},
+		// 	"foodItems": []map[string]interface{}{
+		// 		{"itemId": foodIds[0], "quantity": 1},
+		// 		{"itemId": foodIds[1], "quantity": 2},
+		// 	}, // both stock and food
+		// },
 	}
 	wants := []map[string]interface{}{
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "1234", "memo": "めも2", "pickupDateTime": "2052/12/10 11:30",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "12345", "memo": "", "pickupDateTime": "2052/12/11 21:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123456", "memo": "特別日程", "pickupDateTime": "2055/05/08 11:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
 				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 1.0},
 			},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 			},
@@ -232,6 +245,7 @@ func TestOrderInfoHandler_POST_CREATE(t *testing.T) {
 			},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 1.0},
 				{"itemId": stockIds[2], "name": "stock3", "price": 300.0, "quantity": 3.0},

@@ -12,9 +12,9 @@ var orderStockItems []item.StockItem
 var orderFoodItems []item.FoodItem
 
 type OrderInfoMemoryRepository struct {
-	inMemory map[string]*domains.OrderInfo
+	inMemory   map[string]*domains.OrderInfo
 	stockItems []item.StockItem
-	foodItems []item.FoodItem
+	foodItems  []item.FoodItem
 }
 
 func NewOrderInfoMemoryRepository() *OrderInfoMemoryRepository {
@@ -54,7 +54,7 @@ func resetOrderInfoMemory() {
 	foodOrders1 = append(foodOrders1, *foodOrder2)
 
 	stockOrders1 := []domains.OrderStockItem{}
-	order1, err := domains.NewOrderInfo("user1", "memo1", "2050/12/10 12:00", stockOrders1, foodOrders1)
+	order1, err := domains.NewOrderInfo("user1", "user1@hoge.com", "123456789", "memo1", "2050/12/10 12:00", stockOrders1, foodOrders1)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create stock order")
@@ -77,7 +77,7 @@ func resetOrderInfoMemory() {
 		panic("failed to create food order")
 	}
 	stockOrders2 = append(stockOrders2, *stockOrder1)
-	order2, err := domains.NewOrderInfo("user2", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
+	order2, err := domains.NewOrderInfo("user2", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -133,6 +133,6 @@ func (o *OrderInfoMemoryRepository) UpdateOrderStatus(item *domains.OrderInfo) e
 	return fmt.Errorf("update target not exists")
 }
 
-func (o *OrderInfoMemoryRepository)Transact(fc func() error) (error) {
-	return nil
+func (o *OrderInfoMemoryRepository) Transact(fc func() error) error {
+	return fc()
 }

@@ -7,6 +7,8 @@ import {
   Step,
   StepLabel,
   Box,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import PickupSelect from "./PickupSelect";
 import ItemSelect from "./ItemSelect";
@@ -17,17 +19,20 @@ import { useItemCart } from "../../../hooks/UseItemCart";
 import { useUserInfo, UserInfo } from "../../../hooks/UseUserInfo";
 import { usePickupDate, PickupDate } from "../../../hooks/UsePickupDate";
 import { useOrderableInfo } from "../../../hooks/UseOrderableInfo";
+import { useOrder } from "../../../hooks/UseOrder";
 import LoadingSpinner from "../../../components/parts/LoadingSpinner";
 
 const steps = ["日時選択", "商品選択", "お客様情報入力", "確認"];
 
 export default function ReserveForm() {
   const [activeStep, setActiveStep] = React.useState(0);
+  const [openSnack, setOpenSnack] = React.useState(false);
   const { cart, updateCart, resetCart } = useItemCart();
   const { userInfo, updateUserInfo } = useUserInfo();
   const { pickupDate, updatePickupDate } = usePickupDate();
   const { loading, perDayOrderableInfo, currentOrderableInfo, switchCurrent } =
     useOrderableInfo();
+  const { loading: orderLoading, submitOrder } = useOrder();
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -52,9 +57,15 @@ export default function ReserveForm() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleConfirmSubmit = () => {
-
-  }
+  const handleConfirmSubmit = async () => {
+    setOpenSnack(false);
+    const result = await submitOrder(pickupDate, cart, userInfo);
+    if (result) {
+      alert("オーダーしました。");
+    } else {
+      setOpenSnack(true);
+    }
+  };
 
   const displayByStep = (activeStep: number) => {
     if (activeStep === 0) {
@@ -114,7 +125,19 @@ export default function ReserveForm() {
             ))}
           </Stepper>
         </Box>
-        <LoadingSpinner message="Loading..." isLoading={loading} />
+        <LoadingSpinner
+          message="Loading..."
+          isLoading={loading || orderLoading}
+        />
+        <Snackbar
+          open={openSnack}
+          autoHideDuration={6000}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert severity="error" sx={{ width: "100%" }}>
+            オーダー中に問題が発生しました。ご迷惑をおかけしますが、再度お時間を置いてお試しいただくようにお願いいたします。
+          </Alert>
+        </Snackbar>
       </Container>
     </>
   );

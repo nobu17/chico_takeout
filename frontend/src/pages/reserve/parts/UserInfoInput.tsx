@@ -22,7 +22,6 @@ interface callbackBack {
 export default function UserInfoInput(props: UserInfoInputProps) {
   const {
     handleSubmit,
-    setError,
     register,
     formState: { errors },
   } = useForm<UserInfo>({
@@ -39,20 +38,19 @@ export default function UserInfoInput(props: UserInfoInputProps) {
   };
 
   const handleTelValidation = (tel: string) => {
-    const reg = new RegExp("^[0-9]$");
+    const reg = new RegExp("^[0-9]+$");
     if (!reg.test(tel)) {
-      setError("tel", { message: "数値を入力してください。" });
+      return "数値のみを入力してください。";
     }
     return true;
   };
   const handleEmailValidation = (email: string) => {
     const reg = new RegExp(
-      "/^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*.)+[a-zA-Z]{2,}$/"
+      /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]+.[A-Za-z0-9]+$/
     );
+    console.log("handleEmailValidation", reg.test(email), email);
     if (!reg.test(email)) {
-      setError("email", {
-        message: "正しい形式のメールアドレスを入力してください。",
-      });
+      return "正しい形式のメールアドレスを入力してください。";
     }
     return true;
   };
@@ -79,7 +77,7 @@ export default function UserInfoInput(props: UserInfoInputProps) {
         helperText={errors.email && errors.email.message}
       />
       <TextField
-        label="電話番号"
+        label="電話番号(数値のみ。記号は不要。)"
         {...register("tel", {
           required: { value: true, message: RequiredErrorMessage },
           maxLength: { value: 15, message: MaxLengthErrorMessage(10) },

@@ -10,6 +10,8 @@ import (
 type OrderInfoModel struct {
 	Id             string
 	UserId         string
+	UserEmail      string
+	UserTelNo      string
 	Memo           string
 	OrderDateTime  string
 	PickupDateTime string
@@ -46,6 +48,8 @@ func newOrderInfoModel(item *domains.OrderInfo) *OrderInfoModel {
 	return &OrderInfoModel{
 		Id:             item.GetId(),
 		UserId:         item.GetUserId(),
+		UserEmail:      item.GetUserEmail(),
+		UserTelNo:      item.GetUserTelNo(),
 		Memo:           item.GetMemo(),
 		OrderDateTime:  item.GetOrderDateTime(),
 		PickupDateTime: item.GetPickupDateTime(),
@@ -61,6 +65,8 @@ func newOrderInfoModel(item *domains.OrderInfo) *OrderInfoModel {
 
 type OrderInfoCreateModel struct {
 	UserId         string
+	UserEmail      string
+	UserTelNo      string
 	Memo           string
 	PickupDateTime string
 	StockItems     []CommonItemOrderCreateModel
@@ -141,7 +147,7 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 		foodOrders = append(foodOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
 	}
 	// factory check each item id existence also (will return error)
-	order, err := o.factory.Create(model.UserId, model.Memo, model.PickupDateTime, stockOrders, foodOrders)
+	order, err := o.factory.Create(model.UserId, model.UserEmail, model.UserTelNo, model.Memo, model.PickupDateTime, stockOrders, foodOrders)
 	if err != nil {
 		return "", err
 	}

@@ -11,6 +11,7 @@ export type ItemRequest = {
 
 export type ItemInfo = {
   id: string;
+  type: "food" | "stock";
   name: string;
   imageUrl: string;
   memo: string;

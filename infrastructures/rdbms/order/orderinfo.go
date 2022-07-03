@@ -17,13 +17,15 @@ type OrderInfoRepository struct {
 
 func NewOrderInfoRepository(db *gorm.DB) (*OrderInfoRepository, error) {
 	return &OrderInfoRepository{
-		BaseRepository: rdbms.BaseRepository{ Db: db },
+		BaseRepository: rdbms.BaseRepository{Db: db},
 	}, nil
 }
 
 type OrderInfoModel struct {
 	rdbms.BaseModel
 	UserID          string
+	UserEmail       string
+	UserTelNo       string
 	Memo            string
 	OrderDateTime   time.Time
 	PickupDateTime  time.Time
@@ -62,6 +64,8 @@ func newOrderInfoModel(order *domains.OrderInfo) (*OrderInfoModel, error) {
 	model := &OrderInfoModel{}
 	model.ID = order.GetId()
 	model.UserID = order.GetUserId()
+	model.UserEmail = order.GetUserEmail()
+	model.UserTelNo = order.GetUserTelNo()
 	model.Memo = order.GetMemo()
 	model.OrderDateTime = *orderDateTime
 	model.PickupDateTime = *pickupDateTime
@@ -105,7 +109,7 @@ func (s *OrderInfoModel) toDomain(stocks []OrderedStockItemModel, foods []Ordere
 
 	pickUp := common.ConvertTimeToDateTimeStr(s.PickupDateTime)
 	ordered := common.ConvertTimeToDateTimeStr(s.OrderDateTime)
-	dom, err := domains.NewOrderInfoForOrm(s.ID, s.UserID, s.Memo, pickUp, ordered, stockDoms, foodDoms, s.Canceled)
+	dom, err := domains.NewOrderInfoForOrm(s.ID, s.UserID, s.UserEmail, s.UserTelNo, s.Memo, pickUp, ordered, stockDoms, foodDoms, s.Canceled)
 	if err != nil {
 		return nil, err
 	}

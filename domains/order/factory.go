@@ -29,7 +29,7 @@ func NewOrderInfoFactory(stockRepo item.StockItemRepository, foodRepo item.FoodI
 	}
 }
 
-func (o *OrderInfoFactory) Create(userId, memo, pickupDateTime string, stockOrders, foodOrders []ItemOrder) (*OrderInfo, error) {
+func (o *OrderInfoFactory) Create(userId, userEmail, userTelNo, memo, pickupDateTime string, stockOrders, foodOrders []ItemOrder) (*OrderInfo, error) {
 	stocks, err := o.createOrderStockItems(stockOrders)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (o *OrderInfoFactory) Create(userId, memo, pickupDateTime string, stockOrde
 	if err != nil {
 		return nil, err
 	}
-	return NewOrderInfo(userId, memo, pickupDateTime, stocks, foods)
+	return NewOrderInfo(userId, userEmail, userTelNo, memo, pickupDateTime, stocks, foods)
 }
 
 func (o *OrderInfoFactory) createOrderStockItems(stockOrders []ItemOrder) ([]OrderStockItem, error) {

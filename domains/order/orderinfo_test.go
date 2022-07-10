@@ -122,6 +122,7 @@ func TestNewCommonItemInfo(t *testing.T) {
 type orderInfoArgs struct {
 	id             string
 	userId         string
+	userName       string
 	userEmail      string
 	userTelNo      string
 	memo           string
@@ -158,6 +159,9 @@ func assertOderInfoRoot(t *testing.T, tt orderInfoInput, got *OrderInfo, err err
 
 func assertOrderInfo(t *testing.T, want orderInfoArgs, got *OrderInfo) {
 	assert.Equal(t, want.userId, got.userId)
+	assert.Equal(t, want.userName, got.GetUserName())
+	assert.Equal(t, want.userEmail, got.GetUserEmail())
+	assert.Equal(t, want.userTelNo, got.GetUserTelNo())
 	assert.Equal(t, want.memo, got.GetMemo())
 	assert.Equal(t, want.pickupDateTime, got.GetPickupDateTime())
 	// assert.Equal(t, want.orderDateTime, got.GetOrderDateTime())
@@ -179,7 +183,7 @@ func TestNewOrderInfo(t *testing.T) {
 	inputs := []orderInfoInput{
 		{name: "normal check",
 			args: orderInfoArgs{
-				userId: "abc", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "abc", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -192,7 +196,7 @@ func TestNewOrderInfo(t *testing.T) {
 				},
 			},
 			want: orderInfoArgs{
-				userId: "abc", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "abc", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				canceled: false,
 				stockItems: []commonItemInfoArgs{
 					{
@@ -210,7 +214,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "normal check(min)",
 			args: orderInfoArgs{
-				userId: "a", memo: "", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "1",
+				userId: "a", userName: "u", memo: "", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "1",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -219,7 +223,7 @@ func TestNewOrderInfo(t *testing.T) {
 				foodItems: []commonItemInfoArgs{},
 			},
 			want: orderInfoArgs{
-				userId: "a", memo: "", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "1", canceled: false,
+				userId: "a", userName: "u", memo: "", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "1", canceled: false,
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -232,7 +236,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "normal check(max memo)",
 			args: orderInfoArgs{
-				userId: "a", memo: maxMemo, pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "a", userName: "ユーザーABC", memo: maxMemo, pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -241,7 +245,7 @@ func TestNewOrderInfo(t *testing.T) {
 				foodItems: []commonItemInfoArgs{},
 			},
 			want: orderInfoArgs{
-				userId: "a", memo: maxMemo, pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789", canceled: false,
+				userId: "a", userName: "ユーザーABC", memo: maxMemo, pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789", canceled: false,
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -254,7 +258,41 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "empty userId",
 			args: orderInfoArgs{
-				userId: "", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+					},
+				},
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "empty userName",
+			args: orderInfoArgs{
+				userId: "user", userName: "", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+					},
+				},
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "over limit userName",
+			args: orderInfoArgs{
+				userId: "user", userName: "12345678901", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -271,7 +309,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "empty email",
 			args: orderInfoArgs{
-				userId: "1234", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "", userTelNo: "123456789",
+				userId: "1234", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -288,7 +326,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "incorrect email format",
 			args: orderInfoArgs{
-				userId: "1234", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "abc", userTelNo: "123456789",
+				userId: "1234", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "abc", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -305,7 +343,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "empty telNo",
 			args: orderInfoArgs{
-				userId: "1234", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "",
+				userId: "1234", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -322,7 +360,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "incorrect telNo",
 			args: orderInfoArgs{
-				userId: "1234", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "abc1234",
+				userId: "1234", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "abc1234",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -339,7 +377,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "over limit memo(501)",
 			args: orderInfoArgs{
-				userId: "123", memo: tests.MakeRandomStr(501), pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "123", userName: "ユーザーABC", memo: tests.MakeRandomStr(501), pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -356,7 +394,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "pick up is before than now",
 			args: orderInfoArgs{
-				userId: "123", memo: "123", pickupDateTime: "2010/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "123", userName: "ユーザーABC", memo: "123", pickupDateTime: "2010/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -373,7 +411,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "pick up is incorrect format",
 			args: orderInfoArgs{
-				userId: "123", memo: "123", pickupDateTime: "21001210 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "123", userName: "ユーザーABC", memo: "123", pickupDateTime: "21001210 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -390,7 +428,7 @@ func TestNewOrderInfo(t *testing.T) {
 		},
 		{name: "empty items",
 			args: orderInfoArgs{
-				userId: "123", memo: "123", pickupDateTime: "2020/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "123", userName: "ユーザーABC", memo: "123", pickupDateTime: "2020/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{},
 				foodItems:  []commonItemInfoArgs{},
 			},
@@ -420,7 +458,7 @@ func TestNewOrderInfo(t *testing.T) {
 			}
 			sOrders = append(sOrders, *order)
 		}
-		got, err := NewOrderInfo(tt.args.userId, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
+		got, err := NewOrderInfo(tt.args.userId, tt.args.userName, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
 		assertOderInfoRoot(t, tt, got, err)
 	}
 }
@@ -480,7 +518,7 @@ func TestOrderInfoSetCancel(t *testing.T) {
 			}
 			sOrders = append(sOrders, *order)
 		}
-		got, err := NewOrderInfo(tt.args.userId, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
+		got, err := NewOrderInfo(tt.args.userId, tt.args.userName, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
 		got.SetCancel()
 		assertOderInfoRoot(t, tt, got, err)
 	}

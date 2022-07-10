@@ -8,10 +8,12 @@
             "name": "Launch",
             "type": "go",
             "request": "launch",
-            "mode": "test",
-            "program": "${workspaceRoot}",
+            // "mode": "test",
+            "mode": "auto",
+            "program": "${fileDirname}",
             "env": {},
-            "args": ["-test.v"],
+            //"args": ["-test.v"],
+            "args": [],
             "showLog": true
         }
     ]

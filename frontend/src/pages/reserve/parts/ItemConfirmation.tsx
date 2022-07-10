@@ -29,7 +29,7 @@ export default function ItemConfirmation(props: ItemConfirmationProps) {
       <Typography gutterBottom variant="h6" align="center" color="text.primary">
         注文情報
       </Typography>
-      <Table aria-label="お客様情報">
+      <Table aria-label="注文情報">
         <TableHead>
           <TableRow>
             <TableCell>商品名</TableCell>

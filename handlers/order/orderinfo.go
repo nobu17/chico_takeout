@@ -10,6 +10,7 @@ import (
 type OrderInfoData struct {
 	Id             string                `json:"id" binding:"required"`
 	UserId         string                `json:"userId" binding:"required"`
+	UserName       string                `json:"userName" binding:"required"`
 	UserEmail      string                `json:"userEmail" binding:"required"`
 	UserTelNo      string                `json:"userTelNo" binding:"required"`
 	Memo           string                `json:"memo" binding:"required"`
@@ -48,6 +49,7 @@ func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
 	return &OrderInfoData{
 		Id:             item.Id,
 		UserId:         item.UserId,
+		UserName:       item.UserName,
 		UserEmail:      item.UserEmail,
 		UserTelNo:      item.UserTelNo,
 		Memo:           item.Memo,
@@ -61,6 +63,7 @@ func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
 
 type OrderInfoCreateRequest struct {
 	UserId         string                   `json:"userId" binding:"required"`
+	UserName       string                   `json:"userName" binding:"required"`
 	UserEmail      string                   `json:"userEmail" binding:"required"`
 	UserTelNo      string                   `json:"userTelNo" binding:"required"`
 	Memo           string                   `json:"memo"`
@@ -80,6 +83,7 @@ func (o *OrderInfoCreateRequest) toModel() *usecases.OrderInfoCreateModel {
 	}
 	return &usecases.OrderInfoCreateModel{
 		UserId:         o.UserId,
+		UserName:       o.UserName,
 		UserEmail:      o.UserEmail,
 		UserTelNo:      o.UserTelNo,
 		Memo:           o.Memo,
@@ -128,6 +132,36 @@ func (s *orderInfoHandler) Get(c *gin.Context) {
 		return
 	}
 	s.HandleOK(c, newOrderInfoData(model))
+}
+
+func (s *orderInfoHandler) GetByUser(c *gin.Context) {
+	id := c.Param("userId")
+	models, err := s.usecase.FindByUserId(id)
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	orders := []OrderInfoData{}
+	for _, model := range models {
+		order := newOrderInfoData(&model)
+		orders = append(orders, *order)
+	}
+	s.HandleOK(c, orders)
+}
+
+func (s *orderInfoHandler) GetActiveByUser(c *gin.Context) {
+	id := c.Param("userId")
+	models, err := s.usecase.FindActiveByUserId(id)
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	orders := []OrderInfoData{}
+	for _, model := range models {
+		order := newOrderInfoData(&model)
+		orders = append(orders, *order)
+	}
+	s.HandleOK(c, orders)
 }
 
 func (s *orderInfoHandler) PostCreate(c *gin.Context) {

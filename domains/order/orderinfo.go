@@ -12,6 +12,8 @@ import (
 type OrderInfoRepository interface {
 	Find(id string) (*OrderInfo, error)
 	FindByPickupDate(date string) ([]OrderInfo, error)
+	FindByUserId(userId string) ([]OrderInfo, error)
+	FindActiveByUserId(userId string) ([]OrderInfo, error)
 	FindAll() ([]OrderInfo, error)
 	Create(item *OrderInfo) (string, error)
 	UpdateOrderStatus(item *OrderInfo) error
@@ -20,11 +22,13 @@ type OrderInfoRepository interface {
 
 const (
 	OrderInfoMaxMemoLength = 500
+	UserNameMaxLength = 10
 )
 
 type OrderInfo struct {
 	id             string
 	userId         string
+	userName       UserName
 	userEmail      Email
 	userTelNo      TelNo
 	memo           Memo
@@ -35,12 +39,16 @@ type OrderInfo struct {
 	canceled       bool
 }
 
-func NewOrderInfo(userId, userEmail, userTelNo, memo, pickupDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem) (*OrderInfo, error) {
+func NewOrderInfo(userId, userName, userEmail, userTelNo, memo, pickupDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem) (*OrderInfo, error) {
 	order := &OrderInfo{id: uuid.NewString(), canceled: false}
 	if err := order.validateUserId(userId); err != nil {
 		return nil, err
 	}
 	memoV, err := NewMemo(memo, OrderInfoMaxMemoLength)
+	if err != nil {
+		return nil, err
+	}
+	userNameV, err := NewUserName(userName, UserNameMaxLength)
 	if err != nil {
 		return nil, err
 	}
@@ -68,6 +76,7 @@ func NewOrderInfo(userId, userEmail, userTelNo, memo, pickupDateTime string, sto
 	}
 
 	order.userId = userId
+	order.userName = *userNameV
 	order.memo = *memoV
 	order.userEmail = *userEmailV
 	order.userTelNo = *userTelNoV
@@ -78,13 +87,15 @@ func NewOrderInfo(userId, userEmail, userTelNo, memo, pickupDateTime string, sto
 	return order, nil
 }
 
-func NewOrderInfoForOrm(id, userId, userEmail, userTelNo, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
+func NewOrderInfoForOrm(id, userId, userName, userEmail, userTelNo, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
 	memoVal, _ := NewMemo(memo, OrderInfoMaxMemoLength)
+	userNameV, _ := NewUserName(userTelNo, UserNameMaxLength)
 	userEmailV, _ := NewEmail(userEmail)
 	userTelNoV, _ := NewTelNo(userTelNo)
 	order := &OrderInfo{
 		id:             id,
 		userId:         userId,
+		userName:       *userNameV,
 		userEmail:      *userEmailV,
 		userTelNo:      *userTelNoV,
 		memo:           *memoVal,
@@ -107,6 +118,10 @@ func (o *OrderInfo) GetId() string {
 
 func (o *OrderInfo) GetUserId() string {
 	return o.userId
+}
+
+func (o *OrderInfo) GetUserName() string {
+	return o.userName.GetValue()
 }
 
 func (o *OrderInfo) GetUserEmail() string {

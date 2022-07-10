@@ -24,6 +24,7 @@ func NewOrderInfoRepository(db *gorm.DB) (*OrderInfoRepository, error) {
 type OrderInfoModel struct {
 	rdbms.BaseModel
 	UserID          string
+	UserName        string
 	UserEmail       string
 	UserTelNo       string
 	Memo            string
@@ -32,6 +33,8 @@ type OrderInfoModel struct {
 	Canceled        bool
 	StockItemModels []items.StockItemModel `gorm:"many2many:orderInfo_stockItems;"`
 	FoodItemModels  []items.FoodItemModel  `gorm:"many2many:orderInfo_foodItems;"`
+	OrderedStockItemModels []OrderedStockItemModel 
+	OrderedFoodItemModels []OrderedFoodItemModel
 }
 
 type OrderedStockItemModel struct {
@@ -64,6 +67,7 @@ func newOrderInfoModel(order *domains.OrderInfo) (*OrderInfoModel, error) {
 	model := &OrderInfoModel{}
 	model.ID = order.GetId()
 	model.UserID = order.GetUserId()
+	model.UserName = order.GetUserName()
 	model.UserEmail = order.GetUserEmail()
 	model.UserTelNo = order.GetUserTelNo()
 	model.Memo = order.GetMemo()
@@ -109,7 +113,7 @@ func (s *OrderInfoModel) toDomain(stocks []OrderedStockItemModel, foods []Ordere
 
 	pickUp := common.ConvertTimeToDateTimeStr(s.PickupDateTime)
 	ordered := common.ConvertTimeToDateTimeStr(s.OrderDateTime)
-	dom, err := domains.NewOrderInfoForOrm(s.ID, s.UserID, s.UserEmail, s.UserTelNo, s.Memo, pickUp, ordered, stockDoms, foodDoms, s.Canceled)
+	dom, err := domains.NewOrderInfoForOrm(s.ID, s.UserID, s.UserName, s.UserEmail, s.UserTelNo, s.Memo, pickUp, ordered, stockDoms, foodDoms, s.Canceled)
 	if err != nil {
 		return nil, err
 	}
@@ -144,24 +148,14 @@ func (o *OrderInfoRepository) Find(id string) (*domains.OrderInfo, error) {
 func (o *OrderInfoRepository) FindAll() ([]domains.OrderInfo, error) {
 	models := []OrderInfoModel{}
 
-	err := o.Db.Preload("StockItemModels").Preload("FoodItemModels").Find(&models).Error
+	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Preload("StockItemModels").Preload("FoodItemModels").Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
 
 	orders := []domains.OrderInfo{}
 	for _, model := range models {
-		stocks := []OrderedStockItemModel{}
-		err = o.Db.Model(&model).Association("StockItemModels").Find(&stocks)
-		if err != nil {
-			return nil, err
-		}
-		foods := []OrderedFoodItemModel{}
-		err = o.Db.Model(&model).Association("FoodItemModels").Find(&foods)
-		if err != nil {
-			return nil, err
-		}
-		order, err := model.toDomain(stocks, foods)
+		order, err := model.toDomain(model.OrderedStockItemModels, model.OrderedFoodItemModels)
 		if err != nil {
 			return nil, err
 		}
@@ -178,24 +172,52 @@ func (o *OrderInfoRepository) FindByPickupDate(date string) ([]domains.OrderInfo
 	pickupDateEnd := pickupDateStart.AddDate(0, 0, 1)
 
 	models := []OrderInfoModel{}
-	err = o.Db.Where("pickup_date_time >= ? and pickup_date_time<= ?", pickupDateStart, pickupDateEnd).Find(&models).Error
+	err = o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Where("pickup_date_time >= ? and pickup_date_time<= ?", pickupDateStart, pickupDateEnd).Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
 
 	orders := []domains.OrderInfo{}
 	for _, model := range models {
-		stocks := []OrderedStockItemModel{}
-		err = o.Db.Model(&model).Association("StockItemModels").Find(&stocks)
+		order, err := model.toDomain(model.OrderedStockItemModels, model.OrderedFoodItemModels)
 		if err != nil {
 			return nil, err
 		}
-		foods := []OrderedFoodItemModel{}
-		err = o.Db.Model(&model).Association("FoodItemModels").Find(&foods)
+		orders = append(orders, *order)
+	}
+	return orders, nil
+}
+
+func (o *OrderInfoRepository) FindByUserId(userId string) ([]domains.OrderInfo, error) {
+	models := []OrderInfoModel{}
+	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Where("user_id = ?", userId).Order("pickup_date_time desc").Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []domains.OrderInfo{}
+	for _, model := range models {
+		order, err := model.toDomain(model.OrderedStockItemModels, model.OrderedFoodItemModels)
 		if err != nil {
 			return nil, err
 		}
-		order, err := model.toDomain(stocks, foods)
+		orders = append(orders, *order)
+	}
+	return orders, nil
+}
+
+func (o *OrderInfoRepository) FindActiveByUserId(userId string) ([]domains.OrderInfo, error) {
+	models := []OrderInfoModel{}
+	// until 30 minutes passed, treats as active
+	targetTime := common.GetNowDate().Add(time.Minute * -30)
+	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Where("user_id = ? and canceled = false and pickup_date_time > ?", userId, targetTime).Order("pickup_date_time desc").Find(&models).Error
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []domains.OrderInfo{}
+	for _, model := range models {
+		order, err := model.toDomain(model.OrderedStockItemModels, model.OrderedFoodItemModels)
 		if err != nil {
 			return nil, err
 		}

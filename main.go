@@ -172,6 +172,8 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 		order.GET("/:id", handler.Get)
+		order.GET("/user/:userId", handler.GetByUser)
+		order.GET("/user/active/:userId", handler.GetActiveByUser)
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
 	}

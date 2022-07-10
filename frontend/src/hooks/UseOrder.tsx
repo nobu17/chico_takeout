@@ -27,6 +27,7 @@ export function useOrder() {
       const order: OrderInfo = {
         pickupDateTime: `${pickupDate.date} ${pickupDate.time}`,
         userId: state.uid,
+        userName: userInfo.name,
         userEmail: userInfo.email,
         userTelNo: userInfo.tel,
         memo: userInfo.memo,

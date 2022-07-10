@@ -2,7 +2,10 @@ package memory
 
 import (
 	"fmt"
+	"sort"
+	"time"
 
+	"chico/takeout/common"
 	"chico/takeout/domains/item"
 	domains "chico/takeout/domains/order"
 )
@@ -54,7 +57,7 @@ func resetOrderInfoMemory() {
 	foodOrders1 = append(foodOrders1, *foodOrder2)
 
 	stockOrders1 := []domains.OrderStockItem{}
-	order1, err := domains.NewOrderInfo("user1", "user1@hoge.com", "123456789", "memo1", "2050/12/10 12:00", stockOrders1, foodOrders1)
+	order1, err := domains.NewOrderInfo("user1", "ユーザー1", "user1@hoge.com", "123456789", "memo1", "2050/12/10 12:00", stockOrders1, foodOrders1)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create stock order")
@@ -77,7 +80,7 @@ func resetOrderInfoMemory() {
 		panic("failed to create food order")
 	}
 	stockOrders2 = append(stockOrders2, *stockOrder1)
-	order2, err := domains.NewOrderInfo("user2", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
+	order2, err := domains.NewOrderInfo("user2", "ユーザー２", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -117,6 +120,37 @@ func (o *OrderInfoMemoryRepository) FindByPickupDate(date string) ([]domains.Ord
 			items = append(items, *item)
 		}
 	}
+	return items, nil
+}
+
+func (o *OrderInfoMemoryRepository) FindByUserId(userId string) ([]domains.OrderInfo, error) {
+	items := []domains.OrderInfo{}
+	for _, item := range o.inMemory {
+		if item.GetUserId() == userId {
+			items = append(items, *item)
+		}
+	}
+	sort.Slice(items, func(i, j int) bool { return items[i].GetPickupDateTime() > items[j].GetPickupDateTime() })
+	return items, nil
+}
+
+func (o *OrderInfoMemoryRepository) FindActiveByUserId(userId string) ([]domains.OrderInfo, error) {
+	items := []domains.OrderInfo{}
+	for _, item := range o.inMemory {
+		// not canceled
+		if item.GetUserId() == userId && !item.GetCanceled(){
+			// if time is future, add.
+			pickUpDateTime, err := common.ConvertStrToDateTime(item.GetPickupDateTime())
+			if err != nil {
+				return nil, err
+			}
+			// until 30 minutes after active.
+			if common.StartIsBeforeEnd(*pickUpDateTime, time.Now(), -30) {
+				items = append(items, *item)
+			}
+		}
+	}
+	sort.Slice(items, func(i, j int) bool { return items[i].GetPickupDateTime() > items[j].GetPickupDateTime() })
 	return items, nil
 }
 

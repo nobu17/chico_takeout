@@ -3,6 +3,7 @@ package order
 import (
 	"chico/takeout/common"
 	idomains "chico/takeout/domains/item"
+
 	domains "chico/takeout/domains/order"
 	sdomains "chico/takeout/domains/store"
 )
@@ -10,6 +11,7 @@ import (
 type OrderInfoModel struct {
 	Id             string
 	UserId         string
+	UserName       string
 	UserEmail      string
 	UserTelNo      string
 	Memo           string
@@ -48,6 +50,7 @@ func newOrderInfoModel(item *domains.OrderInfo) *OrderInfoModel {
 	return &OrderInfoModel{
 		Id:             item.GetId(),
 		UserId:         item.GetUserId(),
+		UserName:       item.GetUserName(),
 		UserEmail:      item.GetUserEmail(),
 		UserTelNo:      item.GetUserTelNo(),
 		Memo:           item.GetMemo(),
@@ -65,6 +68,7 @@ func newOrderInfoModel(item *domains.OrderInfo) *OrderInfoModel {
 
 type OrderInfoCreateModel struct {
 	UserId         string
+	UserName       string
 	UserEmail      string
 	UserTelNo      string
 	Memo           string
@@ -87,6 +91,8 @@ func newCommonItemOrderCreateModel(itemId string, quantity int) *CommonItemOrder
 
 type OrderInfoUseCase interface {
 	Find(id string) (*OrderInfoModel, error)
+	FindByUserId(userId string) ([]OrderInfoModel, error)
+	FindActiveByUserId(userId string) ([]OrderInfoModel, error)
 	Create(model *OrderInfoCreateModel) (string, error)
 	Cancel(id string) error
 }
@@ -135,6 +141,38 @@ func (o *orderInfoUseCase) Find(id string) (*OrderInfoModel, error) {
 	return newOrderInfoModel(item), nil
 }
 
+func (o *orderInfoUseCase) FindByUserId(userId string) ([]OrderInfoModel, error) {
+	orders := []OrderInfoModel{}
+
+	userOrders, err := o.orderInfoRepository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, userOrder := range userOrders {
+		order := newOrderInfoModel(&userOrder)
+		orders = append(orders, *order)
+	}
+
+	return orders, nil
+}
+
+func (o *orderInfoUseCase) FindActiveByUserId(userId string) ([]OrderInfoModel, error) {
+	orders := []OrderInfoModel{}
+
+	userOrders, err := o.orderInfoRepository.FindActiveByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, userOrder := range userOrders {
+		order := newOrderInfoModel(&userOrder)
+		orders = append(orders, *order)
+	}
+
+	return orders, nil
+}
+
 func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 	// todo: currently food item schedule id and pickup date time relation is not checking
 
@@ -147,7 +185,7 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 		foodOrders = append(foodOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
 	}
 	// factory check each item id existence also (will return error)
-	order, err := o.factory.Create(model.UserId, model.UserEmail, model.UserTelNo, model.Memo, model.PickupDateTime, stockOrders, foodOrders)
+	order, err := o.factory.Create(model.UserId, model.UserName, model.UserEmail, model.UserTelNo, model.Memo, model.PickupDateTime, stockOrders, foodOrders)
 	if err != nil {
 		return "", err
 	}

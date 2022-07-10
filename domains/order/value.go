@@ -138,3 +138,17 @@ func NewTelNo(value string) (*TelNo, error) {
 
 	return &TelNo{StringValue: shared.NewStringValue(value)}, nil
 }
+
+type UserName struct {
+	shared.StringValue	
+}
+
+func NewUserName(value string, maxLength int) (*UserName, error) {
+	validator := validator.NewStingLength("UserName", maxLength)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &UserName{StringValue: shared.NewStringValue(value)}, nil
+}
+

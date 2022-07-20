@@ -13,6 +13,27 @@ export const ToDate = (strDate: string): Date => {
   return new Date(year, month - 1, day);
 };
 
+export const toDateTime = (strDateTime: string): Date => {
+  // only support yyyy/MM/dd HH:mm
+  const [date, time] = strDateTime.split(" ");
+  const splitted = date.split("/");
+  const year = Number(splitted[0]);
+  const month = Number(splitted[1]);
+  const day = Number(splitted[2]);
+  const [hour, minutes] = time.split(":");
+  return new Date(year, month - 1, day, Number(hour), Number(minutes));
+};
+
+const DayOfWeeks = ["日", "月", "火", "水", "木", "金", "土"];
+
+export const toDateTimeStrWithDayOfWeek = (date: Date): string => {
+  const dateStr = ToDateString(date);
+  const dayOfWeek = DayOfWeeks[date.getDay()];
+  const hourMin = toHourMinutesStr(date);
+
+  return `${dateStr}(${dayOfWeek}) ${hourMin}`;
+};
+
 export const GetNowDate = (addDays: number): Date => {
   const dt = new Date();
   dt.setDate(dt.getDate() + addDays);
@@ -67,6 +88,14 @@ export const IsTimeInRange = (
     return true;
   }
   return false;
+};
+
+export const convertDateTimeStrToIncludeDayOfWeeKStr = (
+  dateTimeStr: string
+) => {
+  const date = toDateTime(dateTimeStr);
+
+  return toDateTimeStrWithDayOfWeek(date);
 };
 
 const toHourMinutesStr = (time: Date): string => {

@@ -8,13 +8,15 @@ export function useMyOrder() {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const { state } = useAuth();
-  const [activeOrder, setActiveOrder] = useState<UserOrderInfo | undefined>(undefined); 
-
+  const [activeOrder, setActiveOrder] = useState<UserOrderInfo | undefined>(
+    undefined
+  );
+  const [orderHistory, setOrderHistory] = useState<UserOrderInfo[]>([]);
 
   const loadActive = async () => {
     if (!state.isAuthorized) {
-        setError(new Error("ユーザー認証がされていません。"));
-        return
+      setError(new Error("ユーザー認証がされていません。"));
+      return;
     }
     try {
       setError(undefined);
@@ -33,9 +35,55 @@ export function useMyOrder() {
     }
   };
 
+  const cancelActive = async () => {
+    if (!state.isAuthorized) {
+      setError(new Error("ユーザー認証がされていません。"));
+      return;
+    }
+    if (!activeOrder || !activeOrder.id) {
+      setError(new Error("有効なオーダーがありません。"));
+      return;
+    }
+    try {
+        setError(undefined);
+        setLoading(true);
+        await api.cancel(activeOrder.id);
+      } catch (e: any) {
+        setError(e);
+      } finally {
+        setLoading(false);
+        await loadActive();
+      }  
+  };
+
+  const loadHistory = async () => {
+    if (!state.isAuthorized) {
+      setError(new Error("ユーザー認証がされていません。"));
+      return;
+    }
+    try {
+      setError(undefined);
+      setLoading(true);
+      const result = await api.getHistoryByUser(state.uid);
+      const res = result.data;
+      if (res && res.length > 0) {
+        setOrderHistory(res);
+      } else {
+        setOrderHistory([]);
+      }
+    } catch (e: any) {
+      setError(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     activeOrder,
+    orderHistory,
     loadActive,
+    loadHistory,
+    cancelActive,
     error,
     loading,
   };

@@ -103,7 +103,7 @@ type CommonItemOrderRequest struct {
 }
 
 type OrderInfoCancelRequest struct {
-	Id string `json:"id" binding:"required"`
+	Id string
 }
 
 func (c *CommonItemOrderRequest) toModel() *usecases.CommonItemOrderCreateModel {
@@ -178,10 +178,8 @@ func (s *orderInfoHandler) PostCreate(c *gin.Context) {
 }
 
 func (s *orderInfoHandler) PutCancel(c *gin.Context) {
-	var req OrderInfoCancelRequest
-	if !s.ShouldBind(c, &req) {
-		return
-	}
+	id := c.Param("id")
+	req := OrderInfoCancelRequest{Id: id}
 	err := s.usecase.Cancel(req.Id)
 	if err != nil {
 		s.HandleError(c, err)

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { UserOrderItem } from "../../../libs/apis/order";
+
 import {
   Paper,
   Table,
@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 
 type UserInfoTableProps = {
-    userName: string;
-    userEmail: string; 
-    userTelNo: string;
-    memo: string;
+  userName: string;
+  userEmail: string;
+  userTelNo: string;
+  memo: string;
 };
 
 export default function UserInfoTable(props: UserInfoTableProps) {
@@ -42,7 +42,7 @@ export default function UserInfoTable(props: UserInfoTableProps) {
             <TableCell>{props.userTelNo}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>要望やメッセージ等</TableCell>
+            <TableCell sx={{ minWidth: 100 }}>要望やメッセージ等</TableCell>
             <TableCell>
               <Typography
                 style={{ display: "inline-block", whiteSpace: "pre-line" }}

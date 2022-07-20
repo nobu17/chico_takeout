@@ -11,8 +11,12 @@ import { UserOrderInfo } from "../../../libs/apis/order";
 import ItemTable from "./ItemTable";
 import UserInfoTable from "./UserInfoTable";
 
+import { convertDateTimeStrToIncludeDayOfWeeKStr } from "../../../libs/util/DateUtil";
+import { Button } from "@mui/material";
+
 type ReserveCardProps = {
   order?: UserOrderInfo;
+  cancelRequest?: () => void;
 };
 
 const getTotal = (order: UserOrderInfo): number => {
@@ -26,7 +30,6 @@ const getTotal = (order: UserOrderInfo): number => {
 };
 
 export default function ReserveInfoCard(props: ReserveCardProps) {
-  console.log("ReserveInfoCard", props);
   if (!props.order) {
     return (
       <Typography gutterBottom variant="h6" component="div">
@@ -34,15 +37,23 @@ export default function ReserveInfoCard(props: ReserveCardProps) {
       </Typography>
     );
   }
+
+  const handleCancel = () => {
+    if (props.cancelRequest) {
+      props.cancelRequest();
+    }
+  };
+
   return (
     <>
-      <Typography variant="h5">
-        現在の予約
-      </Typography>
+      <Typography variant="h5">現在の予約</Typography>
       <Card>
         <CardContent>
           <Typography variant="h6" component="div">
-            受取日時: 2020/02/01(金) 15:09
+            受取日時:{" "}
+            {convertDateTimeStrToIncludeDayOfWeeKStr(
+              props.order.pickupDateTime
+            )}
           </Typography>
           <Typography color="text.primary">
             合計金額: ¥ {getTotal(props.order).toLocaleString()}
@@ -69,6 +80,14 @@ export default function ReserveInfoCard(props: ReserveCardProps) {
               <UserInfoTable {...props.order}></UserInfoTable>
             </AccordionDetails>
           </Accordion>
+          <Button
+            color="error"
+            variant="contained"
+            fullWidth
+            onClick={handleCancel}
+          >
+            キャンセルする
+          </Button>
         </CardContent>
       </Card>
     </>

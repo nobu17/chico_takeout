@@ -23,7 +23,8 @@ export default function ItemTable(props: ItemTableProps) {
           <TableRow>
             <TableCell>商品名</TableCell>
             <TableCell>個数</TableCell>
-            <TableCell>価格</TableCell>
+            <TableCell>単価</TableCell>
+            <TableCell>合計</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -32,6 +33,7 @@ export default function ItemTable(props: ItemTableProps) {
               <TableRow key={item.itemId}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
+                <TableCell>{item.price.toLocaleString()}</TableCell>
                 <TableCell>
                   {(item.price * item.quantity).toLocaleString()}
                 </TableCell>
@@ -43,6 +45,7 @@ export default function ItemTable(props: ItemTableProps) {
               <TableRow key={item.itemId}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
+                <TableCell>{item.price.toLocaleString()}</TableCell>
                 <TableCell>
                   {(item.price * item.quantity).toLocaleString()}
                 </TableCell>

@@ -23,6 +23,7 @@ import UserLogin from "./pages/auth/Login";
 import Logout from "./pages/auth/Logout";
 
 import MyHome from "./pages/mypage/Home";
+import ReserveHistory from "./pages/mypage/reserve/ReserveHistory";
 
 import ReserveHome from "./pages/reserve/Home";
 
@@ -55,6 +56,7 @@ function App() {
                 </Route>
                 <Route element={<UserAuthLayout />}>
                   <Route path="/my_page" element={<MyHome />} />
+                  <Route path="/my_page/history" element={<ReserveHistory />} />
                   <Route path="/auth/sign_out" element={<Logout />} />
                 </Route>
                 <Route element={<AdminLoginLayout />}>

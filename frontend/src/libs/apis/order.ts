@@ -1,14 +1,23 @@
 import ApiBase, { ApiResponse } from "./apibase";
 
-const url = "/order/";
+const orderUrl = "/order/";
 const userActiveUrl = "/order/user/active/";
+const userHistoryUrl = "/order/user/";
 
 export default class OrderApi extends ApiBase {
   async add(order: OrderInfo): Promise<void> {
-    return await this.postAsync(url, order);
+    return await this.postAsync(orderUrl, order);
+  }
+  async cancel(orderId: string): Promise<void> {
+    return await this.putAsync(orderUrl + orderId, {});
   }
   async getActiveByUser(userId: string): Promise<ApiResponse<UserOrderInfo[]>> {
     return await this.getAsync<UserOrderInfo[]>(userActiveUrl + userId);
+  }
+  async getHistoryByUser(
+    userId: string
+  ): Promise<ApiResponse<UserOrderInfo[]>> {
+    return await this.getAsync<UserOrderInfo[]>(userHistoryUrl + userId);
   }
 }
 
@@ -28,8 +37,8 @@ export type OrderItem = {
   quantity: number;
 };
 
-
 export type UserOrderInfo = {
+  id: string;
   userId: string;
   userName: string;
   userEmail: string;
@@ -39,6 +48,7 @@ export type UserOrderInfo = {
   orderDateTime: string;
   stockItems: UserOrderItem[];
   foodItems: UserOrderItem[];
+  canceled: boolean;
 };
 
 export type UserOrderItem = {

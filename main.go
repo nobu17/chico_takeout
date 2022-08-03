@@ -176,6 +176,8 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 		order.GET("/user/active/:userId", handler.GetActiveByUser)
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
+		// todo: need admin auth
+		order.GET("/admin_all/", handler.GetAll)
 	}
 	orderable := r.Group("/orderable")
 	{

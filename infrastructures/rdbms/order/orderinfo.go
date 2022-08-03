@@ -146,9 +146,11 @@ func (o *OrderInfoRepository) Find(id string) (*domains.OrderInfo, error) {
 }
 
 func (o *OrderInfoRepository) FindAll() ([]domains.OrderInfo, error) {
+	maxLimit := 1000;
 	models := []OrderInfoModel{}
 
-	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Preload("StockItemModels").Preload("FoodItemModels").Find(&models).Error
+	// until 1000 order by ordered time(latest ordered item)
+	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Preload("StockItemModels").Preload("FoodItemModels").Find(&models).Order("OrderDateTime").Limit(maxLimit).Error
 	if err != nil {
 		return nil, err
 	}

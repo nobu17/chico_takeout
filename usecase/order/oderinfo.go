@@ -91,6 +91,7 @@ func newCommonItemOrderCreateModel(itemId string, quantity int) *CommonItemOrder
 
 type OrderInfoUseCase interface {
 	Find(id string) (*OrderInfoModel, error)
+	FindAll() ([]OrderInfoModel, error)
 	FindByUserId(userId string) ([]OrderInfoModel, error)
 	FindActiveByUserId(userId string) ([]OrderInfoModel, error)
 	Create(model *OrderInfoCreateModel) (string, error)
@@ -141,14 +142,29 @@ func (o *orderInfoUseCase) Find(id string) (*OrderInfoModel, error) {
 	return newOrderInfoModel(item), nil
 }
 
-func (o *orderInfoUseCase) FindByUserId(userId string) ([]OrderInfoModel, error) {
-	orders := []OrderInfoModel{}
 
+func (o *orderInfoUseCase) FindAll() ([]OrderInfoModel, error) {
+	items, err := o.orderInfoRepository.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []OrderInfoModel{}
+	for _, item := range items {
+		order := newOrderInfoModel(&item)
+		orders = append(orders, *order)
+	}
+
+	return orders, nil
+}
+
+func (o *orderInfoUseCase) FindByUserId(userId string) ([]OrderInfoModel, error) {
 	userOrders, err := o.orderInfoRepository.FindByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
 
+	orders := []OrderInfoModel{}
 	for _, userOrder := range userOrders {
 		order := newOrderInfoModel(&userOrder)
 		orders = append(orders, *order)
@@ -158,13 +174,12 @@ func (o *orderInfoUseCase) FindByUserId(userId string) ([]OrderInfoModel, error)
 }
 
 func (o *orderInfoUseCase) FindActiveByUserId(userId string) ([]OrderInfoModel, error) {
-	orders := []OrderInfoModel{}
-
 	userOrders, err := o.orderInfoRepository.FindActiveByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
 
+	orders := []OrderInfoModel{}
 	for _, userOrder := range userOrders {
 		order := newOrderInfoModel(&userOrder)
 		orders = append(orders, *order)

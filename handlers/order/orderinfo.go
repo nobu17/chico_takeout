@@ -124,6 +124,21 @@ func NewOrderInfoHandler(usecase usecases.OrderInfoUseCase) *orderInfoHandler {
 	}
 }
 
+func (s *orderInfoHandler) GetAll(c *gin.Context) {
+	models, err := s.usecase.FindAll()
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	
+	orders := []OrderInfoData{}
+	for _, model := range models {
+		order := newOrderInfoData(&model)
+		orders = append(orders, *order)
+	}
+	s.HandleOK(c, orders)
+}
+
 func (s *orderInfoHandler) Get(c *gin.Context) {
 	id := c.Param("id")
 	model, err := s.usecase.Find(id)

@@ -80,7 +80,7 @@ func resetOrderInfoMemory() {
 		panic("failed to create food order")
 	}
 	stockOrders2 = append(stockOrders2, *stockOrder1)
-	order2, err := domains.NewOrderInfo("user2", "ユーザー２", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
+	order2, err := domains.NewOrderInfo("user2", "ユーザー2", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -101,6 +101,7 @@ func (o *OrderInfoMemoryRepository) FindAll() ([]domains.OrderInfo, error) {
 	for _, item := range o.inMemory {
 		items = append(items, *item)
 	}
+	sort.Slice(items, func(i, j int) bool { return items[i].GetOrderDateTime() > items[j].GetOrderDateTime() })
 	return items, nil
 }
 

@@ -81,6 +81,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 		order.PUT("/:id", handler.PutCancel)
 		order.GET("/user/:userId", handler.GetByUser)
 		order.GET("/user/active/:userId", handler.GetActiveByUser)
+		order.GET("/admin_all/", handler.GetAll)
 	}
 	return r
 }
@@ -132,6 +133,51 @@ func SetupOrderInfoRouter() *gin.Engine {
 // 	}
 // }
 
+
+func TestOrderInfoHandler_GET_ALL(t *testing.T) {
+	r := SetupOrderInfoRouter()
+
+	stockIds := map[string]string{}
+	for id, value := range stockMemoryMaps {
+		stockIds[value.GetName()] = id
+	}
+	foodIds := map[string]string{}
+	for id, value := range foodMemoryMaps {
+		foodIds[value.GetName()] = id
+	}
+	wants := []map[string]interface{}{
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+			"stockItems": []map[string]interface{}{},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+			},
+		},
+		{"userId": "user2", "userName": "ユーザー2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 2.0},
+			},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
+			},
+		},
+	}
+	req, _ := http.NewRequest("GET", orderUrl+"/admin_all/", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	fmt.Println("body", w.Body)
+	var response []map[string]interface{}
+	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+
+	// fmt.Println("response", response)
+	for index, _ := range response {
+		AssertMaps(t, response[index], wants[index])
+	}
+}
+
 func TestOrderInfoHandler_GETByUser(t *testing.T) {
 	r := SetupOrderInfoRouter()
 
@@ -143,7 +189,7 @@ func TestOrderInfoHandler_GETByUser(t *testing.T) {
 	for id, value := range foodMemoryMaps {
 		foodIds[value.GetName()] = id
 	}
-	userIds := []string{"user1"}
+	userIds := []string{"user1", "user2"}
 
 	wants := []map[string]interface{}{
 		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",

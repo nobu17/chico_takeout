@@ -26,7 +26,10 @@ const storeMenu = {
 const orderMenu = {
   title: "注文関係",
   icon: "coffee",
-  pageInfos: [{ title: "予約カレンダー", url: "/admin/orders/calendar" }],
+  pageInfos: [
+    { title: "予約カレンダー", url: "/admin/orders/calendar" },
+    { title: "予約一覧", url: "/admin/orders/all_orders" },
+  ],
 };
 
 export default function AdminHome() {

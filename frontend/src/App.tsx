@@ -38,6 +38,7 @@ import BusinessHour from "./pages/admin/stores/BusinessHour";
 import SpecialBusinessHour from "./pages/admin/stores/SpecialBusinessHour";
 import SpecialHoliday from "./pages/admin/stores/SpecialHoliday";
 import Calendar from "./pages/admin/orders/Calendar";
+import AllOrderTable from "./pages/admin/orders/AllOrderTable";
 
 import "./App.css";
 
@@ -87,6 +88,7 @@ function App() {
                     element={<SpecialHoliday />}
                   />
                   <Route path="/admin/orders/calendar" element={<Calendar />} />
+                  <Route path="/admin/orders/all_orders" element={<AllOrderTable />} />
                 </Route>
                 <Route path="/reserve" element={<ReserveHome />} />
                 <Route path="*" element={<Home />} />

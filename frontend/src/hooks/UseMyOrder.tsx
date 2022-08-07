@@ -45,15 +45,15 @@ export function useMyOrder() {
       return;
     }
     try {
-        setError(undefined);
-        setLoading(true);
-        await api.cancel(activeOrder.id);
-      } catch (e: any) {
-        setError(e);
-      } finally {
-        setLoading(false);
-        await loadActive();
-      }  
+      setError(undefined);
+      setLoading(true);
+      await api.cancel(activeOrder.id);
+    } catch (e: any) {
+      setError(e);
+    } finally {
+      setLoading(false);
+      await loadActive();
+    }
   };
 
   const loadHistory = async () => {

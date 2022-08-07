@@ -37,6 +37,8 @@ import FoodItem from "./pages/admin/items/FoodItem";
 import BusinessHour from "./pages/admin/stores/BusinessHour";
 import SpecialBusinessHour from "./pages/admin/stores/SpecialBusinessHour";
 import SpecialHoliday from "./pages/admin/stores/SpecialHoliday";
+import Calendar from "./pages/admin/orders/Calendar";
+
 import "./App.css";
 
 let theme = createTheme();
@@ -84,6 +86,7 @@ function App() {
                     path="/admin/store/holiday"
                     element={<SpecialHoliday />}
                   />
+                  <Route path="/admin/orders/calendar" element={<Calendar />} />
                 </Route>
                 <Route path="/reserve" element={<ReserveHome />} />
                 <Route path="*" element={<Home />} />

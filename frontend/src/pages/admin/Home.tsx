@@ -23,6 +23,11 @@ const storeMenu = {
   ],
 };
 
+const orderMenu = {
+  title: "注文関係",
+  icon: "coffee",
+  pageInfos: [{ title: "予約カレンダー", url: "/admin/orders/calendar" }],
+};
 
 export default function AdminHome() {
   return (
@@ -34,6 +39,9 @@ export default function AdminHome() {
         </Grid>
         <Grid item xs={12} md={6}>
           <PageMenu {...storeMenu}></PageMenu>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <PageMenu {...orderMenu}></PageMenu>
         </Grid>
       </Grid>
     </>

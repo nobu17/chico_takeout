@@ -19,6 +19,7 @@ export type PageMenuProps = {
 export type PageInfo = {
   title: string;
   url: string;
+  disabled?: boolean;
 };
 
 const getIcon = (input: string) => {
@@ -63,14 +64,23 @@ export default function PageMenu(props: PageMenuProps) {
           </ListSubheader>
         }
       >
-        {props.pageInfos.map((item, index) => (
-          <ListItemButton key={index} component={RouterLink} to={item.url}>
-            <ListItemIcon>
-              <DoubleArrowIcon />
-            </ListItemIcon>
-            <ListItemText primary={item.title} />
-          </ListItemButton>
-        ))}
+        {props.pageInfos.map((item, index) =>
+          item.disabled ? (
+            <ListItemButton key={index} disabled={true}>
+              <ListItemIcon>
+                <DoubleArrowIcon />
+              </ListItemIcon>
+              <ListItemText primary={item.title} />
+            </ListItemButton>
+          ) : (
+            <ListItemButton key={index} component={RouterLink} to={item.url}>
+              <ListItemIcon>
+                <DoubleArrowIcon />
+              </ListItemIcon>
+              <ListItemText primary={item.title} />
+            </ListItemButton>
+          )
+        )}
       </List>
     </>
   );

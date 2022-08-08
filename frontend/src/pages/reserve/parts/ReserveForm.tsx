@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Stack,
@@ -25,6 +26,7 @@ import LoadingSpinner from "../../../components/parts/LoadingSpinner";
 const steps = ["日時選択", "商品選択", "お客様情報入力", "確認"];
 
 export default function ReserveForm() {
+  const navigation = useNavigate()
   const [activeStep, setActiveStep] = React.useState(0);
   const [openSnack, setOpenSnack] = React.useState(false);
   const { cart, updateCart, resetCart } = useItemCart();
@@ -62,6 +64,7 @@ export default function ReserveForm() {
     const result = await submitOrder(pickupDate, cart, userInfo);
     if (result) {
       alert("オーダーしました。");
+      navigation("/my_page");
     } else {
       setOpenSnack(true);
     }

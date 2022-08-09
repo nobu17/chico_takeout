@@ -1,4 +1,5 @@
 import { useState } from "react";
+import UserInfoStore from "../libs/apis/userInfo";
 
 export type UserInfo = {
   name: string;
@@ -7,17 +8,13 @@ export type UserInfo = {
   memo: string;
 };
 
-const defaultUserInfo: UserInfo = {
-  name: "",
-  tel: "",
-  email: "",
-  memo: "",
-};
+const store = new UserInfoStore();
 
 export function useUserInfo() {
-  const [userInfo, setUserInfo] = useState<UserInfo>(defaultUserInfo);
+  const [userInfo, setUserInfo] = useState<UserInfo>(store.load());
   const updateUserInfo = (request: UserInfo) => {
     setUserInfo({...userInfo, ...request});
+    store.save(request);
   };
 
   return {

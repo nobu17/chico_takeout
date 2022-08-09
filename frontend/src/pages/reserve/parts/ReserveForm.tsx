@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -34,7 +35,18 @@ export default function ReserveForm() {
   const { pickupDate, updatePickupDate } = usePickupDate();
   const { loading, perDayOrderableInfo, currentOrderableInfo, switchCurrent } =
     useOrderableInfo();
-  const { loading: orderLoading, submitOrder } = useOrder();
+  const { loading: orderLoading, submitOrder, checkOrderExists } = useOrder();
+
+  useEffect(() => {
+    const init = async () => {
+      const error = await checkOrderExists();
+      if (error) {
+        alert(error.message);
+        navigation("/my_page");
+      }
+    };
+    init();
+  }, []);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);

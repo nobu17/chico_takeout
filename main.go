@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	itemHandler "chico/takeout/handlers/item"
@@ -10,8 +11,8 @@ import (
 	storeHandler "chico/takeout/handlers/store"
 	itemRDBMS "chico/takeout/infrastructures/rdbms/items"
 	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
-	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
 	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
+	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
 	itemUseCase "chico/takeout/usecase/item"
 	orderUseCase "chico/takeout/usecase/order"
 	orderQueryUseCase "chico/takeout/usecase/order/query"
@@ -19,11 +20,13 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func main() {
+	loadEnv();
 	db := setUpDb()
 	sqlDb, err := db.DB()
 	if err != nil {
@@ -35,6 +38,15 @@ func main() {
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8086")
 }
+
+func loadEnv() {
+	err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
+    if err != nil {
+		fmt.Println(err);
+        panic("failed to load env.");
+    }
+}
+
 
 func setupRouter(db *gorm.DB) *gin.Engine {
 	// Disable Console Color
@@ -197,11 +209,11 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 }
 
 func setUpDb() *gorm.DB {
-	user := "test"
-	pass := "password"
-	server := "localhost"
-	port := "15432"
-	dbName := "chicoDB"
+	user := os.Getenv("DB_USER")
+	pass := os.Getenv("DB_PASS")
+	server := os.Getenv("DB_SERVER")
+	port := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
 
 	dsn := "host=" + server + " user=" + user + " password=" + pass + " dbname=" + dbName + " port=" + port + " sslmode=disable"
 	// dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"

@@ -30,3 +30,6 @@ app_setting.json
 temp_work/*
 !.gitkeep
 !dist/samples/*
+
+# env
+.env

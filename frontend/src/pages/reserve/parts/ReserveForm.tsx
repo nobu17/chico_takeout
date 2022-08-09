@@ -72,6 +72,9 @@ export default function ReserveForm() {
   };
 
   const handleConfirmSubmit = async () => {
+    if (!window.confirm("注文を確定します。よろしいですか？")) {
+      return;
+    }
     setOpenSnack(false);
     const result = await submitOrder(pickupDate, cart, userInfo);
     if (result) {

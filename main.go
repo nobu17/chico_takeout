@@ -13,6 +13,7 @@ import (
 	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
 	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
 	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
+	"chico/takeout/middleware"
 	itemUseCase "chico/takeout/usecase/item"
 	orderUseCase "chico/takeout/usecase/order"
 	orderQueryUseCase "chico/takeout/usecase/order/query"
@@ -26,7 +27,7 @@ import (
 )
 
 func main() {
-	loadEnv();
+	loadEnv()
 	db := setUpDb()
 	sqlDb, err := db.DB()
 	if err != nil {
@@ -34,24 +35,36 @@ func main() {
 	}
 	defer sqlDb.Close()
 
-	r := setupRouter(db)
+	auth := initAuthService()
+
+	r := setupRouter(db, auth)
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8086")
 }
 
 func loadEnv() {
 	err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
-    if err != nil {
-		fmt.Println(err);
-        panic("failed to load env.");
-    }
+	if err != nil {
+		fmt.Println(err)
+		panic("failed to load env.")
+	}
 }
 
+func initAuthService() middleware.AuthService {
+	service, err := middleware.NewFirebaseApp()
+	if err != nil {
+		fmt.Println(err)
+		panic("failed to init auth service.")
+	}
+	return service
+}
 
-func setupRouter(db *gorm.DB) *gin.Engine {
+func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
+	// set auth info at first
+	r.Use(middleware.SetAuthInfo())
 
 	// Setting Cors
 	r.Use(cors.New(cors.Config{
@@ -89,55 +102,51 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	})
 
 	kindRepo := itemRDBMS.NewItemKindRepository(db)
-	//itemKindRepo := memory.NewItemKindMemoryRepository()
-	// itemkind
 	kind := r.Group("/item/kind")
 	{
+		kind.Use(middleware.CheckAuthInfo(auth))
 		useCase := itemUseCase.NewItemKindUseCase(kindRepo)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
-		kind.POST("/", handler.Post)
-		kind.PUT("/:id", handler.Put)
-		kind.DELETE("/:id", handler.Delete)
+		kind.POST("/", middleware.CheckAdmin(), handler.Post)
+		kind.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		kind.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
 	}
-	// kindRepo := memory.NewItemKindMemoryRepository()
-	//stockRepo := memory.NewStockItemMemoryRepository()
+
 	stockRepo := itemRDBMS.NewStockItemRepository(db)
-	// stock
 	stock := r.Group("/item/stock")
 	{
+		stock.Use(middleware.CheckAuthInfo(auth))
 		useCase := itemUseCase.NewStockItemUseCase(stockRepo, kindRepo)
 		handler := itemHandler.NewStockItemHandler(useCase)
 		stock.GET("/:id", handler.Get)
 		stock.GET("/", handler.GetAll)
-		stock.POST("/", handler.Post)
-		stock.PUT("/:id", handler.Put)
-		stock.PUT("/:id/remain", handler.PutRemain)
-		stock.DELETE("/:id", handler.Delete)
+		stock.POST("/", middleware.CheckAdmin(), handler.Post)
+		stock.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		stock.PUT("/:id/remain", middleware.CheckAdmin(), handler.PutRemain)
+		stock.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
 	}
 
-	//businessHoursRepo := memory.NewBusinessHoursMemoryRepository()
 	businessHoursRepo := storeRDBMS.NewBusinessHoursRepository(db)
 	foodRepo := itemRDBMS.NewFoodItemRepository(db)
-	// foodRepo := memory.NewFoodItemMemoryRepository()
 	// todo idのGET紐付け
 	food := r.Group("/item/food")
 	{
+		food.Use(middleware.CheckAuthInfo(auth))
 		useCase := itemUseCase.NewFoodItemUseCase(foodRepo, kindRepo, businessHoursRepo)
 		handler := itemHandler.NewFoodItemHandler(useCase)
 		food.GET("/:id", handler.Get)
 		food.GET("/", handler.GetAll)
-		food.POST("/", handler.Post)
-		food.PUT("/:id", handler.Put)
-		food.DELETE("/:id", handler.Delete)
+		food.POST("/", middleware.CheckAdmin(), handler.Post)
+		food.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		food.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
 	}
 
-	// hour
-	// spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
 	spBusinessHourRepo := storeRDBMS.NewSpecialBusinessHoursRepository(db)
 	hour := r.Group("/store/hour")
 	{
+		hour.Use(middleware.CheckAuthInfo(auth))
 		useCase := storeUseCase.NewBusinessHoursUseCase(businessHoursRepo, spBusinessHourRepo)
 		// init
 		err := useCase.InitIfNotExists()
@@ -146,41 +155,41 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 		}
 		handler := storeHandler.BusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
-		hour.PUT("/:id", handler.Put)
+		hour.PUT("/:id", middleware.CheckAdmin(), handler.Put)
 	}
+
 	specialHour := r.Group("/store/special_hour")
 	{
+		specialHour.Use(middleware.CheckAuthInfo(auth))
 		useCase := storeUseCase.NewSpecialBusinessHoursUseCase(businessHoursRepo, spBusinessHourRepo)
 		handler := storeHandler.NewSpecialBusinessHourHandler(useCase)
 		specialHour.GET("/:id", handler.Get)
 		specialHour.GET("/", handler.GetAll)
-		specialHour.POST("/", handler.Post)
-		specialHour.PUT("/:id", handler.Put)
-		specialHour.DELETE("/:id", handler.Delete)
+		specialHour.POST("/", middleware.CheckAdmin(), handler.Post)
+		specialHour.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		specialHour.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
 	}
 
-	//holiday
-	// holidayRepo := memory.NewSpecialHolidayMemoryRepository()
 	holidayRepo := storeRDBMS.NewSpecialHolidayRepository(db)
 	holiday := r.Group("/store/holiday")
 	{
+		holiday.Use(middleware.CheckAuthInfo(auth))
 		useCase := storeUseCase.NewSpecialHolidayUseCase(holidayRepo)
 		handler := storeHandler.NewSpecialHolidayHandler(useCase)
 		holiday.GET("/:id", handler.Get)
 		holiday.GET("/", handler.GetAll)
-		holiday.POST("/", handler.Post)
-		holiday.PUT("/:id", handler.Put)
-		holiday.DELETE("/:id", handler.Delete)
+		holiday.POST("/", middleware.CheckAdmin(), handler.Post)
+		holiday.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		holiday.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
 	}
 
-	// order
 	orderRepo, err := orderRDBMS.NewOrderInfoRepository(db)
 	if err != nil {
 		panic(err)
 	}
 	order := r.Group("/order")
 	{
-		// orderRepo := memory.NewOrderInfoMemoryRepository()
+		order.Use(middleware.CheckAuthInfo(auth))
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 		order.GET("/:id", handler.Get)
@@ -188,12 +197,11 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 		order.GET("/user/active/:userId", handler.GetActiveByUser)
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
-		// todo: need admin auth
-		order.GET("/admin_all/", handler.GetAll)
+		order.GET("/admin_all/", middleware.CheckAdmin(), handler.GetAll)
 	}
 	orderable := r.Group("/orderable")
 	{
-		// orderRepo := memory.NewOrderInfoMemoryRepository()
+		orderable.Use(middleware.CheckAuthInfo(auth))
 		qService := orderQueryRDBMS.NewOrderableInfoRdbmsQueryService(db)
 		useCase := orderQueryUseCase.NewOrderQueryUseCase(qService)
 		handler := orderHandler.NewOrderableInfoHandler(useCase)

@@ -24,9 +24,11 @@ const defaultCart: Cart = {
 };
 
 export function useItemCart() {
-  const [cart, setCart] = useState<Cart>(JSON.parse(JSON.stringify(defaultCart)));
+  const [cart, setCart] = useState<Cart>(
+    JSON.parse(JSON.stringify(defaultCart))
+  );
   const updateCart = (request: ItemRequest) => {
-    const newCarts: Cart = {...cart};
+    const newCarts: Cart = { ...cart };
     if (request.quantity > 0) {
       newCarts.items[request.item.id] = request;
     } else {

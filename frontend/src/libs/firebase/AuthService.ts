@@ -11,7 +11,13 @@ export class AuthService {
       const result = await signIn(auth, email, password);
       // check id are existed
       const isAdmin = await this.checkAdmin(result.user);
-      return new AuthResult(true, isAdmin, "", "", "");
+      return new AuthResult(
+        true,
+        isAdmin,
+        result.user.uid,
+        result.user.email ?? "",
+        ""
+      );
     } catch (e: unknown) {
       let msg = "";
       if (e instanceof Error) {
@@ -64,7 +70,7 @@ export class AuthService {
   private async checkAdmin(user: User | null): Promise<boolean> {
     if (user === null) return false;
     const token = await user.getIdTokenResult();
-    console.log("token", token);
+    // console.log("token", token);
     const role = token.claims["role"];
     return role === "Admin";
   }

@@ -1,9 +1,6 @@
 import * as React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
-import {
-  AuthService,
-  AuthResult,
-} from "../../libs/firebase/AuthService";
+import { AuthService, AuthResult } from "../../libs/firebase/AuthService";
 import LoadingSpinner from "../parts/LoadingSpinner";
 
 type AuthState = {
@@ -20,7 +17,7 @@ type ContextType = {
 };
 
 const service = new AuthService();
-const initialState = { isAuthorized: false, isAdmin: false,  uid: "" };
+const initialState = { isAuthorized: false, isAdmin: false, uid: "" };
 
 const AuthContext = createContext({} as ContextType);
 
@@ -33,13 +30,14 @@ export const AdminAuthProvider = ({ children }: any) => {
   const [initializing, setInitializing] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  async function signIn(
-    email: string,
-    password: string
-  ): Promise<AuthResult> {
+  async function signIn(email: string, password: string): Promise<AuthResult> {
     setLoading(true);
     const result = await service.signIn(email, password);
-    setState({ isAuthorized: result.isSuccessful, isAdmin: result.isAdmin, uid: result.uid });
+    setState({
+      isAuthorized: result.isSuccessful,
+      isAdmin: result.isAdmin,
+      uid: result.uid
+    });
     setLoading(false);
     return result;
   }
@@ -56,7 +54,11 @@ export const AdminAuthProvider = ({ children }: any) => {
   useEffect(() => {
     service.onAuthStateChange((result) => {
       setInitializing(false);
-      setState({ isAuthorized: result.isSuccessful, isAdmin: result.isAdmin, uid: result.uid });
+      setState({
+        isAuthorized: result.isSuccessful,
+        isAdmin: result.isAdmin,
+        uid: result.uid
+      });
     });
   }, []);
 

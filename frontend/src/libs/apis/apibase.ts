@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
+import { auth } from "../firebase/Firebase";
 
 export interface ApiResponse<T> {
   data: T;
@@ -13,7 +14,11 @@ interface ApiErrorImpl {
 
 export class ApiError implements ApiErrorImpl {
   public name: string;
-  constructor(public error: Error, public code: number, public message: string) {
+  constructor(
+    public error: Error,
+    public code: number,
+    public message: string
+  ) {
     this.name = "ApiError";
   }
 
@@ -25,6 +30,7 @@ export class ApiError implements ApiErrorImpl {
 export default class ApiBase {
   private _api: AxiosInstance;
   private _baseUrl: string;
+
   constructor(baseUrl: string) {
     this._baseUrl = baseUrl;
     this._api = axios.create({
@@ -34,6 +40,14 @@ export default class ApiBase {
         "X-Requested-With": "XMLHttpRequest",
       },
       responseType: "json",
+    });
+    this._api.interceptors.request.use(async (request) => {
+      if (!request || !request.headers)
+        return request;
+
+      const idToken = await auth.currentUser?.getIdToken();
+      request.headers.Authorization = `Bearer ${idToken}`;
+      return request;
     });
   }
 
@@ -106,14 +120,10 @@ const convertError = (error: any): ApiError => {
     return new ApiError(
       error,
       error.response?.status != null ? error.response?.status : 0,
-      message,
+      message
     );
   }
-  return new ApiError(
-    error,
-    0,
-    "",
-  );
+  return new ApiError(error, 0, "");
 };
 
 const isAxiosError = (error: any): error is AxiosError => {

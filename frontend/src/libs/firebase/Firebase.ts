@@ -1,6 +1,24 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, EmailAuthProvider, sendEmailVerification, getAdditionalUserInfo } from 'firebase/auth';
-import { getStorage, ref, uploadBytes, getDownloadURL, updateMetadata, listAll } from "firebase/storage";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  EmailAuthProvider,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  getAdditionalUserInfo,
+  createUserWithEmailAndPassword,
+  getRedirectResult,
+  signInWithRedirect,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  updateMetadata,
+  listAll,
+} from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -17,12 +35,16 @@ const firebase = initializeApp(firebaseConfig);
 const auth_obj = getAuth();
 const storage_obj = getStorage();
 
-
 export default firebase;
 export const auth = auth_obj;
 export const sendMail = sendEmailVerification;
+export const sendResetMail = sendPasswordResetEmail;
+export const googleAuthProvider = GoogleAuthProvider;
+export const getRedirect = getRedirectResult
+export const signInRedirect = signInWithRedirect
 export const getAdditionalUser = getAdditionalUserInfo;
 export const signIn = signInWithEmailAndPassword;
+export const signUp = createUserWithEmailAndPassword;
 export const storage = storage_obj;
 export const storageRef = ref;
 export const storageUploadBytes = uploadBytes;

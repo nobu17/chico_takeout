@@ -13,6 +13,7 @@ type ContextType = {
   state: AuthState;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -36,10 +37,16 @@ export const AdminAuthProvider = ({ children }: any) => {
     setState({
       isAuthorized: result.isSuccessful,
       isAdmin: result.isAdmin,
-      uid: result.uid
+      uid: result.uid,
     });
     setLoading(false);
     return result;
+  }
+
+  async function signInWithGoogle(): Promise<void> {
+    setLoading(true);
+    await service.signInWithGoogle();
+    setLoading(false);
   }
 
   async function signOut(): Promise<void> {
@@ -52,12 +59,19 @@ export const AdminAuthProvider = ({ children }: any) => {
   }
 
   useEffect(() => {
+    service.getRedirectResult((result) => {
+      setState({
+        isAuthorized: result.isSuccessful,
+        isAdmin: result.isAdmin,
+        uid: result.uid,
+      });
+    })
     service.onAuthStateChange((result) => {
       setInitializing(false);
       setState({
         isAuthorized: result.isSuccessful,
         isAdmin: result.isAdmin,
-        uid: result.uid
+        uid: result.uid,
       });
     });
   }, []);
@@ -67,6 +81,7 @@ export const AdminAuthProvider = ({ children }: any) => {
     loading,
     signIn,
     signOut,
+    signInWithGoogle,
   };
 
   if (initializing) {

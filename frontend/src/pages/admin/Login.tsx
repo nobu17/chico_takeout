@@ -10,7 +10,6 @@ export default function AdminLogin() {
   const { signIn, loading } = useAuth();
   const handleSignIn = async (input: LoginInput) => {
     const result = await signIn(input.email, input.password);
-    console.log(result);
     if (result.isSuccessful) {
       navigate("/admin");
     } else {

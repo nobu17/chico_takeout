@@ -1,5 +1,14 @@
 import { User } from "firebase/auth";
-import { auth, signIn, sendMail } from "./Firebase";
+import {
+  auth,
+  signIn,
+  sendMail,
+  sendResetMail,
+  signUp,
+  googleAuthProvider,
+  signInRedirect,
+  getRedirect,
+} from "./Firebase";
 
 export class AuthService {
   private adminIds: string[];
@@ -26,9 +35,59 @@ export class AuthService {
       return new AuthResult(false, false, "", "", msg);
     }
   }
+
   async signOut(): Promise<void> {
     await auth.signOut();
   }
+
+  async signUp(email: string, password: string): Promise<SignUpResult> {
+    try {
+      const result = await signUp(auth, email, password);
+      const mailSent = await this.checkEmailVerification(result.user);
+      return new SignUpResult(
+        true,
+        result.user.uid,
+        result.user.email ?? "",
+        mailSent,
+        ""
+      );
+    } catch (e: unknown) {
+      let msg = "";
+      if (e instanceof Error) {
+        msg = e.message;
+      }
+      return new SignUpResult(false, "", "", false, msg);
+    }
+  }
+
+  async sendPassResetMail(email: string): Promise<PassResetResult> {
+    try {
+      await sendResetMail(auth, email);
+      return new PassResetResult(true, "");
+    } catch (e: unknown) {
+      let msg = "";
+      if (e instanceof Error) {
+        msg = e.message;
+      }
+      return new PassResetResult(false, msg);
+    }
+  }
+
+  async signInWithGoogle() {
+    const provider = new googleAuthProvider();
+    await signInRedirect(auth, provider);
+    // provider.addScope("email");
+  }
+
+  async getRedirectResult(callback: (data: AuthResult) => void) {
+    const result = await getRedirect(auth);
+    if (result !== null) {
+      callback(new AuthResult(true, false, result.user.uid, result.user.email ?? "", ""))
+      return;
+    }
+    callback(new AuthResult(false, false, "", "", ""));
+  }
+
   async onAuthStateChange(callback: (data: AuthResult) => void) {
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -58,9 +117,6 @@ export class AuthService {
     }
     if (!this.mailSent) {
       this.mailSent = true;
-      alert(
-        "検証用のメールを送信しました。メールからユーザー登録を行なってください。"
-      );
       await sendMail(user);
     }
 
@@ -87,6 +143,52 @@ export class AuthResult {
 
   public hasError(): boolean {
     if (!this.isSuccessful && this.errorMessage !== "") {
+      return true;
+    }
+    return false;
+  }
+}
+
+export class SignUpResult {
+  constructor(
+    public isSuccessful: boolean,
+    public uid: string,
+    public email: string,
+    public mailSent: boolean,
+    public errorMessage: string
+  ) {}
+
+  public hasError(): boolean {
+    if (!this.isSuccessful && this.errorMessage !== "") {
+      return true;
+    }
+    return false;
+  }
+  public isUserAlreadyExists(): boolean {
+    if (
+      !this.isSuccessful &&
+      this.errorMessage.includes("auth/email-already-in-use")
+    ) {
+      return true;
+    }
+    return false;
+  }
+}
+
+export class PassResetResult {
+  constructor(public isSuccessful: boolean, public errorMessage: string) {}
+
+  public hasError(): boolean {
+    if (!this.isSuccessful && this.errorMessage !== "") {
+      return true;
+    }
+    return false;
+  }
+  public isUserNotExists(): boolean {
+    if (
+      !this.isSuccessful &&
+      this.errorMessage.includes("auth/user-not-found")
+    ) {
       return true;
     }
     return false;

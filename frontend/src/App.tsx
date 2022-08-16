@@ -20,6 +20,8 @@ import Header from "./components/layouts/Header";
 
 import Home from "./pages/Home";
 import UserLogin from "./pages/auth/Login";
+import UserSignUp from "./pages/auth/SignUp";
+import UserReset from "./pages/auth/Reset";
 import Logout from "./pages/auth/Logout";
 
 import MyHome from "./pages/mypage/Home";
@@ -42,6 +44,7 @@ import AllOrderTable from "./pages/admin/orders/AllOrderTable";
 
 import "./App.css";
 
+
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
@@ -56,6 +59,8 @@ function App() {
               <Routes>
                 <Route element={<UserLoginLayout />}>
                   <Route path="/auth/sign_in" element={<UserLogin />} />
+                  <Route path="/auth/sign_up" element={<UserSignUp />} />
+                  <Route path="/auth/reset" element={<UserReset />} />
                 </Route>
                 <Route element={<UserAuthLayout />}>
                   <Route path="/my_page" element={<MyHome />} />

@@ -48,7 +48,6 @@ export default function UserInfoInput(props: UserInfoInputProps) {
     const reg = new RegExp(
       /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]+.[A-Za-z0-9]+$/
     );
-    console.log("handleEmailValidation", reg.test(email), email);
     if (!reg.test(email)) {
       return "正しい形式のメールアドレスを入力してください。";
     }

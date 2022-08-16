@@ -1,41 +1,45 @@
 import * as React from "react";
-import { Container, Stack, TextField, Button } from "@mui/material";
+import { Container, Stack, TextField, Button, Alert } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { isValidEmail } from "../../../libs/util/Email";
 import { RequiredErrorMessage } from "../../../libs/ErrorMessages";
 
-type AdminLoginFormProps = {
-  input: LoginInput;
+type SignUpFormProps = {
+  input: SignUpInput;
   onSubmit: callbackSubmit;
-  onGoogleSubmit?: callbackProviderSubmit;
 };
 interface callbackSubmit {
-  (item: LoginInput): void;
-}
-interface callbackProviderSubmit {
-  (): void;
+  (data: SignUpInput): void;
 }
 
-export type LoginInput = {
+export type SignUpInput = {
   email: string;
   password: string;
 };
 
-export default function AdminLoginForm(props: AdminLoginFormProps) {
+export default function SignUpForm(props: SignUpFormProps) {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({ defaultValues: props.input });
-  const onSubmit: SubmitHandler<LoginInput> = (data) => {
+  } = useForm<SignUpInput>({ defaultValues: props.input });
+  const onSubmit: SubmitHandler<SignUpInput> = (data) => {
     props.onSubmit(data);
   };
   const handleEmailValidation = (email: string) => {
-    console.log("handleEmailValidation");
     const isValid = isValidEmail(email);
     if (!isValid) {
       return "正しい形式のメールアドレスを入力してください。";
+    }
+    return;
+  };
+
+  const reg = new RegExp("^(?=.*[A-Z])(?=.*[.?/-])[a-zA-Z0-9.?/-]{8,24}$");
+  // const passwordReget = /^(?=.*?[a-z])(?=.*?\d)(?=.*?[!-\/:-@[-`{-~])[!-~]{8,100}$/i;
+  const handlePasswordValidation = (password: string) => {
+    if (!reg.test(password)) {
+      return "英数字の大小文字と記号を含む,8文字以上24文字以下の値を入力してください。";
     }
     return;
   };
@@ -45,7 +49,7 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
       <Container maxWidth="sm" sx={{ pt: 5 }}>
         <Stack spacing={3}>
           <TextField
-            label="ID"
+            label="email"
             fullWidth
             {...register("email", {
               required: { value: true, message: RequiredErrorMessage },
@@ -61,6 +65,7 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
             autoComplete="current-password"
             {...register("password", {
               required: { value: true, message: RequiredErrorMessage },
+              validate: handlePasswordValidation,
             })}
             error={Boolean(errors.password)}
             helperText={errors.password && errors.password.message}
@@ -71,20 +76,8 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
             size="large"
             onClick={handleSubmit(onSubmit)}
           >
-            ログイン
+            登録
           </Button>
-          {props.onGoogleSubmit ? (
-            <Button
-              color="error"
-              variant="contained"
-              size="large"
-              onClick={props.onGoogleSubmit}
-            >
-              Googleアカウントでログイン
-            </Button>
-          ) : (
-            <></>
-          )}
         </Stack>
       </Container>
     </>

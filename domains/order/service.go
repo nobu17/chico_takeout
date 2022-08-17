@@ -48,7 +48,7 @@ func (s *StockItemRemainCheckAndConsumer) IncrementCanceledRemain(stockOrders []
 	for _, order := range stockOrders {
 		for _, stock := range allStocks {
 			if stock.HasSameId(order.GetItemId()) {
-				err = stock.IncreseRemain(order.GetQuantity())
+				err = stock.IncreaseRemain(order.GetQuantity())
 				if err != nil {
 					return err
 				}
@@ -78,11 +78,11 @@ func NewFoodItemRemainChecker(orderRepo OrderInfoRepository, foodRepo item.FoodI
 
 func (f *FoodItemRemainChecker) CheckRemain(pickupDateTime string, foodOrders []OrderFoodItem) error {
 	// step1 get same days food order and calc each quantity
-	samedateOrders, err := f.orderRepo.FindByPickupDate(pickupDateTime)
+	sameDateOrders, err := f.orderRepo.FindByPickupDate(pickupDateTime)
 	if err != nil {
 		return err
 	}
-	spec := newFoodItemRemainQuantitySpecification(samedateOrders)
+	spec := newFoodItemRemainQuantitySpecification(sameDateOrders)
 
 	// step2: check each order remain
 	foods, err := f.foodRepo.FindAll()
@@ -93,7 +93,7 @@ func (f *FoodItemRemainChecker) CheckRemain(pickupDateTime string, foodOrders []
 		for _, food := range foods {
 			if foodOrder.HasSameId(food.GetId()) {
 				if spec.IsOverRemain(food.GetId(), foodOrder.GetQuantity(), food.GetMaxOrderPerDay()) {
-					return common.NewValidationError("foodOrders", "Food items remain count perday is over limit.")
+					return common.NewValidationError("foodOrders", "Food items remain count perDay is over limit.")
 				}
 				break
 			}

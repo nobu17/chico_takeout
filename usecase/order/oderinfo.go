@@ -1,9 +1,11 @@
 package order
 
 import (
+	"fmt"
+	"os"
+
 	"chico/takeout/common"
 	idomains "chico/takeout/domains/item"
-
 	domains "chico/takeout/domains/order"
 	sdomains "chico/takeout/domains/store"
 )
@@ -107,6 +109,7 @@ type orderInfoUseCase struct {
 	factory             domains.OrderInfoFactory
 	stockConsumer       domains.StockItemRemainCheckAndConsumer
 	foodRemainChecker   domains.FoodItemRemainChecker
+	mailerService       SendOrderMailService
 }
 
 func NewOrderInfoUseCase(
@@ -116,6 +119,7 @@ func NewOrderInfoUseCase(
 	busRepo sdomains.BusinessHoursRepository,
 	spBusRepo sdomains.SpecialBusinessHourRepository,
 	spHolidayRepo sdomains.SpecialHolidayRepository,
+	mailerService SendOrderMailService,
 ) OrderInfoUseCase {
 	return &orderInfoUseCase{
 		orderInfoRepository: orderInfoRepository,
@@ -126,6 +130,7 @@ func NewOrderInfoUseCase(
 		factory:             *domains.NewOrderInfoFactory(stockRepo, foodRepo),
 		stockConsumer:       *domains.NewStockItemRemainCheckAndConsumer(stockRepo),
 		foodRemainChecker:   *domains.NewFoodItemRemainChecker(orderInfoRepository, foodRepo),
+		mailerService:       mailerService,
 	}
 }
 
@@ -261,6 +266,12 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 		return "", gError
 	}
 
+	mError := o.sendCompleteMail(order)
+	// mail error not treats as error only displaying as info
+	if mError != nil {
+		fmt.Printf("mail send error.%s", mError)
+	}
+
 	return id, nil
 }
 
@@ -278,5 +289,31 @@ func (o *orderInfoUseCase) Cancel(id string) error {
 	if err != nil {
 		return err
 	}
-	return o.orderInfoRepository.UpdateOrderStatus(order)
+	upErr := o.orderInfoRepository.UpdateOrderStatus(order)
+	if upErr != nil {
+		return upErr
+	}
+
+	mError := o.sendCancelMail(order)
+	// mail error not treats as error only displaying as info
+	if mError != nil {
+		fmt.Printf("mail send error.%s", mError)
+	}
+	return nil
+}
+
+func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) (error) {
+	mailData, err := NewOrderCompleteMailData(order, os.Getenv("MAIL_FROM"))
+	if err != nil {
+		return err
+	}
+	return o.mailerService.SendComplete(*mailData)
+}
+
+func (o *orderInfoUseCase) sendCancelMail(order *domains.OrderInfo) (error) {
+	mailData, err := NewOrderCancelMailData(order, os.Getenv("MAIL_FROM"))
+	if err != nil {
+		return err
+	}
+	return o.mailerService.SendCancel(*mailData)
 }

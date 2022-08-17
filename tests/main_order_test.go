@@ -74,7 +74,8 @@ func SetupOrderInfoRouter() *gin.Engine {
 	orderMemoryMaps = orderRepos.GetMemory()
 	order := r.Group(orderUrl)
 	{
-		useCase := orderUseCase.NewOrderInfoUseCase(orderRepos, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
+		mailer := memory.NewMemorySendOrderMail()
+		useCase := orderUseCase.NewOrderInfoUseCase(orderRepos, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 		order.GET("/:id", handler.Get)
 		order.POST("/", handler.PostCreate)

@@ -13,6 +13,7 @@ import (
 	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
 	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
 	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
+	"chico/takeout/infrastructures/smtp"
 	"chico/takeout/middleware"
 	itemUseCase "chico/takeout/usecase/item"
 	orderUseCase "chico/takeout/usecase/order"
@@ -190,7 +191,8 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	order := r.Group("/order")
 	{
 		order.Use(middleware.CheckAuthInfo(auth))
-		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo)
+		mailer := smtp.NewSmtpSendOrderMail()
+		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 		order.GET("/:id", handler.Get)
 		order.GET("/user/:userId", handler.GetByUser)

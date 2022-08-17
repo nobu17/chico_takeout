@@ -304,7 +304,7 @@ func TestIncrementRemain(t *testing.T) {
 		assert.NoError(t, err, "init remain test is failed")
 
 		// act
-		err = got.IncreseRemain(tt.args.remain)
+		err = got.IncreaseRemain(tt.args.remain)
 		if tt.hasValidationErr {
 			assert.Error(t, err)
 			assert.IsType(t, err, common.NewValidationError("", ""))

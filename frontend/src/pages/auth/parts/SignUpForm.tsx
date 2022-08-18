@@ -1,9 +1,17 @@
 import * as React from "react";
-import { Container, Stack, TextField, Button, Alert } from "@mui/material";
+import {
+  Container,
+  Stack,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { isValidEmail } from "../../../libs/util/Email";
 import { RequiredErrorMessage } from "../../../libs/ErrorMessages";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 type SignUpFormProps = {
   input: SignUpInput;
@@ -24,9 +32,13 @@ export default function SignUpForm(props: SignUpFormProps) {
     handleSubmit,
     formState: { errors },
   } = useForm<SignUpInput>({ defaultValues: props.input });
+  const [showPassword, setShowPassword] = React.useState(false);
   const onSubmit: SubmitHandler<SignUpInput> = (data) => {
     props.onSubmit(data);
   };
+  function handleClickShowPassword() {
+    setShowPassword(!showPassword);
+  }
   const handleEmailValidation = (email: string) => {
     const isValid = isValidEmail(email);
     if (!isValid) {
@@ -61,12 +73,26 @@ export default function SignUpForm(props: SignUpFormProps) {
           <TextField
             label="Password"
             fullWidth
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             {...register("password", {
               required: { value: true, message: RequiredErrorMessage },
               validate: handlePasswordValidation,
             })}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={(e) => e.preventDefault()}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
             error={Boolean(errors.password)}
             helperText={errors.password && errors.password.message}
           />

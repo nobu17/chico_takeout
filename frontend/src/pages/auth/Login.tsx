@@ -7,7 +7,6 @@ import LoadingSpinner from "../../components/parts/LoadingSpinner";
 import LoginForm, { LoginInput } from "../admin/parts/LoginForm";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../components/contexts/AuthContext";
-import { Button } from "@mui/material";
 
 export default function UserLogin() {
   const navigate = useNavigate();

@@ -135,6 +135,9 @@ func (o *OrderableInfoRdbmsQueryService) getStockItems() ([]order.OrderableItemI
 	infoList := []order.OrderableItemInfo{}
 
 	for _, item := range models {
+		if !item.Enabled {
+			continue
+		} 
 		info := order.OrderableItemInfo{}
 		info.Id = item.ID
 		info.ItemType = "stock"
@@ -150,6 +153,9 @@ func (o *OrderableInfoRdbmsQueryService) getFoodItems(hourTypeId string, foods [
 	infoList := []order.OrderableItemInfo{}
 
 	for _, item := range foods {
+		if !item.Enabled {
+			continue
+		}
 		belongs := false
 		for _, hour := range item.BusinessHours {
 			if hour.ID == hourTypeId {

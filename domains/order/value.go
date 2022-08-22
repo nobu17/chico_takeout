@@ -49,20 +49,26 @@ func validateQuantity(value int) error {
 
 type DateTime struct {
 	value string
+	time time.Time
 }
 
 func NewDateTime(value string) (*DateTime, error) {
-	_, err := common.ConvertStrToDateTime(value)
+	t, err := common.ConvertStrToDateTime(value)
 	if err != nil {
 		return nil, common.NewValidationError("date", fmt.Sprintf("can not convert dateTime:%s", value))
 	}
-	return &DateTime{value: value}, nil
+	return &DateTime{value: value, time: *t}, nil
 }
 
 func (d *DateTime)GetAsDate() string {
 	val, _ := common.ConvertDateTimeStrToDateStr(d.value)
 	return val
 }
+
+func (d *DateTime) GetDateTime() time.Time {
+	return d.time
+}
+
 // for testing
 var now = time.Now
 

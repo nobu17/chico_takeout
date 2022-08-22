@@ -17,12 +17,12 @@ type OrderInfoRepository interface {
 	FindAll() ([]OrderInfo, error)
 	Create(item *OrderInfo) (string, error)
 	UpdateOrderStatus(item *OrderInfo) error
-	Transact(fc func() error) (error)
+	Transact(fc func() error) error
 }
 
 const (
 	OrderInfoMaxMemoLength = 500
-	UserNameMaxLength = 10
+	UserNameMaxLength      = 10
 )
 
 type OrderInfo struct {
@@ -169,6 +169,19 @@ func (o *OrderInfo) FindStockItemQuantity(itemId string) int {
 	return 0
 }
 
+func (o *OrderInfo) GetTotalCost() int {
+	total := 0
+
+	for _, food := range o.foodItems {
+		total += food.GetTotalCost()
+	}
+	for _, stock := range o.stockItems {
+		total += stock.GetTotalCost()
+	}
+
+	return total
+}
+
 func (o *OrderInfo) SetCancel() {
 	o.canceled = true
 }
@@ -233,6 +246,10 @@ func (c *commonItemInfo) GetQuantity() int {
 
 func (c *commonItemInfo) GetPrice() int {
 	return c.price.value
+}
+
+func (c *commonItemInfo) GetTotalCost() int {
+	return c.price.value * c.quantity.value
 }
 
 func newCommonItemInfo(itemId, name string, price, quantity int) (*commonItemInfo, error) {

@@ -3,6 +3,7 @@ package order
 import (
 	"chico/takeout/common"
 	"chico/takeout/domains/item"
+	"time"
 )
 
 type StockItemRemainCheckAndConsumer struct {
@@ -100,4 +101,30 @@ func (f *FoodItemRemainChecker) CheckRemain(pickupDateTime string, foodOrders []
 		}
 	}
 	return nil
+}
+
+type OrderFilter struct {
+	orderRepo OrderInfoRepository
+}
+
+func NewOrderFilter(orderRepo OrderInfoRepository) *OrderFilter {
+	return &OrderFilter{
+		orderRepo: orderRepo,
+	}
+}
+
+func (o *OrderFilter) GetActiveOrderOfSpecifiedDay(startDateTime time.Time) ([]OrderInfo, error){
+	// fetch orders of specified date
+	orders, err := o.orderRepo.FindByPickupDate(common.ConvertTimeToDateStr(startDateTime))
+	if err != nil {
+		return nil, err
+	}
+	// check active and after time
+	target := []OrderInfo{}
+	for _, order := range orders {
+		if !order.canceled && order.pickupDateTime.GetDateTime().After(startDateTime) {
+			target = append(target, order)
+		}
+	}
+	return target, nil
 }

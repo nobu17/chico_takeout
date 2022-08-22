@@ -19,3 +19,7 @@ func (s *SmtpSendOrderMail) SendComplete(data order.OrderCompleteMailData) error
 func (s *SmtpSendOrderMail) SendCancel(data order.OrderCancelMailData) error {
 	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Bcc, data.SendTo)
 }
+
+func (s *SmtpSendOrderMail) SendDailySummary(data order.ReservationSummaryMailData) error {
+	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Bcc, data.SendTo)
+}

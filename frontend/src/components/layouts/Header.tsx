@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -7,22 +8,22 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const title = "CHICO SPICE";
+const title = "CHICO★SPICE";
 const pages: NavItem[] = [
-  { label: "Products", link: "" },
+  { label: "テイクアウト予約", link: "/reserve" },
   { label: "マイページ", link: "/my_page", isUser: true },
   { label: "管理ページ", link: "/admin", isAdmin: true },
   { label: "ログアウト", link: "/auth/sign_out", isUser: true },
+  { label: "店舗公式", link: "https://chico-sp-website.web.app" },
+  { label: "イートイン予約", link: "https://nobu17.pythonanywhere.com" },
+  { label: "お問い合わせ", link: "/inquiry" },
 ];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 type NavItem = {
   label: string;
@@ -35,7 +36,6 @@ const Header = () => {
   const navigate = useNavigate();
   const { state } = useAuth();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const getFilteredNaviItem = (): NavItem[] => {
     const menus = Array<NavItem>();
@@ -61,9 +61,6 @@ const Header = () => {
   const handleOpenNavMenu = (event: any) => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleOpenUserMenu = (event: any) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
@@ -71,11 +68,11 @@ const Header = () => {
 
   const handleLinkClick = (url: string) => {
     setAnchorElNav(null);
-    navigate(url);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
+    if (url.startsWith("http")) {
+      window.open(url);
+    } else {
+      navigate(url);
+    }
   };
 
   return (
@@ -86,8 +83,8 @@ const Header = () => {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="/"
+            component={Link}
+            to="/"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -144,8 +141,8 @@ const Header = () => {
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href=""
+            component={Link}
+            to="/"
             sx={{
               mr: 2,
               display: { xs: "flex", md: "none" },
@@ -169,36 +166,6 @@ const Header = () => {
                 {page.label}
               </Button>
             ))}
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
           </Box>
         </Toolbar>
       </Container>

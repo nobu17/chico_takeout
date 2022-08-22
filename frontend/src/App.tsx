@@ -27,6 +27,8 @@ import Logout from "./pages/auth/Logout";
 import MyHome from "./pages/mypage/Home";
 import ReserveHistory from "./pages/mypage/reserve/ReserveHistory";
 
+import Inquiry from "./pages/Inquiry";
+
 import ReserveHome from "./pages/reserve/Home";
 
 import AdminHome from "./pages/admin/Home";
@@ -44,8 +46,16 @@ import AllOrderTable from "./pages/admin/orders/AllOrderTable";
 
 import "./App.css";
 
-
-let theme = createTheme();
+let theme = createTheme({
+  palette: {
+    primary: {
+      light: "#5f5fc4",
+      main: "#283593",
+      dark: "#001064",
+      contrastText: "#ffffff",
+    },
+  },
+});
 theme = responsiveFontSizes(theme);
 
 function App() {
@@ -66,6 +76,7 @@ function App() {
                   <Route path="/my_page" element={<MyHome />} />
                   <Route path="/my_page/history" element={<ReserveHistory />} />
                   <Route path="/auth/sign_out" element={<Logout />} />
+                  <Route path="/reserve" element={<ReserveHome />} />
                 </Route>
                 <Route element={<AdminLoginLayout />}>
                   <Route path="/admin/sign_in" element={<AdminLogin />} />
@@ -93,9 +104,12 @@ function App() {
                     element={<SpecialHoliday />}
                   />
                   <Route path="/admin/orders/calendar" element={<Calendar />} />
-                  <Route path="/admin/orders/all_orders" element={<AllOrderTable />} />
+                  <Route
+                    path="/admin/orders/all_orders"
+                    element={<AllOrderTable />}
+                  />
                 </Route>
-                <Route path="/reserve" element={<ReserveHome />} />
+                <Route path="/inquiry" element={<Inquiry />} />
                 <Route path="*" element={<Home />} />
               </Routes>
             </Container>

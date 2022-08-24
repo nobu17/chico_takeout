@@ -1,6 +1,7 @@
 package order
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 	idomains "chico/takeout/domains/item"
 	domains "chico/takeout/domains/order"
 	sdomains "chico/takeout/domains/store"
+	"chico/takeout/usecase"
 )
 
 type OrderInfoModel struct {
@@ -92,6 +94,7 @@ func newCommonItemOrderCreateModel(itemId string, quantity int) *CommonItemOrder
 }
 
 type OrderInfoUseCase interface {
+	InitContext(ctx context.Context)
 	Find(id string) (*OrderInfoModel, error)
 	FindAll() ([]OrderInfoModel, error)
 	FindByUserId(userId string) ([]OrderInfoModel, error)
@@ -101,6 +104,7 @@ type OrderInfoUseCase interface {
 }
 
 type orderInfoUseCase struct {
+	*usecase.BaseUseCase
 	orderInfoRepository domains.OrderInfoRepository
 	stockRepo           idomains.StockItemRepository
 	busRepo             sdomains.BusinessHoursRepository
@@ -109,6 +113,7 @@ type orderInfoUseCase struct {
 	factory             domains.OrderInfoFactory
 	stockConsumer       domains.StockItemRemainCheckAndConsumer
 	foodRemainChecker   domains.FoodItemRemainChecker
+	orderDuplicateChecker domains.OrderDuplicateChecker
 	mailerService       SendOrderMailService
 }
 
@@ -122,6 +127,7 @@ func NewOrderInfoUseCase(
 	mailerService SendOrderMailService,
 ) OrderInfoUseCase {
 	return &orderInfoUseCase{
+		BaseUseCase: usecase.NewBaseUseCase(),
 		orderInfoRepository: orderInfoRepository,
 		stockRepo:           stockRepo,
 		busRepo:             busRepo,
@@ -130,6 +136,7 @@ func NewOrderInfoUseCase(
 		factory:             *domains.NewOrderInfoFactory(stockRepo, foodRepo),
 		stockConsumer:       *domains.NewStockItemRemainCheckAndConsumer(stockRepo),
 		foodRemainChecker:   *domains.NewFoodItemRemainChecker(orderInfoRepository, foodRepo),
+		orderDuplicateChecker: *domains.NewOrderDuplicateChecker(orderInfoRepository),
 		mailerService:       mailerService,
 	}
 }
@@ -196,6 +203,18 @@ func (o *orderInfoUseCase) FindActiveByUserId(userId string) ([]OrderInfoModel, 
 func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 	// todo: currently food item schedule id and pickup date time relation is not checking
 
+	// if not admin, can not reserve 2 times.
+	if !o.IsAdmin(){
+		fmt.Println("not admin. checking order duplicated...")
+		duplicated, err := o.orderDuplicateChecker.ActiveOrderExists(model.UserId)
+		if err != nil {
+			return "", err
+		}
+		if duplicated {
+			return "", common.NewValidationError("UserId", "active order is already exists")
+		}
+	}
+
 	stockOrders := []domains.ItemOrder{}
 	for _, item := range model.StockItems {
 		stockOrders = append(stockOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
@@ -205,6 +224,7 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 		foodOrders = append(foodOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
 	}
 	// factory check each item id existence also (will return error)
+	// factory check pickup date time is past or not
 	order, err := o.factory.Create(model.UserId, model.UserName, model.UserEmail, model.UserTelNo, model.Memo, model.PickupDateTime, stockOrders, foodOrders)
 	if err != nil {
 		return "", err

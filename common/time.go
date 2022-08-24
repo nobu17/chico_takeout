@@ -7,19 +7,30 @@ import (
 
 var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
 
+// for mock
+var now = time.Now
+
 const dateLayout = "2006/01/02"
 const dateTimeLayout = "2006/01/02 15:04"
 const timeLayout = "15:04"
 
+// for UT
+func MockNow(mock func() time.Time) {
+	now = mock
+}
+func ResetNow() {
+	now = time.Now
+}
+
 func GetNowDate() *time.Time {
-	now := time.Now()
+	now := now().In(jst)
 	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
 	return &t
 }
 
 func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	timeLayout := "2006/01/02T15:04"
-	currentTime := time.Now()
+	currentTime := now().In(jst)
 	currentDate := currentTime.Format(dateLayout)
 
 	startDateStr := currentDate + "T" + timeStr
@@ -102,6 +113,12 @@ func IsInRangeTime(startTime, endTime, targetDateTime time.Time) bool {
 	return isAfterStart && isBeforeEnd
 }
 
+func IsAfterFromNow(target time.Time, offsetHour int) bool {
+	now := now().In(jst)
+	actualTime := now.Add(time.Duration(offsetHour) * time.Hour)
+	return target.After(actualTime)
+}
+
 func ListUpDates(startDate, endDate time.Time) ([]time.Time, error) {
 	actStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
 	actEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 1, 0, 0, 0, time.UTC) // add 1minutes to compare
@@ -122,7 +139,7 @@ func ListUpDates(startDate, endDate time.Time) ([]time.Time, error) {
 }
 
 func DateEqual(date1, date2 time.Time) bool {
-    y1, m1, d1 := date1.Date()
-    y2, m2, d2 := date2.Date()
-    return y1 == y2 && m1 == m2 && d1 == d2
+	y1, m1, d1 := date1.Date()
+	y2, m2, d2 := date2.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
 }

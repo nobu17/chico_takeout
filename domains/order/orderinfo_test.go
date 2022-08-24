@@ -467,7 +467,7 @@ func TestOrderInfoSetCancel(t *testing.T) {
 	inputs := []orderInfoInput{
 		{name: "normal check",
 			args: orderInfoArgs{
-				userId: "abc", memo: "12", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				userId: "abc", userName: "name", memo: "12", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -480,7 +480,7 @@ func TestOrderInfoSetCancel(t *testing.T) {
 				},
 			},
 			want: orderInfoArgs{
-				userId: "abc", memo: "12", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789", canceled: true,
+				userId: "abc", userName: "name", memo: "12", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789", canceled: true,
 				stockItems: []commonItemInfoArgs{
 					{
 						name: "item1", itemId: "12", price: 100, quantity: 10,
@@ -519,7 +519,9 @@ func TestOrderInfoSetCancel(t *testing.T) {
 			sOrders = append(sOrders, *order)
 		}
 		got, err := NewOrderInfo(tt.args.userId, tt.args.userName, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
-		got.SetCancel()
+		if err == nil {
+			got.SetCancel()
+		}	
 		assertOderInfoRoot(t, tt, got, err)
 	}
 }

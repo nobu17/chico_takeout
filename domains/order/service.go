@@ -113,7 +113,7 @@ func NewOrderFilter(orderRepo OrderInfoRepository) *OrderFilter {
 	}
 }
 
-func (o *OrderFilter) GetActiveOrderOfSpecifiedDay(startDateTime time.Time) ([]OrderInfo, error){
+func (o *OrderFilter) GetActiveOrderOfSpecifiedDay(startDateTime time.Time) ([]OrderInfo, error) {
 	// fetch orders of specified date
 	orders, err := o.orderRepo.FindByPickupDate(common.ConvertTimeToDateStr(startDateTime))
 	if err != nil {
@@ -127,4 +127,25 @@ func (o *OrderFilter) GetActiveOrderOfSpecifiedDay(startDateTime time.Time) ([]O
 		}
 	}
 	return target, nil
+}
+
+type OrderDuplicateChecker struct {
+	orderRepo OrderInfoRepository
+}
+
+func NewOrderDuplicateChecker(orderRepo OrderInfoRepository) *OrderDuplicateChecker {
+	return &OrderDuplicateChecker{
+		orderRepo: orderRepo,
+	}
+}
+
+func (o *OrderDuplicateChecker) ActiveOrderExists(userId string) (bool, error) {
+	order, err := o.orderRepo.FindActiveByUserId(userId)
+	if err != nil {
+		return false, err
+	}
+	if len(order) > 0 {
+		return true, nil
+	}
+	return false, nil
 }

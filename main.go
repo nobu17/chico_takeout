@@ -190,10 +190,12 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	}
 	order := r.Group("/order")
 	{
-		order.Use(middleware.CheckAuthInfo(auth))
 		mailer := smtp.NewSmtpSendOrderMail()
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
+
+		order.Use(middleware.CheckAuthInfo(auth))
+		order.Use(middleware.SetContext(handler.InitContext))
 		order.GET("/:id", handler.Get)
 		order.GET("/user/:userId", handler.GetByUser)
 		order.GET("/user/active/:userId", handler.GetActiveByUser)

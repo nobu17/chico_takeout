@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	idomains "chico/takeout/domains/item"
 	domains "chico/takeout/domains/order"
@@ -521,7 +523,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 				{"itemId": "123", "quantity": 1.0},
 			},
 		}},
-		{name: "lack of fooditems", args: map[string]interface{}{
+		{name: "lack of foodItems", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -529,7 +531,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 				{"itemId": stockIds[0], "quantity": 1.0},
 			},
 		}},
-		{name: "lack of stockitems", args: map[string]interface{}{
+		{name: "lack of stockItems", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -564,7 +566,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 			},
 			"stockItems": []map[string]interface{}{},
 		}},
-		{name: "ouf of bussiness hour", args: map[string]interface{}{
+		{name: "ouf of business hour", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 05:00",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -573,7 +575,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 			},
 			"stockItems": []map[string]interface{}{},
 		}},
-		{name: "ouf of bussiness day", args: map[string]interface{}{
+		{name: "ouf of business day", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/09 12:00",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -591,7 +593,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 			},
 			"stockItems": []map[string]interface{}{},
 		}},
-		{name: "pickupdate is out of sp hour", args: map[string]interface{}{
+		{name: "pickupDate is out of sp hour", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2055/05/08 14:10",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -600,7 +602,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 			},
 			"stockItems": []map[string]interface{}{},
 		}},
-		{name: "pickupdate is in special holiday", args: map[string]interface{}{
+		{name: "pickupDate is in special holiday", args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2056/08/01 14:10",
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
@@ -641,6 +643,81 @@ func TestOrderInfoHandler_POST_BadRequest(t *testing.T) {
 		fmt.Println("body", w.Body)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	}
+}
+
+func TestOrderInfoHandler_POST_BadRequest_PickupDateIsPast(t *testing.T) {
+	r := SetupOrderInfoRouter()
+
+	stockIds := []string{}
+	for id := range stockMemoryMaps {
+		stockIds = append(stockIds, id)
+	}
+	foodIds := []string{}
+	for id := range foodMemoryMaps {
+		foodIds = append(foodIds, id)
+	}
+
+	// mock now
+	domains.MockNow(func() time.Time {
+		return time.Date(2022, 03, 04, 12, 10, 0, 0, time.Local)
+	})
+
+	var items = []orderInfoErrorData{
+		{name: "pickupDate is over from now(year)", args: map[string]interface{}{
+			"userId": "test", "memo": "めも", "pickupDateTime": "2021/12/10 09:00",
+			"userName":  "ユーザー123",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds[0], "quantity": 1.0},
+			},
+			"foodItems": []map[string]interface{}{},
+		}},
+		{name: "pickupDate is over from now(day)", args: map[string]interface{}{
+			"userId": "test", "memo": "めも", "pickupDateTime": "2022/03/03 09:00",
+			"userName":  "ユーザー123",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds[0], "quantity": 1.0},
+			},
+			"foodItems": []map[string]interface{}{},
+		}},
+		{name: "pickupDate is over from now(hour)", args: map[string]interface{}{
+			"userId": "test", "memo": "めも", "pickupDateTime": "2022/03/04 12:00",
+			"userName":  "ユーザー123",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds[0], "quantity": 1.0},
+			},
+			"foodItems": []map[string]interface{}{},
+		}},
+		{name: "pickupDate is over from now(hour + 3 hour offset)", args: map[string]interface{}{
+			"userId": "test", "memo": "めも", "pickupDateTime": "2022/03/04 15:09",
+			"userName":  "ユーザー123",
+			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds[0], "quantity": 1.0},
+			},
+			"foodItems": []map[string]interface{}{},
+		}},
+	}
+	for _, tt := range items {
+		fmt.Println("case:", tt.name)
+		jBytes, err := json.Marshal(tt.args)
+		assert.NoError(t, err, "init json is failed")
+
+		req, _ := http.NewRequest("POST", orderUrl+"/", bytes.NewBuffer(jBytes))
+		req.Header.Add("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		fmt.Println("body", w.Body)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		// check validation message
+		assert.Equal(t, true, strings.Contains(w.Body.String(), "Name:PickupDateTime"))
+	}
+
+	// back mock
+	domains.ResetNow()
 }
 
 func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {

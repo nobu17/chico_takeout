@@ -49,7 +49,7 @@ func validateQuantity(value int) error {
 
 type DateTime struct {
 	value string
-	time time.Time
+	time  time.Time
 }
 
 func NewDateTime(value string) (*DateTime, error) {
@@ -60,7 +60,7 @@ func NewDateTime(value string) (*DateTime, error) {
 	return &DateTime{value: value, time: *t}, nil
 }
 
-func (d *DateTime)GetAsDate() string {
+func (d *DateTime) GetAsDate() string {
 	val, _ := common.ConvertDateTimeStrToDateStr(d.value)
 	return val
 }
@@ -71,6 +71,13 @@ func (d *DateTime) GetDateTime() time.Time {
 
 // for testing
 var now = time.Now
+
+func MockNow(mock func() time.Time) {
+	now = mock
+}
+func ResetNow() {
+	now = time.Now
+}
 
 type OrderDateTime struct {
 	DateTime
@@ -89,10 +96,6 @@ type PickupDateTime struct {
 	DateTime
 }
 
-const (
-	OrderableOffsetMinutes = 180
-)
-
 func NewPickupDateTime(value string) (*PickupDateTime, error) {
 	item, err := NewDateTime(value)
 	if err != nil {
@@ -101,7 +104,7 @@ func NewPickupDateTime(value string) (*PickupDateTime, error) {
 	date, _ := common.ConvertStrToDateTime(value)
 	// pick up time should be future from now + offset
 	now := now()
-	if !common.StartIsBeforeEnd(now, *date, OrderableOffsetMinutes) {
+	if !common.StartIsBeforeEnd(now, *date, common.OffsetMinutesOrderableBefore) {
 		return nil, common.NewValidationError("PickupDateTime", fmt.Sprintf("not allowed set(%s) before now(%s).", value, now))
 	}
 	return &PickupDateTime{DateTime: *item}, nil
@@ -110,6 +113,7 @@ func NewPickupDateTime(value string) (*PickupDateTime, error) {
 type Memo struct {
 	shared.StringValue
 }
+
 func NewMemo(value string, maxLength int) (*Memo, error) {
 	validator := validator.NewAllowEmptyStingLength("Memo", maxLength)
 	if err := validator.Validate(value); err != nil {
@@ -120,7 +124,7 @@ func NewMemo(value string, maxLength int) (*Memo, error) {
 }
 
 type Email struct {
-	shared.StringValue	
+	shared.StringValue
 }
 
 func NewEmail(value string) (*Email, error) {
@@ -133,7 +137,7 @@ func NewEmail(value string) (*Email, error) {
 }
 
 type TelNo struct {
-	shared.StringValue	
+	shared.StringValue
 }
 
 func NewTelNo(value string) (*TelNo, error) {
@@ -146,7 +150,7 @@ func NewTelNo(value string) (*TelNo, error) {
 }
 
 type UserName struct {
-	shared.StringValue	
+	shared.StringValue
 }
 
 func NewUserName(value string, maxLength int) (*UserName, error) {
@@ -157,4 +161,3 @@ func NewUserName(value string, maxLength int) (*UserName, error) {
 
 	return &UserName{StringValue: shared.NewStringValue(value)}, nil
 }
-

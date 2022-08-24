@@ -5,12 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-)
+	"chico/takeout/common"
 
-const (
-	authTokenKey   = "authToken"
-	authIsAdminKey = "isAdmin"
+	"github.com/gin-gonic/gin"
 )
 
 func SetAuthInfo() gin.HandlerFunc {
@@ -51,23 +48,21 @@ func CheckAdmin() gin.HandlerFunc {
 }
 
 func setAuthToken(c *gin.Context, token string) {
-	c.Set(authTokenKey, token)
+	ctx := common.SetAuthToken(token, c.Request.Context())
+	c.Request = c.Request.WithContext(ctx)
 }
 
 func getAuthToken(c *gin.Context) string {
-	return c.GetString(authTokenKey)
+	return common.GetAuthToken(c.Request.Context())
 }
 
 func setIsAdmin(c *gin.Context, isAdmin bool) {
-	c.Set(authIsAdminKey, isAdmin)
+	ctx := common.SetIsAdmin(isAdmin, c.Request.Context())
+	c.Request = c.Request.WithContext(ctx)
 }
 
 func getIsAdmin(c *gin.Context) bool {
-	result, ok := c.Get(authIsAdminKey)
-	if !ok {
-		return false
-	}
-	return result.(bool)
+	return common.GetIsAdmin(c.Request.Context())
 }
 
 func handleUnAuth(c *gin.Context) {

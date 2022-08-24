@@ -3,6 +3,7 @@ package order
 import (
 	"chico/takeout/handlers"
 	usecases "chico/takeout/usecase/order"
+	"context"
 
 	"github.com/gin-gonic/gin"
 )
@@ -124,13 +125,17 @@ func NewOrderInfoHandler(usecase usecases.OrderInfoUseCase) *orderInfoHandler {
 	}
 }
 
+func (s *orderInfoHandler)InitContext(ctx context.Context) {
+	s.usecase.InitContext(ctx)
+}
+
 func (s *orderInfoHandler) GetAll(c *gin.Context) {
 	models, err := s.usecase.FindAll()
 	if err != nil {
 		s.HandleError(c, err)
 		return
 	}
-	
+
 	orders := []OrderInfoData{}
 	for _, model := range models {
 		order := newOrderInfoData(&model)

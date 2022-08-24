@@ -13,6 +13,7 @@
     "rdbms",
     "sdomains",
     "stretchr",
-    "Unscoped"
+    "Unscoped",
+    "usecases"
   ]
 }

@@ -130,7 +130,7 @@ export default function ReserveForm() {
 
   return (
     <>
-      <Container maxWidth="md" sx={{ pt: 2 }}>
+      <Container maxWidth="md" sx={{ pt: 2, pb: 4 }}>
         <Box sx={{ width: "100%" }}>
           <Stepper activeStep={activeStep} orientation="vertical">
             {steps.map((step, index) => (

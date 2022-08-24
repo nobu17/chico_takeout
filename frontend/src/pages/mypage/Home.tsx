@@ -4,8 +4,8 @@ import Grid from "@mui/material/Grid";
 
 import PageTitle from "../../components/parts/PageTitle";
 import { useMyOrder } from "../../hooks/UseMyOrder";
-import ReserveInfoCard from "./parts/ReserveInfoCard";
 import PageMenu from "../../components/parts/PageMenu";
+import ReserveInfoCardList from "./parts/ReserveInfoCardList";
 
 const myMenu = {
   title: "マイメニュー",
@@ -17,7 +17,7 @@ const myMenu = {
 };
 
 export default function MyHome() {
-  const { activeOrder, loadActive, cancelActive, loading, error } =
+  const { activeOrders, loadActive, cancelActive, loading, error } =
     useMyOrder();
 
   useEffect(() => {
@@ -27,9 +27,9 @@ export default function MyHome() {
     init();
   }, []);
 
-  const handleCancel = async () => {
+  const handleCancel = async (id: string) => {
     if (window.confirm("キャンセルしてもよろしいですか？")) {
-      await cancelActive();
+      await cancelActive(id);
     }
   };
 
@@ -45,10 +45,10 @@ export default function MyHome() {
               予約情報の取得でエラーが発生しました。{error?.message}
             </Alert>
           ) : (
-            <ReserveInfoCard
-              order={activeOrder}
+            <ReserveInfoCardList
+              orders={activeOrders}
               cancelRequest={handleCancel}
-            ></ReserveInfoCard>
+            ></ReserveInfoCardList>
           )}
         </Grid>
       </Grid>

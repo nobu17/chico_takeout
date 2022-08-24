@@ -16,7 +16,7 @@ import { Button } from "@mui/material";
 
 type ReserveCardProps = {
   order?: UserOrderInfo;
-  cancelRequest?: () => void;
+  cancelRequest?: (id: string) => void;
 };
 
 const getTotal = (order: UserOrderInfo): number => {
@@ -39,14 +39,13 @@ export default function ReserveInfoCard(props: ReserveCardProps) {
   }
 
   const handleCancel = () => {
-    if (props.cancelRequest) {
-      props.cancelRequest();
+    if (props.cancelRequest && props.order) {
+      props.cancelRequest(props.order.id);
     }
   };
 
   return (
     <>
-      <Typography variant="h5">現在の予約</Typography>
       <Card>
         <CardContent>
           <Typography variant="h6" component="div">

@@ -8,7 +8,7 @@ export function useMyOrder() {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const { state } = useAuth();
-  const [activeOrder, setActiveOrder] = useState<UserOrderInfo | undefined>(
+  const [activeOrders, setActiveOrders] = useState<UserOrderInfo[] | undefined>(
     undefined
   );
   const [orderHistory, setOrderHistory] = useState<UserOrderInfo[]>([]);
@@ -24,9 +24,9 @@ export function useMyOrder() {
       const result = await api.getActiveByUser(state.uid);
       const res = result.data;
       if (res && res.length > 0) {
-        setActiveOrder(res[0]);
+        setActiveOrders(res);
       } else {
-        setActiveOrder(undefined);
+        setActiveOrders(undefined);
       }
     } catch (e: any) {
       setError(e);
@@ -35,19 +35,20 @@ export function useMyOrder() {
     }
   };
 
-  const cancelActive = async () => {
+  const cancelActive = async (id: string) => {
     if (!state.isAuthorized) {
       setError(new Error("ユーザー認証がされていません。"));
       return;
     }
-    if (!activeOrder || !activeOrder.id) {
+    const target = activeOrders?.find(x => x.id === id)
+    if (!target || !target.id) {
       setError(new Error("有効なオーダーがありません。"));
       return;
     }
     try {
       setError(undefined);
       setLoading(true);
-      await api.cancel(activeOrder.id);
+      await api.cancel(target.id);
     } catch (e: any) {
       setError(e);
     } finally {
@@ -79,7 +80,7 @@ export function useMyOrder() {
   };
 
   return {
-    activeOrder,
+    activeOrders,
     orderHistory,
     loadActive,
     loadHistory,

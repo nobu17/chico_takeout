@@ -22,6 +22,7 @@ import { useUserInfo, UserInfo } from "../../../hooks/UseUserInfo";
 import { usePickupDate, PickupDate } from "../../../hooks/UsePickupDate";
 import { useOrderableInfo } from "../../../hooks/UseOrderableInfo";
 import { useOrder } from "../../../hooks/UseOrder";
+import { useTimer } from "../../../hooks/UseTimer";
 import LoadingSpinner from "../../../components/parts/LoadingSpinner";
 
 const steps = ["日時選択", "商品選択", "お客様情報入力", "確認"];
@@ -36,6 +37,11 @@ export default function ReserveForm() {
   const { loading, perDayOrderableInfo, currentOrderableInfo, switchCurrent } =
     useOrderableInfo();
   const { loading: orderLoading, submitOrder, checkOrderExists } = useOrder();
+
+  // if 30 minutes over, reload
+  useTimer(30, ()=>{
+    window.location.reload()
+  });
 
   useEffect(() => {
     const init = async () => {

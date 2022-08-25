@@ -2,6 +2,7 @@ import * as React from "react";
 import Typography from "@mui/material/Typography";
 import { UserOrderInfo } from "../../../libs/apis/order";
 import ReserveInfoCard from "./ReserveInfoCard";
+import { OffsetMinutesUserCanCancel } from "../../../libs/Constant";
 
 type ReserveInfoCardListProps = {
   orders?: UserOrderInfo[];
@@ -26,9 +27,11 @@ export default function ReserveInfoCardList(props: ReserveInfoCardListProps) {
   return (
     <>
       <Typography variant="h5">現在の予約</Typography>
-      {props.orders?.map((order) => {
+      <Typography variant="subtitle1" color="error">※キャンセルは{OffsetMinutesUserCanCancel / 60}時間前まで可能です。</Typography>  
+      {props.orders?.map((order, index) => {
         return (
           <ReserveInfoCard
+            key={index}
             order={order}
             cancelRequest={handleCancel}
           ></ReserveInfoCard>

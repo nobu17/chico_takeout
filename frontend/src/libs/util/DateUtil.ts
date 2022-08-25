@@ -98,6 +98,15 @@ export const convertDateTimeStrToIncludeDayOfWeeKStr = (
   return toDateTimeStrWithDayOfWeek(date);
 };
 
+export const isBeforeFromNow = (
+  datetimeStr: string,
+  offsetMinutes: number
+): boolean => {
+  const datetime = addMinutes(getDateFromTimeStr(datetimeStr), offsetMinutes);
+  const now = new Date(Date.now());
+  return datetime < now;
+};
+
 const toHourMinutesStr = (time: Date): string => {
   const h = ("00" + time.getHours()).slice(-2);
   const m = ("00" + time.getMinutes()).slice(-2);

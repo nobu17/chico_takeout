@@ -202,6 +202,7 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
 		order.GET("/admin_all/", middleware.CheckAdmin(), handler.GetAll)
+		order.GET("/active/:date", middleware.CheckAdmin(), handler.GetActiveByDate)
 	}
 	orderable := r.Group("/orderable")
 	{

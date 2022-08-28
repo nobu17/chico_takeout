@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"chico/takeout/common"
 	idomains "chico/takeout/domains/item"
 	domains "chico/takeout/domains/order"
 	sdomains "chico/takeout/domains/store"
@@ -85,6 +86,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 		order.GET("/user/:userId", handler.GetByUser)
 		order.GET("/user/active/:userId", handler.GetActiveByUser)
 		order.GET("/admin_all/", handler.GetAll)
+		order.GET("/active/*date", handler.GetActiveByDate)
 	}
 	return r
 }
@@ -166,6 +168,85 @@ func TestOrderInfoHandler_GET_ALL(t *testing.T) {
 		},
 	}
 	req, _ := http.NewRequest("GET", orderUrl+"/admin_all/", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	fmt.Println("body", w.Body)
+	var response []map[string]interface{}
+	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+
+	// fmt.Println("response", response)
+	for index, _ := range response {
+		AssertMaps(t, response[index], wants[index])
+	}
+}
+
+func TestOrderInfoHandler_GetByDateNow(t *testing.T) {
+	r := SetupOrderInfoRouter()
+
+	// mock now
+	common.MockNow(func() time.Time {
+		return time.Date(2050, 12, 10, 0, 0, 0, 0, time.Local)
+	})
+
+	stockIds := map[string]string{}
+	for id, value := range stockMemoryMaps {
+		stockIds[value.GetName()] = id
+	}
+	foodIds := map[string]string{}
+	for id, value := range foodMemoryMaps {
+		foodIds[value.GetName()] = id
+	}
+	wants := []map[string]interface{}{
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+			"stockItems": []map[string]interface{}{},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+			},
+		},
+	}
+	req, _ := http.NewRequest("GET", orderUrl+"/active/", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	fmt.Println("body", w.Body)
+	var response []map[string]interface{}
+	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+
+	// fmt.Println("response", response)
+	for index, _ := range response {
+		AssertMaps(t, response[index], wants[index])
+	}
+
+	common.ResetNow()
+}
+
+func TestOrderInfoHandler_GetByDate(t *testing.T) {
+	r := SetupOrderInfoRouter()
+
+	stockIds := map[string]string{}
+	for id, value := range stockMemoryMaps {
+		stockIds[value.GetName()] = id
+	}
+	foodIds := map[string]string{}
+	for id, value := range foodMemoryMaps {
+		foodIds[value.GetName()] = id
+	}
+	wants := []map[string]interface{}{
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+			"stockItems": []map[string]interface{}{},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+			},
+		},
+	}
+	req, _ := http.NewRequest("GET", orderUrl+"/active/2050-12-10", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -728,7 +809,7 @@ func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {
 		foodIds = append(foodIds, id)
 	}
 
-	parepare := orderInfoErrorData{
+	prepare := orderInfoErrorData{
 		name: "consuming all food stock",
 		args: map[string]interface{}{
 			"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
@@ -755,8 +836,8 @@ func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {
 	}
 
 	// at first consuming all stocks
-	fmt.Println("case:", parepare.name)
-	jBytes, err := json.Marshal(parepare.args)
+	fmt.Println("case:", prepare.name)
+	jBytes, err := json.Marshal(prepare.args)
 	assert.NoError(t, err, "init json is failed")
 
 	req, _ := http.NewRequest("POST", orderUrl+"/", bytes.NewBuffer(jBytes))

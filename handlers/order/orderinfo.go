@@ -4,6 +4,7 @@ import (
 	"chico/takeout/handlers"
 	usecases "chico/takeout/usecase/order"
 	"context"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -172,6 +173,23 @@ func (s *orderInfoHandler) GetByUser(c *gin.Context) {
 func (s *orderInfoHandler) GetActiveByUser(c *gin.Context) {
 	id := c.Param("userId")
 	models, err := s.usecase.FindActiveByUserId(id)
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	orders := []OrderInfoData{}
+	for _, model := range models {
+		order := newOrderInfoData(&model)
+		orders = append(orders, *order)
+	}
+	s.HandleOK(c, orders)
+}
+
+func (s *orderInfoHandler) GetActiveByDate(c *gin.Context) {
+	date := c.Param("date")
+	// remove slash (optional url is added)
+	date = strings.Replace(date, "/", "", -1)
+	models, err := s.usecase.FindActiveByPickupDate(date)
 	if err != nil {
 		s.HandleError(c, err)
 		return

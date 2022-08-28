@@ -10,6 +10,7 @@ var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
 // for mock
 var now = time.Now
 
+const dateHyphenLayout = "2006-01-02"
 const dateLayout = "2006/01/02"
 const dateTimeLayout = "2006/01/02 15:04"
 const timeLayout = "15:04"
@@ -48,6 +49,15 @@ func ConvertTimeToTimeStr(target time.Time) string {
 
 func ConvertStrToDate(dateStr string) (*time.Time, error) {
 	actualTime, err := time.ParseInLocation(dateLayout, dateStr, jst)
+	if err != nil {
+		return nil, err
+	}
+
+	return &actualTime, nil
+}
+
+func ConvertHyphenStrToDate(dateStr string) (*time.Time, error) {
+	actualTime, err := time.ParseInLocation(dateHyphenLayout, dateStr, jst)
 	if err != nil {
 		return nil, err
 	}

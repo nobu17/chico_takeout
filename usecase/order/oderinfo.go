@@ -99,22 +99,23 @@ type OrderInfoUseCase interface {
 	FindAll() ([]OrderInfoModel, error)
 	FindByUserId(userId string) ([]OrderInfoModel, error)
 	FindActiveByUserId(userId string) ([]OrderInfoModel, error)
+	FindActiveByPickupDate(dateStr string) ([]OrderInfoModel, error)
 	Create(model *OrderInfoCreateModel) (string, error)
 	Cancel(id string) error
 }
 
 type orderInfoUseCase struct {
 	*usecase.BaseUseCase
-	orderInfoRepository domains.OrderInfoRepository
-	stockRepo           idomains.StockItemRepository
-	busRepo             sdomains.BusinessHoursRepository
-	spBusRepo           sdomains.SpecialBusinessHourRepository
-	spHolidayRepo       sdomains.SpecialHolidayRepository
-	factory             domains.OrderInfoFactory
-	stockConsumer       domains.StockItemRemainCheckAndConsumer
-	foodRemainChecker   domains.FoodItemRemainChecker
+	orderInfoRepository   domains.OrderInfoRepository
+	stockRepo             idomains.StockItemRepository
+	busRepo               sdomains.BusinessHoursRepository
+	spBusRepo             sdomains.SpecialBusinessHourRepository
+	spHolidayRepo         sdomains.SpecialHolidayRepository
+	factory               domains.OrderInfoFactory
+	stockConsumer         domains.StockItemRemainCheckAndConsumer
+	foodRemainChecker     domains.FoodItemRemainChecker
 	orderDuplicateChecker domains.OrderDuplicateChecker
-	mailerService       SendOrderMailService
+	mailerService         SendOrderMailService
 }
 
 func NewOrderInfoUseCase(
@@ -127,17 +128,17 @@ func NewOrderInfoUseCase(
 	mailerService SendOrderMailService,
 ) OrderInfoUseCase {
 	return &orderInfoUseCase{
-		BaseUseCase: usecase.NewBaseUseCase(),
-		orderInfoRepository: orderInfoRepository,
-		stockRepo:           stockRepo,
-		busRepo:             busRepo,
-		spBusRepo:           spBusRepo,
-		spHolidayRepo:       spHolidayRepo,
-		factory:             *domains.NewOrderInfoFactory(stockRepo, foodRepo),
-		stockConsumer:       *domains.NewStockItemRemainCheckAndConsumer(stockRepo),
-		foodRemainChecker:   *domains.NewFoodItemRemainChecker(orderInfoRepository, foodRepo),
+		BaseUseCase:           usecase.NewBaseUseCase(),
+		orderInfoRepository:   orderInfoRepository,
+		stockRepo:             stockRepo,
+		busRepo:               busRepo,
+		spBusRepo:             spBusRepo,
+		spHolidayRepo:         spHolidayRepo,
+		factory:               *domains.NewOrderInfoFactory(stockRepo, foodRepo),
+		stockConsumer:         *domains.NewStockItemRemainCheckAndConsumer(stockRepo),
+		foodRemainChecker:     *domains.NewFoodItemRemainChecker(orderInfoRepository, foodRepo),
 		orderDuplicateChecker: *domains.NewOrderDuplicateChecker(orderInfoRepository),
-		mailerService:       mailerService,
+		mailerService:         mailerService,
 	}
 }
 
@@ -153,7 +154,6 @@ func (o *orderInfoUseCase) Find(id string) (*OrderInfoModel, error) {
 
 	return newOrderInfoModel(item), nil
 }
-
 
 func (o *orderInfoUseCase) FindAll() ([]OrderInfoModel, error) {
 	items, err := o.orderInfoRepository.FindAll()
@@ -200,11 +200,36 @@ func (o *orderInfoUseCase) FindActiveByUserId(userId string) ([]OrderInfoModel, 
 	return orders, nil
 }
 
+func (o *orderInfoUseCase) FindActiveByPickupDate(dateStr string) ([]OrderInfoModel, error) {
+	// empty treats now
+	targetDate := common.GetNowDate()
+	if dateStr != "" {
+		converted, err := common.ConvertHyphenStrToDate(dateStr)
+		if err != nil {
+			return nil, common.NewValidationError("date", fmt.Sprintf("not allowed date format:%s", dateStr))
+		}
+		targetDate = converted
+	}
+
+	dateOrders, err := o.orderInfoRepository.FindByPickupDate(common.ConvertTimeToDateStr(*targetDate))
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []OrderInfoModel{}
+	for _, userOrder := range dateOrders {
+		order := newOrderInfoModel(&userOrder)
+		orders = append(orders, *order)
+	}
+
+	return orders, nil
+}
+
 func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 	// todo: currently food item schedule id and pickup date time relation is not checking
 
 	// if not admin, can not reserve 2 times.
-	if !o.IsAdmin(){
+	if !o.IsAdmin() {
 		fmt.Println("not admin. checking order duplicated...")
 		duplicated, err := o.orderDuplicateChecker.ActiveOrderExists(model.UserId)
 		if err != nil {
@@ -322,7 +347,7 @@ func (o *orderInfoUseCase) Cancel(id string) error {
 	return nil
 }
 
-func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) (error) {
+func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) error {
 	mailData, err := NewOrderCompleteMailData(order, os.Getenv("MAIL_FROM"))
 	if err != nil {
 		return err
@@ -330,7 +355,7 @@ func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) (error) {
 	return o.mailerService.SendComplete(*mailData)
 }
 
-func (o *orderInfoUseCase) sendCancelMail(order *domains.OrderInfo) (error) {
+func (o *orderInfoUseCase) sendCancelMail(order *domains.OrderInfo) error {
 	mailData, err := NewOrderCancelMailData(order, os.Getenv("MAIL_FROM"))
 	if err != nil {
 		return err

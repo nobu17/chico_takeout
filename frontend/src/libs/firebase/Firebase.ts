@@ -10,6 +10,7 @@ import {
   getRedirectResult,
   signInWithRedirect,
   GoogleAuthProvider,
+  TwitterAuthProvider,
 } from "firebase/auth";
 import {
   getStorage,
@@ -40,6 +41,7 @@ export const auth = auth_obj;
 export const sendMail = sendEmailVerification;
 export const sendResetMail = sendPasswordResetEmail;
 export const googleAuthProvider = GoogleAuthProvider;
+export const twitterAuthProvider = TwitterAuthProvider;
 export const getRedirect = getRedirectResult
 export const signInRedirect = signInWithRedirect
 export const getAdditionalUser = getAdditionalUserInfo;

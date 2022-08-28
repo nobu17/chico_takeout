@@ -6,6 +6,7 @@ import {
   sendResetMail,
   signUp,
   googleAuthProvider,
+  twitterAuthProvider,
   signInRedirect,
   getRedirect,
 } from "./Firebase";
@@ -24,7 +25,7 @@ export class AuthService {
         true,
         isAdmin,
         result.user.uid,
-        result.user.email ?? "",
+        this.getEmail(result.user),
         ""
       );
     } catch (e: unknown) {
@@ -47,7 +48,7 @@ export class AuthService {
       return new SignUpResult(
         true,
         result.user.uid,
-        result.user.email ?? "",
+        this.getEmail(result.user),
         mailSent,
         ""
       );
@@ -75,14 +76,28 @@ export class AuthService {
 
   async signInWithGoogle() {
     const provider = new googleAuthProvider();
+    // provider.addScope('user:email');
     await signInRedirect(auth, provider);
     // provider.addScope("email");
+  }
+
+  async signInWithTwitter() {
+    const provider = new twitterAuthProvider();
+    await signInRedirect(auth, provider);
   }
 
   async getRedirectResult(callback: (data: AuthResult) => void) {
     const result = await getRedirect(auth);
     if (result !== null) {
-      callback(new AuthResult(true, false, result.user.uid, result.user.email ?? "", ""))
+      callback(
+        new AuthResult(
+          true,
+          false,
+          result.user.uid,
+          this.getEmail(result.user),
+          ""
+        )
+      );
       return;
     }
     callback(new AuthResult(false, false, "", "", ""));
@@ -93,18 +108,31 @@ export class AuthService {
       if (!user) {
         callback(new AuthResult(false, false, "", "", ""));
       } else {
-        const isAdmin = await this.checkAdmin(user);
-        if (!isAdmin) {
-          const checkRes = await this.checkEmailVerification(user);
-          if (!checkRes) {
-            callback(
-              new AuthResult(false, isAdmin, user.uid, user.email ?? "", "")
-            );
-            await this.signOut();
-            return;
+        try {
+          const isAdmin = await this.checkAdmin(user);
+          if (!isAdmin) {
+            const checkRes = await this.checkEmailVerification(user);
+            if (!checkRes) {
+              callback(
+                new AuthResult(
+                  false,
+                  isAdmin,
+                  user.uid,
+                  this.getEmail(user),
+                  ""
+                )
+              );
+              await this.signOut();
+              return;
+            }
           }
+          callback(
+            new AuthResult(true, isAdmin, user.uid, this.getEmail(user), "")
+          );
+        } catch (err) {
+          console.error("failed auth:", err);
+          callback(new AuthResult(false, false, "", "", ""));
         }
-        callback(new AuthResult(true, isAdmin, user.uid, user.email ?? "", ""));
       }
     });
   }
@@ -112,6 +140,10 @@ export class AuthService {
   private mailSent: boolean = false;
 
   private async checkEmailVerification(user: User): Promise<boolean> {
+    // sns auth skip email check
+    if (user.providerData[0].providerId !== "password") {
+      return true;
+    }
     if (user.emailVerified) {
       return true;
     }
@@ -129,6 +161,15 @@ export class AuthService {
     // console.log("token", token);
     const role = token.claims["role"];
     return role === "Admin";
+  }
+
+  private getEmail(user: User): string {
+    if (user.email) return user.email;
+
+    if (user.providerData && user.providerData[0].email) {
+      return user.providerData[0].email;
+    }
+    return "";
   }
 }
 

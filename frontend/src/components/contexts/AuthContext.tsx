@@ -14,6 +14,7 @@ type ContextType = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signInWithGoogle: () => Promise<void>;
+  signInWithTwitter: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -46,6 +47,12 @@ export const AdminAuthProvider = ({ children }: any) => {
   async function signInWithGoogle(): Promise<void> {
     setLoading(true);
     await service.signInWithGoogle();
+    setLoading(false);
+  }
+
+  async function signInWithTwitter(): Promise<void> {
+    setLoading(true);
+    await service.signInWithTwitter();
     setLoading(false);
   }
 
@@ -82,6 +89,7 @@ export const AdminAuthProvider = ({ children }: any) => {
     signIn,
     signOut,
     signInWithGoogle,
+    signInWithTwitter,
   };
 
   if (initializing) {

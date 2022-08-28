@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Container, Stack, TextField, Button, InputAdornment, IconButton } from "@mui/material";
+import {
+  Container,
+  Stack,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { isValidEmail } from "../../../libs/util/Email";
@@ -10,6 +17,7 @@ type AdminLoginFormProps = {
   input: LoginInput;
   onSubmit: callbackSubmit;
   onGoogleSubmit?: callbackProviderSubmit;
+  onTwitterSubmit?: callbackProviderSubmit;
 };
 interface callbackSubmit {
   (item: LoginInput): void;
@@ -34,7 +42,7 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
     props.onSubmit(data);
   };
   function handleClickShowPassword() {
-    setShowPassword(!(showPassword))
+    setShowPassword(!showPassword);
   }
   const handleEmailValidation = (email: string) => {
     console.log("handleEmailValidation");
@@ -62,13 +70,13 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
           <TextField
             label="Password"
             fullWidth
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             {...register("password", {
               required: { value: true, message: RequiredErrorMessage },
             })}
             InputProps={{
-              endAdornment:
+              endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="toggle password visibility"
@@ -79,6 +87,7 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
+              ),
             }}
             error={Boolean(errors.password)}
             helperText={errors.password && errors.password.message}
@@ -99,6 +108,18 @@ export default function AdminLoginForm(props: AdminLoginFormProps) {
               onClick={props.onGoogleSubmit}
             >
               Googleアカウントでログイン
+            </Button>
+          ) : (
+            <></>
+          )}
+          {props.onTwitterSubmit ? (
+            <Button
+              color="secondary"
+              variant="contained"
+              size="large"
+              onClick={props.onTwitterSubmit}
+            >
+              Twitterアカウントでログイン
             </Button>
           ) : (
             <></>

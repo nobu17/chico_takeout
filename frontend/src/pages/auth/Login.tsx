@@ -10,7 +10,7 @@ import { useAuth } from "../../components/contexts/AuthContext";
 
 export default function UserLogin() {
   const navigate = useNavigate();
-  const { signIn, loading, signInWithGoogle } = useAuth();
+  const { signIn, loading, signInWithGoogle, signInWithTwitter } = useAuth();
   const handleSignIn = async (input: LoginInput) => {
     const result = await signIn(input.email, input.password);
     if (result.isSuccessful) {
@@ -22,6 +22,9 @@ export default function UserLogin() {
   const handleSignInWithGoogle = async () => {
     await signInWithGoogle();
   };
+  const handleSignInWithTwitter = async () => {
+    await signInWithTwitter();
+  };
   return (
     <>
       <PageTitle title="ログイン" />
@@ -31,6 +34,7 @@ export default function UserLogin() {
             input={{ email: "", password: "" }}
             onSubmit={handleSignIn}
             onGoogleSubmit={handleSignInWithGoogle}
+            onTwitterSubmit={handleSignInWithTwitter}
           ></LoginForm>
           <LoadingSpinner message="Loading..." isLoading={loading} />
         </Grid>

@@ -23,18 +23,18 @@ func NewOrderInfoRepository(db *gorm.DB) (*OrderInfoRepository, error) {
 
 type OrderInfoModel struct {
 	rdbms.BaseModel
-	UserID          string
-	UserName        string
-	UserEmail       string
-	UserTelNo       string
-	Memo            string
-	OrderDateTime   time.Time
-	PickupDateTime  time.Time
-	Canceled        bool
-	StockItemModels []items.StockItemModel `gorm:"many2many:orderInfo_stockItems;"`
-	FoodItemModels  []items.FoodItemModel  `gorm:"many2many:orderInfo_foodItems;"`
-	OrderedStockItemModels []OrderedStockItemModel 
-	OrderedFoodItemModels []OrderedFoodItemModel
+	UserID                 string
+	UserName               string
+	UserEmail              string
+	UserTelNo              string
+	Memo                   string
+	OrderDateTime          time.Time
+	PickupDateTime         time.Time
+	Canceled               bool
+	StockItemModels        []items.StockItemModel `gorm:"many2many:orderInfo_stockItems;"`
+	FoodItemModels         []items.FoodItemModel  `gorm:"many2many:orderInfo_foodItems;"`
+	OrderedStockItemModels []OrderedStockItemModel
+	OrderedFoodItemModels  []OrderedFoodItemModel
 }
 
 type OrderedStockItemModel struct {
@@ -146,7 +146,7 @@ func (o *OrderInfoRepository) Find(id string) (*domains.OrderInfo, error) {
 }
 
 func (o *OrderInfoRepository) FindAll() ([]domains.OrderInfo, error) {
-	maxLimit := 1000;
+	maxLimit := 1000
 	models := []OrderInfoModel{}
 
 	// until 1000 order by ordered time(latest ordered item)
@@ -288,5 +288,11 @@ func (o *OrderInfoRepository) Create(order *domains.OrderInfo) (string, error) {
 func (o *OrderInfoRepository) UpdateOrderStatus(order *domains.OrderInfo) error {
 	model := OrderInfoModel{}
 	err := o.Db.Model(&model).Where("ID = ?", order.GetId()).Update("Canceled", order.GetCanceled()).Error
+	return err
+}
+
+func (o *OrderInfoRepository) UpdateUserInfo(order *domains.OrderInfo) error {
+	model := OrderInfoModel{}
+	err := o.Db.Model(&model).Where("ID = ?", order.GetId()).Updates(OrderInfoModel{UserName: order.GetUserName(), UserEmail: order.GetUserEmail(), UserTelNo: order.GetUserTelNo(), Memo: order.GetMemo()}).Error
 	return err
 }

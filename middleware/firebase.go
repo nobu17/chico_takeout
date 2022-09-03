@@ -17,6 +17,7 @@ type AuthService interface {
 }
 
 type AuthData struct {
+	UserId       string
 	IsAuthorized bool
 	IsAdmin      bool
 }
@@ -36,9 +37,9 @@ func (app *firebaseApp) VerifyIDToken(ctx context.Context, idToken string) (*Aut
 	}
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		return &AuthData{IsAdmin: false, IsAuthorized: false}, err
+		return &AuthData{UserId: "", IsAdmin: false, IsAuthorized: false}, err
 	}
-	result := AuthData{IsAdmin: false, IsAuthorized: true}
+	result := AuthData{UserId: token.UID, IsAdmin: false, IsAuthorized: true}
 	if role, ok := token.Claims["role"]; ok {
 		if role.(string) == "Admin" {
 			result.IsAdmin = true

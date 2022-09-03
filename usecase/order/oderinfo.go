@@ -81,6 +81,26 @@ type OrderInfoCreateModel struct {
 	FoodItems      []CommonItemOrderCreateModel
 }
 
+type OrderUserInfoUpdateModel struct {
+	OrderId   string
+	UserId    string
+	UserName  string
+	UserEmail string
+	UserTelNo string
+	Memo      string
+}
+
+func NewOrderUserInfoUpdateModel(orderId, userId, userName, userEmail, userTelNo, memo string) *OrderUserInfoUpdateModel {
+	return &OrderUserInfoUpdateModel{
+		OrderId:   orderId,
+		UserId:    userId,
+		UserName:  userName,
+		UserEmail: userEmail,
+		UserTelNo: userTelNo,
+		Memo:      memo,
+	}
+}
+
 type CommonItemOrderCreateModel struct {
 	ItemId   string
 	Quantity int
@@ -101,6 +121,7 @@ type OrderInfoUseCase interface {
 	FindActiveByUserId(userId string) ([]OrderInfoModel, error)
 	FindActiveByPickupDate(dateStr string) ([]OrderInfoModel, error)
 	Create(model *OrderInfoCreateModel) (string, error)
+	UpdateUserInfo(model *OrderUserInfoUpdateModel) error
 	Cancel(id string) error
 }
 
@@ -344,6 +365,33 @@ func (o *orderInfoUseCase) Cancel(id string) error {
 	if mError != nil {
 		fmt.Printf("mail send error.%s", mError)
 	}
+	return nil
+}
+
+func (o *orderInfoUseCase) UpdateUserInfo(model *OrderUserInfoUpdateModel) error {
+	order, err := o.orderInfoRepository.Find(model.OrderId)
+	if err != nil {
+		return err
+	}
+	if order == nil {
+		return common.NewNotFoundError(fmt.Sprintf("order is not exist. id:%s", model.OrderId))
+	}
+	// check user id is same
+	userId := o.GetUserId()
+	if model.UserId != userId {
+		return common.NewValidationError("UserID", "UserId is invalid. not match authorized user.")
+	}
+
+	err = order.UpdateUserInfo(model.UserName, model.UserEmail, model.UserTelNo, model.Memo)
+	if err != nil {
+		return err
+	}
+
+	err = o.orderInfoRepository.UpdateUserInfo(order)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

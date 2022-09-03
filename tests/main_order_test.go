@@ -85,59 +85,60 @@ func SetupOrderInfoRouter() *gin.Engine {
 		order.PUT("/:id", handler.PutCancel)
 		order.GET("/user/:userId", handler.GetByUser)
 		order.GET("/user/active/:userId", handler.GetActiveByUser)
+		order.PUT("user/:userId/:orderId", handler.PutUpdateUserInfo)
 		order.GET("/admin_all/", handler.GetAll)
 		order.GET("/active/*date", handler.GetActiveByDate)
 	}
 	return r
 }
 
-// func TestOrderInfoHandler_GET(t *testing.T) {
-// 	r := SetupOrderInfoRouter()
+func TestOrderInfoHandler_GET(t *testing.T) {
+	r := SetupOrderInfoRouter()
 
-// 	stockIds := []string{}
-// 	for id := range stockMemoryMaps {
-// 		stockIds = append(stockIds, id)
-// 	}
-// 	foodIds := []string{}
-// 	for id := range foodMemoryMaps {
-// 		foodIds = append(foodIds, id)
-// 	}
+	stockIds := []string{}
+	for id := range stockMemoryMaps {
+		stockIds = append(stockIds, id)
+	}
+	foodIds := []string{}
+	for id := range foodMemoryMaps {
+		foodIds = append(foodIds, id)
+	}
 
-// 	wants := []map[string]interface{}{
-// 		{"userId": "user1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
-// 			"stockItems": []map[string]interface{}{},
-// 			"foodItems": []map[string]interface{}{
-// 				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 3.0},
-// 				{"itemId": foodIds[1], "name": "food2", "price": 200.0, "quantity": 1.0},
-// 			},
-// 		},
-// 		{"userId": "user2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
-// 			"stockItems": []map[string]interface{}{
-// 				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 2.0},
-// 			},
-// 			"foodItems": []map[string]interface{}{
-// 				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 1.0},
-// 			},
-// 		},
-// 	}
-// 	index := 0
-// 	for id := range orderMemoryMaps {
+	wants := []map[string]interface{}{
+		{"userId": "user2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 2.0},
+			},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 1.0},
+			},
+		},
+		{"userId": "user1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+			"stockItems": []map[string]interface{}{},
+			"foodItems": []map[string]interface{}{
+				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 3.0},
+				{"itemId": foodIds[1], "name": "food2", "price": 200.0, "quantity": 1.0},
+			},
+		},
+	}
+	
+	index := 0
+	for id := range orderMemoryMaps {
 
-// 		req, _ := http.NewRequest("GET", orderUrl+"/"+id, nil)
-// 		w := httptest.NewRecorder()
-// 		r.ServeHTTP(w, req)
+		req, _ := http.NewRequest("GET", orderUrl+"/"+id, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
 
-// 		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusOK, w.Code)
 
-// 		fmt.Println("body", w.Body)
-// 		var response map[string]interface{}
-// 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
+		fmt.Println("body", w.Body)
+		var response map[string]interface{}
+		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
-// 		AssertMaps(t, response, wants[index])
-// 		index++
-// 	}
-// }
-
+		AssertMaps(t, response, wants[index])
+		index++
+	}
+}
 
 func TestOrderInfoHandler_GET_ALL(t *testing.T) {
 	r := SetupOrderInfoRouter()

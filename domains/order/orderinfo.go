@@ -17,6 +17,7 @@ type OrderInfoRepository interface {
 	FindAll() ([]OrderInfo, error)
 	Create(item *OrderInfo) (string, error)
 	UpdateOrderStatus(item *OrderInfo) error
+	UpdateUserInfo(item *OrderInfo) error
 	Transact(fc func() error) error
 }
 
@@ -110,6 +111,31 @@ func NewOrderInfoForOrm(id, userId, userName, userEmail, userTelNo, memo, pickup
 	order.orderDateTime.value = orderDateTime
 
 	return order, nil
+}
+
+func (o *OrderInfo) UpdateUserInfo(userName, userEmail, userTelNo, memo string) error {
+	memoV, err := NewMemo(memo, OrderInfoMaxMemoLength)
+	if err != nil {
+		return err
+	}
+	userNameV, err := NewUserName(userName, UserNameMaxLength)
+	if err != nil {
+		return err
+	}
+	userEmailV, err := NewEmail(userEmail)
+	if err != nil {
+		return err
+	}
+	userTelNoV, err := NewTelNo(userTelNo)
+	if err != nil {
+		return err
+	}
+
+	o.memo = *memoV
+	o.userName = *userNameV
+	o.userEmail = *userEmailV
+	o.userTelNo = *userTelNoV
+	return nil
 }
 
 func (o *OrderInfo) GetId() string {

@@ -21,3 +21,7 @@ func (b *BaseUseCase) InitContext(ctx context.Context) {
 func (b *BaseUseCase) IsAdmin() bool {
 	return common.GetIsAdmin(b.ctx)
 }
+
+func (b *BaseUseCase) GetUserId() string {
+	return common.GetUserId(b.ctx)
+}

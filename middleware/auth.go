@@ -30,8 +30,9 @@ func CheckAuthInfo(auth AuthService) gin.HandlerFunc {
 			handleUnAuth(c)
 			return
 		}
-		// set auth role
+		// set auth role and userId
 		setIsAdmin(c, result.IsAdmin)
+		setUserId(c, result.UserId)
 		c.Next()
 	}
 }
@@ -63,6 +64,11 @@ func setIsAdmin(c *gin.Context, isAdmin bool) {
 
 func getIsAdmin(c *gin.Context) bool {
 	return common.GetIsAdmin(c.Request.Context())
+}
+
+func setUserId(c *gin.Context, userId string) {
+	ctx := common.SetUserId(userId, c.Request.Context())
+	c.Request = c.Request.WithContext(ctx)
 }
 
 func handleUnAuth(c *gin.Context) {

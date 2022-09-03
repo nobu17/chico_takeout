@@ -168,6 +168,15 @@ func (o *OrderInfoMemoryRepository) UpdateOrderStatus(item *domains.OrderInfo) e
 	return fmt.Errorf("update target not exists")
 }
 
+func (o *OrderInfoMemoryRepository) UpdateUserInfo(item *domains.OrderInfo) error {
+	if _, ok := o.inMemory[item.GetId()]; ok {
+		o.inMemory[item.GetId()] = item
+		return nil
+	}
+	return fmt.Errorf("update target not exists")
+}
+
+
 func (o *OrderInfoMemoryRepository) Transact(fc func() error) error {
 	return fc()
 }

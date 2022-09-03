@@ -115,6 +115,26 @@ func (c *CommonItemOrderRequest) toModel() *usecases.CommonItemOrderCreateModel 
 	}
 }
 
+type OrderUserInfoUpdateRequest struct {
+	OrderId   string
+	UserId    string
+	UserName  string `json:"userName" binding:"required"`
+	UserEmail string `json:"userEmail" binding:"required"`
+	UserTelNo string `json:"userTelNo" binding:"required"`
+	Memo      string `json:"memo"`
+}
+
+func (o *OrderUserInfoUpdateRequest) toModel() *usecases.OrderUserInfoUpdateModel {
+	return &usecases.OrderUserInfoUpdateModel{
+		OrderId:   o.OrderId,
+		UserId:    o.UserId,
+		UserName:  o.UserName,
+		UserEmail: o.UserEmail,
+		UserTelNo: o.UserTelNo,
+		Memo:      o.Memo,
+	}
+}
+
 type orderInfoHandler struct {
 	*handlers.BaseHandler
 	usecase usecases.OrderInfoUseCase
@@ -126,7 +146,7 @@ func NewOrderInfoHandler(usecase usecases.OrderInfoUseCase) *orderInfoHandler {
 	}
 }
 
-func (s *orderInfoHandler)InitContext(ctx context.Context) {
+func (s *orderInfoHandler) InitContext(ctx context.Context) {
 	s.usecase.InitContext(ctx)
 }
 
@@ -219,6 +239,23 @@ func (s *orderInfoHandler) PutCancel(c *gin.Context) {
 	id := c.Param("id")
 	req := OrderInfoCancelRequest{Id: id}
 	err := s.usecase.Cancel(req.Id)
+	if err != nil {
+		s.HandleError(c, err)
+		return
+	}
+	s.HandleOK(c, nil)
+}
+
+func (s *orderInfoHandler) PutUpdateUserInfo(c *gin.Context) {
+	userId := c.Param("userId")
+	orderId := c.Param("orderId")
+	var req OrderUserInfoUpdateRequest
+	if !s.ShouldBind(c, &req) {
+		return
+	}
+	req.OrderId = orderId
+	req.UserId = userId
+	err := s.usecase.UpdateUserInfo(req.toModel())
 	if err != nil {
 		s.HandleError(c, err)
 		return

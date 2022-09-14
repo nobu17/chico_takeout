@@ -8,6 +8,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import CoffeeIcon from "@mui/icons-material/Coffee";
+import AppleIcon from "@mui/icons-material/Apple";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Typography } from "@mui/material";
 
 export type PageMenuProps = {
@@ -26,6 +28,12 @@ const getIcon = (input: string) => {
   switch (input) {
     case "coffee": {
       return <CoffeeIcon />;
+    }
+    case "apple": {
+      return <AppleIcon />;
+    }
+    case "calendar": {
+      return <CalendarMonthIcon />;
     }
     default: {
       return <CoffeeIcon />;
@@ -50,6 +58,7 @@ export default function PageMenu(props: PageMenuProps) {
               fontSize: 20,
               textAlign: "center",
               fontWeight: "bold",
+              pb: 2,
             }}
           >
             <Stack

@@ -35,7 +35,7 @@ export default function MyHome() {
 
   return (
     <>
-      <PageTitle title="MyPage" />
+      <PageTitle title="マイページ" />
       <Grid container spacing={2} direction="column" alignItems="center">
         <Grid item xs={12}>
           {loading ? (

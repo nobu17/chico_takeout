@@ -47,6 +47,9 @@ import AllOrderTable from "./pages/admin/orders/AllOrderTable";
 import "./App.css";
 
 let theme = createTheme({
+  typography: {
+    fontFamily: ["M PLUS Rounded 1c"].join(","),
+  },
   palette: {
     primary: {
       light: "#5f5fc4",

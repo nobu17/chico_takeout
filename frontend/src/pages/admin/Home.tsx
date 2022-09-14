@@ -4,7 +4,7 @@ import PageMenu from "../../components/parts/PageMenu";
 
 const itemMenu = {
   title: "商品管理",
-  icon: "coffee",
+  icon: "apple",
   pageInfos: [
     { title: "アイテム種別編集", url: "/admin/items/kind" },
     { title: "アイテム編集(在庫タイプ)", url: "/admin/items/stock" },
@@ -15,7 +15,7 @@ const itemMenu = {
 
 const storeMenu = {
   title: "店舗設定",
-  icon: "coffee",
+  icon: "calendar",
   pageInfos: [
     { title: "営業時間 編集", url: "/admin/store/hour" },
     { title: "特別営業時間 編集", url: "/admin/store/special_hour" },

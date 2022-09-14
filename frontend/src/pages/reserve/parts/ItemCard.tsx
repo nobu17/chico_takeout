@@ -6,8 +6,8 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import{ ItemInfo, ItemRequest } from "../../../hooks/UseItemCart"
-import { getImageUrl } from "../../../libs/util/ImageUtil"
+import { ItemInfo, ItemRequest } from "../../../hooks/UseItemCart";
+import { getImageUrl } from "../../../libs/util/ImageUtil";
 
 type ItemCardProps = {
   item: ItemInfo;
@@ -15,8 +15,9 @@ type ItemCardProps = {
   onCountChanged?: callback;
 };
 interface callback {
-  (item :ItemRequest): void;
+  (item: ItemRequest): void;
 }
+
 
 export default function ItemCard(props: ItemCardProps) {
   const onCountChanged = (count: number) => {
@@ -27,8 +28,8 @@ export default function ItemCard(props: ItemCardProps) {
     <Card sx={{ maxWidth: 480 }}>
       <CardMedia
         component="img"
-        alt="green iguana"
-        height="180"
+        height="230"
+        sx={{ objectFit: "contain" }}
         image={getImageUrl(props.item.imageUrl)}
       />
       <CardContent>

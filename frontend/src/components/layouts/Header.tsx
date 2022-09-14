@@ -19,6 +19,7 @@ const pages: NavItem[] = [
   { label: "テイクアウト予約", link: "/reserve" },
   { label: "マイページ", link: "/my_page", isUser: true },
   { label: "管理ページ", link: "/admin", isAdmin: true },
+  { label: "ログイン", link: "/auth/sign_in", isNotAuth: true },
   { label: "ログアウト", link: "/auth/sign_out", isUser: true },
   { label: "店舗公式", link: "https://chico-sp-website.web.app" },
   { label: "イートイン予約", link: "https://nobu17.pythonanywhere.com" },
@@ -30,6 +31,7 @@ type NavItem = {
   link: string;
   isAdmin?: boolean;
   isUser?: boolean;
+  isNotAuth?: boolean;
 };
 
 const Header = () => {
@@ -49,6 +51,12 @@ const Header = () => {
       }
       if (item.isUser) {
         if (state.isAuthorized) {
+          menus.push(item);
+        }
+        continue;
+      }
+      if (item.isNotAuth) {
+        if (!state.isAuthorized) {
           menus.push(item);
         }
         continue;

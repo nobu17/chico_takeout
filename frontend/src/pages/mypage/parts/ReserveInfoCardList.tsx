@@ -3,18 +3,32 @@ import Typography from "@mui/material/Typography";
 import { UserOrderInfo } from "../../../libs/apis/order";
 import ReserveInfoCard from "./ReserveInfoCard";
 import { OffsetMinutesUserCanCancel } from "../../../libs/Constant";
+import { Stack } from "@mui/material";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
 type ReserveInfoCardListProps = {
   orders?: UserOrderInfo[];
   cancelRequest?: (id: string) => void;
 };
 
+const getHeader = () => {
+  return (
+    <Stack direction="row" justifyContent="center" alignItems="center" gap={1} sx={{ pt: 1, pb: 2 }}>
+      <CalendarMonthIcon></CalendarMonthIcon>
+      <Typography variant="h5">現在の予約</Typography>
+    </Stack>
+  );
+};
+
 export default function ReserveInfoCardList(props: ReserveInfoCardListProps) {
   if (!props.orders || props.orders.length === 0) {
     return (
-      <Typography gutterBottom variant="h6" component="div">
-        現在、予約はありません。
-      </Typography>
+      <>
+        {getHeader()}
+        <Typography gutterBottom variant="h6" component="div">
+          現在、予約はありません。
+        </Typography>
+      </>
     );
   }
 
@@ -26,8 +40,10 @@ export default function ReserveInfoCardList(props: ReserveInfoCardListProps) {
 
   return (
     <>
-      <Typography variant="h5">現在の予約</Typography>
-      <Typography variant="subtitle1" color="error">※キャンセルは{OffsetMinutesUserCanCancel / 60}時間前まで可能です。</Typography>  
+      {getHeader()}
+      <Typography variant="subtitle1" color="error" textAlign="center">
+        ※キャンセルは{OffsetMinutesUserCanCancel / 60}時間前まで可能です。
+      </Typography>
       {props.orders?.map((order, index) => {
         return (
           <ReserveInfoCard

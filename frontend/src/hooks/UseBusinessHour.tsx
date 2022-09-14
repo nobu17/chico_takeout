@@ -11,7 +11,7 @@ const defaultBusinessHour: BusinessHour = {
   weekdays: [],
 };
 
-const busApi = new businessHourApi("http://localhost:8086");
+const busApi = new businessHourApi();
 
 export default function useFoodItem() {
   const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);

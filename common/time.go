@@ -39,7 +39,7 @@ func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &actualTime, nil
 }
 

@@ -30,12 +30,12 @@ type BusinessHourModel struct {
 }
 
 func (b *BusinessHourModel) HasWeekDay(weekday int) bool {
-    for _, week := range b.Weekdays {
-        if week.Value == weekday {
-            return true
-        }
-    }
-    return false
+	for _, week := range b.Weekdays {
+		if week.Value == weekday {
+			return true
+		}
+	}
+	return false
 }
 
 func newBusinessHourModel(b *domains.BusinessHour) (*BusinessHourModel, error) {

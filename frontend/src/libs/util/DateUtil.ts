@@ -45,6 +45,14 @@ export const IsFutureFromNow = (date: Date, offsetMinutes: number): boolean => {
   return now < date;
 };
 
+export const isFutureFromNowStr = (
+  datetimeStr: string,
+  offsetMinutes: number
+): boolean => {
+  const datetime = toDateTime(datetimeStr);
+  return IsFutureFromNow(datetime, offsetMinutes)
+};
+
 export const GetDateTimeFromStr = (date: string, time: string) => {
   const tempDate = ToDate(date);
   const tempTime = getDateFromTimeStr(time);
@@ -96,15 +104,6 @@ export const convertDateTimeStrToIncludeDayOfWeeKStr = (
   const date = toDateTime(dateTimeStr);
 
   return toDateTimeStrWithDayOfWeek(date);
-};
-
-export const isBeforeFromNow = (
-  datetimeStr: string,
-  offsetMinutes: number
-): boolean => {
-  const datetime = addMinutes(getDateFromTimeStr(datetimeStr), offsetMinutes);
-  const now = new Date(Date.now());
-  return datetime < now;
 };
 
 const toHourMinutesStr = (time: Date): string => {

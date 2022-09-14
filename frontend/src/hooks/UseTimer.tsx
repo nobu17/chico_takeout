@@ -24,7 +24,6 @@ export function useTimer(timeoutMinutes: number, callback: Callback): void {
 
   const checkTimeOut = () => {
     const now = Date.now()
-    console.log("checkTimeOut", now, dueTime.current)
     if (now >= dueTime.current) {
         // check current is focused or not
         if (!isBlurNow.current) {

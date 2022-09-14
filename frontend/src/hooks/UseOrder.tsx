@@ -6,7 +6,7 @@ import { Cart, ItemRequest } from "./UseItemCart";
 import { PickupDate } from "./UsePickupDate";
 import { UserInfo } from "./UseUserInfo";
 
-const api = new OrderApi("http://localhost:8086");
+const api = new OrderApi();
 
 export function useOrder() {
   const [error, setError] = useState<Error>();

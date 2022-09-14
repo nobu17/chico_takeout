@@ -8,7 +8,7 @@ const defaultItemKind: ItemKind = {
   priority: 1,
 };
 
-const api = new ItemKindApi("http://localhost:8086");
+const api = new ItemKindApi();
 
 export default function useItemKind() {
   const [itemKinds, setItemKinds] = useState<ItemKind[]>([]);

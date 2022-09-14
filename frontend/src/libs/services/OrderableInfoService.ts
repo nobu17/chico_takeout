@@ -17,7 +17,7 @@ export default class OrderableInfoService {
   private stockApi: StockItemApi;
   private kindApi: ItemKindApi;
 
-  constructor(public baseUrl: string) {
+  constructor(public baseUrl: string = "") {
     this.orderableApi = new OrderableInfoApi(baseUrl);
     this.foodApi = new FoodItemApi(baseUrl);
     this.stockApi = new StockItemApi(baseUrl);

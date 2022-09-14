@@ -39,15 +39,25 @@ func main() {
 	auth := initAuthService()
 
 	r := setupRouter(db, auth)
-	// Listen and Server in 0.0.0.0:8080
-	r.Run(":8086")
+
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = "80"
+		fmt.Println("failed to get setting run port. run as port 80")
+	}
+	r.Run(":" + port)
 }
 
 func loadEnv() {
-	err := godotenv.Load(fmt.Sprintf("./%s.env", os.Getenv("GO_ENV")))
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "dev"
+	}
+	fmt.Printf("env:%s\n", env)
+	err := godotenv.Load(fmt.Sprintf("./.env.%s", env))
 	if err != nil {
 		fmt.Println(err)
-		panic("failed to load env.")
+		fmt.Println("failed to load env.")
 	}
 }
 
@@ -97,8 +107,12 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	}))
 
 	r.LoadHTMLGlob("frontend/build/*.html")
+	r.Static("/images", "./frontend/build/images")
 	r.Static("/static", "./frontend/build/static")
 	r.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+	r.NoRoute(func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 

@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { auth } from "../firebase/Firebase";
+import Config from "../Config";
 
 export interface ApiResponse<T> {
   data: T;
@@ -29,12 +30,13 @@ export class ApiError implements ApiErrorImpl {
 
 export default class ApiBase {
   private _api: AxiosInstance;
-  private _baseUrl: string;
 
-  constructor(baseUrl: string) {
-    this._baseUrl = baseUrl;
+  constructor(private _baseUrl: string = "") {
+    if (this._baseUrl === "") {
+      this._baseUrl = Config.apiRoot;
+    }
     this._api = axios.create({
-      baseURL: baseUrl,
+      baseURL: this._baseUrl,
       headers: {
         "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
@@ -42,8 +44,7 @@ export default class ApiBase {
       responseType: "json",
     });
     this._api.interceptors.request.use(async (request) => {
-      if (!request || !request.headers)
-        return request;
+      if (!request || !request.headers) return request;
 
       const idToken = await auth.currentUser?.getIdToken();
       request.headers.Authorization = `Bearer ${idToken}`;

@@ -32,4 +32,8 @@ temp_work/*
 !dist/samples/*
 
 # env
-.env
+.env.dev
+.env.prod
+
+# memo
+.memo

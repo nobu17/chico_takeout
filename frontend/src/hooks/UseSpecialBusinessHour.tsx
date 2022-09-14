@@ -13,7 +13,7 @@ const defaultSpecialBusinessHour: SpecialBusinessHour = {
   businessHourId: "",
 };
 
-const busApi = new SpecialBusinessHourApi("http://localhost:8086");
+const busApi = new SpecialBusinessHourApi();
 
 export default function useSpecialBusinessHour() {
   const [specialBusinessHours, setSpecialBusinessHours] = useState<SpecialBusinessHour[]>([]);

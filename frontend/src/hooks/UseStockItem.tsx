@@ -17,8 +17,8 @@ const defaultStockItem: StockItem = {
   kind: null
 };
 
-const stockApi = new StockItemApi("http://localhost:8086");
-const kindApi = new ItemKindApi("http://localhost:8086");
+const stockApi = new StockItemApi();
+const kindApi = new ItemKindApi();
 
 export default function useStockItem() {
   const [stockItems, setStockItems] = useState<StockItem[]>([]);

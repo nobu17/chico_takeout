@@ -11,7 +11,7 @@ const defaultSpecialHoliday: SpecialHoliday = {
   end: ToDateString(GetNowDate(8)),
 };
 
-const api = new SpecialHolidayApi("http://localhost:8086");
+const api = new SpecialHolidayApi();
 
 export default function useSpecialBusinessHour() {
   const [specialHolidays, setSpecialHolidays] = useState<SpecialHoliday[]>([]);

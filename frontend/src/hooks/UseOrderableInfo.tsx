@@ -13,7 +13,7 @@ const defaultPerDayOrderableInfo: PerDayOrderableInfo[] = [
   },
 ];
 
-const service = new OrderableInfoService("http://localhost:8086");
+const service = new OrderableInfoService();
 
 export function useOrderableInfo() {
   const [perDayOrderableInfo, setPerDayOrderableInfo] = useState<

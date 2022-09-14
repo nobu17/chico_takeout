@@ -19,8 +19,8 @@ const defaultFoodItem: FoodItem = {
   imageUrl: "",
 };
 
-const foodApi = new FoodItemApi("http://localhost:8086");
-const kindApi = new ItemKindApi("http://localhost:8086");
+const foodApi = new FoodItemApi();
+const kindApi = new ItemKindApi();
 
 export default function useFoodItem() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);

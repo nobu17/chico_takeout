@@ -60,7 +60,7 @@ func (b *BusinessHours) GetSchedules() []BusinessHour {
 	return tmp
 }
 
-func (b *BusinessHours) FindById(id string) (*BusinessHour) {
+func (b *BusinessHours) FindById(id string) *BusinessHour {
 	_, item := b.findSchedule(id)
 	if item == nil {
 		return nil

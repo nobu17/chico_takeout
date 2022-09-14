@@ -3,8 +3,8 @@ import { useAuth } from "../components/contexts/AuthContext";
 import AdminOrderApi from "../libs/apis/adminOrder";
 import OrderApi, { UserOrderInfo } from "../libs/apis/order";
 
-const adminOrderApi = new AdminOrderApi("http://localhost:8086");
-const orderApi = new OrderApi("http://localhost:8086");
+const adminOrderApi = new AdminOrderApi();
+const orderApi = new OrderApi();
 
 export function useAdminOrder() {
   const [error, setError] = useState<Error>();

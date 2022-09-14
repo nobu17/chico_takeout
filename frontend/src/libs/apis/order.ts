@@ -57,3 +57,13 @@ export type UserOrderItem = {
   price: number;
   quantity: number;
 };
+
+export const getTotal = (order: UserOrderInfo): number => {
+  const stockTotal = order.stockItems.reduce((sum, element) => {
+    return sum + element.price * element.quantity;
+  }, 0);
+  const foodTotal = order.foodItems.reduce((sum, element) => {
+    return sum + element.price * element.quantity;
+  }, 0);
+  return stockTotal + foodTotal;
+};

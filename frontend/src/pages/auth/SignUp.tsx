@@ -23,7 +23,6 @@ export default function UserSignUp() {
       setError(undefined);
       setLoading(true);
       const result = await service.signUp(input.email, input.password);
-      console.log(result);
       if (result.isSuccessful && result.mailSent) {
         await showMessageDialog(
           "",

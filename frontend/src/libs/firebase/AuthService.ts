@@ -19,21 +19,36 @@ export class AuthService {
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
       const result = await signIn(auth, email, password);
+      const emailVerified = await this.checkEmailVerification(
+        result.user,
+        false
+      );
       // check id are existed
       const isAdmin = await this.checkAdmin(result.user);
+      if (!emailVerified && !isAdmin) {
+        return new AuthResult(
+          false,
+          false,
+          result.user.uid,
+          this.getEmail(result.user),
+          "",
+          false
+        );
+      }
       return new AuthResult(
         true,
         isAdmin,
         result.user.uid,
         this.getEmail(result.user),
-        ""
+        "",
+        true
       );
     } catch (e: unknown) {
       let msg = "";
       if (e instanceof Error) {
         msg = e.message;
       }
-      return new AuthResult(false, false, "", "", msg);
+      return new AuthResult(false, false, "", "", msg, false);
     }
   }
 
@@ -44,12 +59,15 @@ export class AuthService {
   async signUp(email: string, password: string): Promise<SignUpResult> {
     try {
       const result = await signUp(auth, email, password);
-      const mailSent = await this.checkEmailVerification(result.user);
+      const emailVerified = await this.checkEmailVerification(
+        result.user,
+        true
+      );
       return new SignUpResult(
         true,
         result.user.uid,
         this.getEmail(result.user),
-        mailSent,
+        !emailVerified,
         ""
       );
     } catch (e: unknown) {
@@ -95,23 +113,25 @@ export class AuthService {
           false,
           result.user.uid,
           this.getEmail(result.user),
-          ""
+          "",
+          true
         )
       );
       return;
     }
-    callback(new AuthResult(false, false, "", "", ""));
+    callback(new AuthResult(false, false, "", "", "", false));
   }
 
   async onAuthStateChange(callback: (data: AuthResult) => void) {
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
-        callback(new AuthResult(false, false, "", "", ""));
+        callback(new AuthResult(false, false, "", "", "", false));
       } else {
         try {
           const isAdmin = await this.checkAdmin(user);
           if (!isAdmin) {
-            const checkRes = await this.checkEmailVerification(user);
+            const checkRes = await this.checkEmailVerification(user, false);
+            // if not email not verified, sign out
             if (!checkRes) {
               callback(
                 new AuthResult(
@@ -119,7 +139,8 @@ export class AuthService {
                   isAdmin,
                   user.uid,
                   this.getEmail(user),
-                  ""
+                  "",
+                  false
                 )
               );
               await this.signOut();
@@ -127,19 +148,27 @@ export class AuthService {
             }
           }
           callback(
-            new AuthResult(true, isAdmin, user.uid, this.getEmail(user), "")
+            new AuthResult(
+              true,
+              isAdmin,
+              user.uid,
+              this.getEmail(user),
+              "",
+              false
+            )
           );
         } catch (err) {
           console.error("failed auth:", err);
-          callback(new AuthResult(false, false, "", "", ""));
+          callback(new AuthResult(false, false, "", "", "", false));
         }
       }
     });
   }
 
-  private mailSent: boolean = false;
-
-  private async checkEmailVerification(user: User): Promise<boolean> {
+  private async checkEmailVerification(
+    user: User,
+    sendEmail: boolean
+  ): Promise<boolean> {
     // sns auth skip email check
     if (user.providerData[0].providerId !== "password") {
       return true;
@@ -147,8 +176,7 @@ export class AuthService {
     if (user.emailVerified) {
       return true;
     }
-    if (!this.mailSent) {
-      this.mailSent = true;
+    if (sendEmail) {
       await sendMail(user);
     }
 
@@ -179,7 +207,8 @@ export class AuthResult {
     public isAdmin: boolean,
     public uid: string,
     public email: string,
-    public errorMessage: string
+    public errorMessage: string,
+    public emailVerified: boolean
   ) {}
 
   public hasError(): boolean {

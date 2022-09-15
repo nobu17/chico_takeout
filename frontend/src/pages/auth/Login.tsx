@@ -18,7 +18,10 @@ export default function UserLogin() {
     const result = await signIn(input.email, input.password);
     if (result.isSuccessful) {
       navigate("/my_page");
-    } else {
+    } else if (!result.emailVerified) {
+      await showMessageDialog("エラー", "メール認証が完了していません。先にメール認証を進めてください。");
+    }
+    else {
       await showMessageDialog("エラー", "ログインに失敗しました。");
     }
   };

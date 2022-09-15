@@ -6,30 +6,35 @@ import PageTitle from "../../components/parts/PageTitle";
 import { AuthService } from "../../libs/firebase/AuthService";
 import { useNavigate } from "react-router-dom";
 import ResetForm, { ResetInput } from "./parts/ResetForm";
+import { useMessageDialog } from "../../hooks/UseMessageDialog";
 
 const service = new AuthService();
 
 export default function UserReset() {
+  const { showMessageDialog, renderDialog } = useMessageDialog();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
   const [failedMessage, setFailedMessage] = React.useState<string>("");
   const handleReset = async (input: ResetInput) => {
     try {
-        setFailedMessage("");
+      setFailedMessage("");
       setError(undefined);
       setLoading(true);
       const result = await service.sendPassResetMail(input.email);
       console.log(result);
       if (result.isSuccessful) {
-        alert(
-          "確認用のメールを送信しました。お手数ですがメールの内容を確認して、リセットを行なってください。"
+        await showMessageDialog(
+          "",
+          "確認用のメールを送信しました。メールの内容を確認して、リセットを行なってください。"
         );
         navigate("/");
         return;
       }
       if (result.isUserNotExists()) {
-        setFailedMessage("指定したメールアドレスが存在しません。入力内容をご確認ください。");
+        setFailedMessage(
+          "指定したメールアドレスが存在しません。入力内容をご確認ください。"
+        );
       } else if (result.hasError()) {
         setFailedMessage("エラーが発生しました。" + result.errorMessage);
       }
@@ -60,6 +65,7 @@ export default function UserReset() {
         </Grid>
         <LoadingSpinner message="Loading..." isLoading={loading} />
       </Grid>
+      {renderDialog()}
     </>
   );
 }

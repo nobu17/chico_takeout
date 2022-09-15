@@ -6,10 +6,12 @@ import PageTitle from "../../components/parts/PageTitle";
 import { AuthService } from "../../libs/firebase/AuthService";
 import SignUpForm, { SignUpInput } from "./parts/SignUpForm";
 import { useNavigate } from "react-router-dom";
+import { useMessageDialog } from "../../hooks/UseMessageDialog";
 
 const service = new AuthService();
 
 export default function UserSignUp() {
+  const { showMessageDialog, renderDialog } = useMessageDialog();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
@@ -23,8 +25,9 @@ export default function UserSignUp() {
       const result = await service.signUp(input.email, input.password);
       console.log(result);
       if (result.isSuccessful && result.mailSent) {
-        alert(
-          "確認用のメールを送信しました。お手数ですがメールの内容を確認して、本登録を行なってください。"
+        await showMessageDialog(
+          "",
+          "確認用のメールを送信しました。メールのリンクから、本登録を行なってください。"
         );
         navigate("/");
         return;
@@ -64,6 +67,7 @@ export default function UserSignUp() {
         </Grid>
         <LoadingSpinner message="Loading..." isLoading={loading} />
       </Grid>
+      {renderDialog()}
     </>
   );
 }

@@ -6,6 +6,7 @@ import PageTitle from "../../components/parts/PageTitle";
 import { useMyOrder } from "../../hooks/UseMyOrder";
 import PageMenu from "../../components/parts/PageMenu";
 import ReserveInfoCardList from "./parts/ReserveInfoCardList";
+import { useConfirmDialog } from "../../hooks/UseConfirmDialog";
 
 const myMenu = {
   title: "マイメニュー",
@@ -17,7 +18,8 @@ const myMenu = {
 };
 
 export default function MyHome() {
-  const { activeOrders, loadActive, cancelActive, loading, error } =
+  const { showConfirmDialog, renderConfirmDialog } = useConfirmDialog();
+  const { activeOrders, loadActive, cancelActive, loading, error, renderDialog } =
     useMyOrder();
 
   useEffect(() => {
@@ -28,7 +30,11 @@ export default function MyHome() {
   }, []);
 
   const handleCancel = async (id: string) => {
-    if (window.confirm("キャンセルしてもよろしいですか？")) {
+    const confirmResult = await showConfirmDialog(
+      "確認",
+      "キャンセルしてもよろしいですか？"
+    );
+    if (confirmResult) {
       await cancelActive(id);
     }
   };
@@ -63,6 +69,8 @@ export default function MyHome() {
           <PageMenu {...myMenu}></PageMenu>
         </Grid>
       </Grid>
+      {renderConfirmDialog()}
+      {renderDialog()}
     </>
   );
 }

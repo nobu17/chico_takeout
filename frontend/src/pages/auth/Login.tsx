@@ -1,3 +1,4 @@
+import * as React from "react";
 import { NavLink as RouterLink } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -7,8 +8,10 @@ import LoadingSpinner from "../../components/parts/LoadingSpinner";
 import LoginForm, { LoginInput } from "../admin/parts/LoginForm";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../components/contexts/AuthContext";
+import { useMessageDialog } from "../../hooks/UseMessageDialog";
 
 export default function UserLogin() {
+  const { showMessageDialog, renderDialog } = useMessageDialog();
   const navigate = useNavigate();
   const { signIn, loading, signInWithGoogle, signInWithTwitter } = useAuth();
   const handleSignIn = async (input: LoginInput) => {
@@ -16,7 +19,7 @@ export default function UserLogin() {
     if (result.isSuccessful) {
       navigate("/my_page");
     } else {
-      alert("ログインに失敗しました。");
+      await showMessageDialog("エラー", "ログインに失敗しました。");
     }
   };
   const handleSignInWithGoogle = async () => {
@@ -65,6 +68,7 @@ export default function UserLogin() {
           </Typography>
         </Grid>
       </Grid>
+      {renderDialog()}
     </>
   );
 }

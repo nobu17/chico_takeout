@@ -3,10 +3,12 @@ import { useAuth } from "../components/contexts/AuthContext";
 import OrderApi, { UserOrderInfo } from "../libs/apis/order";
 import { OffsetMinutesUserCanCancel } from "../libs/Constant";
 import { isBeforeFromNowStr } from "../libs/util/DateUtil";
+import { useMessageDialog } from "./UseMessageDialog";
 
 const api = new OrderApi();
 
 export function useMyOrder() {
+  const { showMessageDialog, renderDialog } = useMessageDialog();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const { state } = useAuth();
@@ -52,7 +54,8 @@ export function useMyOrder() {
       !state.isAdmin &&
       isBeforeFromNowStr(target.pickupDateTime, OffsetMinutesUserCanCancel)
     ) {
-      alert(
+      await showMessageDialog(
+        "",
         "直前のキャンセルはできません。お手数ですが店舗にご連絡お願いいたします。"
       );
       return;
@@ -92,6 +95,7 @@ export function useMyOrder() {
   };
 
   return {
+    renderDialog,
     activeOrders,
     orderHistory,
     loadActive,

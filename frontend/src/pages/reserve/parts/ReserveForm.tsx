@@ -23,12 +23,17 @@ import { usePickupDate, PickupDate } from "../../../hooks/UsePickupDate";
 import { useOrderableInfo } from "../../../hooks/UseOrderableInfo";
 import { useOrder } from "../../../hooks/UseOrder";
 import { useTimer } from "../../../hooks/UseTimer";
+import { useMessageDialog } from "../../../hooks/UseMessageDialog";
+import { useConfirmDialog } from "../../../hooks/UseConfirmDialog";
 import LoadingSpinner from "../../../components/parts/LoadingSpinner";
 
 const steps = ["日時選択", "商品選択", "お客様情報入力", "確認"];
 
 export default function ReserveForm() {
-  const navigation = useNavigate()
+  const { showMessageDialog, renderDialog } = useMessageDialog();
+  const { showConfirmDialog, renderConfirmDialog } = useConfirmDialog();
+
+  const navigation = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
   const [openSnack, setOpenSnack] = React.useState(false);
   const { cart, updateCart, resetCart } = useItemCart();
@@ -39,15 +44,15 @@ export default function ReserveForm() {
   const { loading: orderLoading, submitOrder, checkOrderExists } = useOrder();
 
   // if 30 minutes over, reload
-  useTimer(30, ()=>{
-    window.location.reload()
+  useTimer(30, () => {
+    window.location.reload();
   });
 
   useEffect(() => {
     const init = async () => {
       const error = await checkOrderExists();
       if (error) {
-        alert(error.message);
+        await showMessageDialog("エラー", error.message);
         navigation("/my_page");
       }
     };
@@ -78,13 +83,14 @@ export default function ReserveForm() {
   };
 
   const handleConfirmSubmit = async () => {
-    if (!window.confirm("注文を確定します。よろしいですか？")) {
+    const confirmResult = await showConfirmDialog("確認", "注文を確定します。よろしいですか？");
+    if (!confirmResult) {
       return;
     }
     setOpenSnack(false);
     const result = await submitOrder(pickupDate, cart, userInfo);
     if (result) {
-      alert("オーダーしました。");
+      await showMessageDialog("", "オーダーが完了しました。");
       navigation("/my_page");
     } else {
       setOpenSnack(true);
@@ -163,6 +169,8 @@ export default function ReserveForm() {
           </Alert>
         </Snackbar>
       </Container>
+      {renderDialog()}
+      {renderConfirmDialog()}
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { Button, Stack } from "@mui/material";
 import { ItemInfo, ItemRequest, Cart } from "../../../hooks/UseItemCart";
 import ItemList from "./ItemList";
+import { useMessageDialog } from "../../../hooks/UseMessageDialog";
 
 type ItemSelectProps = {
   allItems: CategoryItems[];
@@ -25,9 +26,13 @@ type CategoryItems = {
 };
 
 export default function ItemSelect(props: ItemSelectProps) {
-  const handleSubmit = () => {
+  const { showMessageDialog, renderDialog } = useMessageDialog();
+  const handleSubmit = async () => {
     if (Object.keys(props.cart.items).length <= 0) {
-      alert("注文するアイテムが選択されていません。");
+      await showMessageDialog(
+        "エラー",
+        "注文する商品を１つ以上選択してください。"
+      );
       return;
     }
     props.onSubmit?.();
@@ -35,7 +40,6 @@ export default function ItemSelect(props: ItemSelectProps) {
   const handleBack = () => {
     props.onBack?.();
   };
-
   return (
     <>
       <ItemList
@@ -51,6 +55,7 @@ export default function ItemSelect(props: ItemSelectProps) {
           戻る
         </Button>
       </Stack>
+      {renderDialog()}
     </>
   );
 }

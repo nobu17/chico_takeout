@@ -1,4 +1,5 @@
 export const OffsetMinutesUserCanCancel = 180;
+export const OffsetMinutesUserCanOrder = 190;
 
 export const StoreTimeList = [
   "06:00",

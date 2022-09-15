@@ -6,11 +6,12 @@ import { RhfSelects } from "../../../components/parts/Rhf/RhfSelects";
 
 import { PickupDate } from "../../../hooks/UsePickupDate";
 import {
-  ToDateString,
+  toDateString,
   GetTimeList,
-  IsFutureFromNow,
+  isBeforeFromNow,
   GetDateTimeFromStr,
 } from "../../../libs/util/DateUtil";
+import { OffsetMinutesUserCanOrder } from "../../../libs/Constant";
 
 type PickupSelectProps = {
   selectedInfo: PickupDate;
@@ -42,11 +43,11 @@ export default function PickupSelect(props: PickupSelectProps) {
   const onSubmit: SubmitHandler<PickupDate> = (data) => {
     setValue("time", data.time);
     const inputDateTime = GetDateTimeFromStr(data.date, data.time);
-    // check pick up time is over 1 hour later
-    if (!IsFutureFromNow(inputDateTime, 60)) {
+    // check pick up time is over 3 hours from now
+    if (isBeforeFromNow(inputDateTime, OffsetMinutesUserCanOrder)) {
       setError("time", {
         message:
-          "現在日時から近すぎるため、お手数ですが余裕を持った時間を指定してください。(お手数ですが画面をリロードすることをオススメします。)",
+          "現在日時から近すぎるため、お手数ですが余裕を持った時間を指定してください。(お手数ですが画面をリロードをお願いいたします。)",
       });
       return;
     }
@@ -61,7 +62,7 @@ export default function PickupSelect(props: PickupSelectProps) {
   }, []);
 
   const handleSelectDate = (date: Date) => {
-    const dateStr = ToDateString(date);
+    const dateStr = toDateString(date);
     setValue("date", dateStr);
     // reset selectable times
     setValue("time", "");
@@ -123,7 +124,7 @@ export default function PickupSelect(props: PickupSelectProps) {
               disablePast={true}
               shouldDisableDate={(day: Date) => {
                 // find from selectable date list
-                const dateStr = ToDateString(day);
+                const dateStr = toDateString(day);
                 const date = props.selectableInfo.find(
                   (item) => item.date === dateStr
                 );

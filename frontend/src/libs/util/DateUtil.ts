@@ -1,11 +1,11 @@
-export const ToDateString = (date: Date): string => {
+export const toDateString = (date: Date): string => {
   const y = date.getFullYear();
   const m = ("00" + (date.getMonth() + 1)).slice(-2);
   const d = ("00" + date.getDate()).slice(-2);
   return y + "/" + m + "/" + d;
 };
 
-export const ToDate = (strDate: string): Date => {
+export const toDate = (strDate: string): Date => {
   const splitted = strDate.split("/");
   const year = Number(splitted[0]);
   const month = Number(splitted[1]);
@@ -27,34 +27,32 @@ export const toDateTime = (strDateTime: string): Date => {
 const DayOfWeeks = ["日", "月", "火", "水", "木", "金", "土"];
 
 export const toDateTimeStrWithDayOfWeek = (date: Date): string => {
-  const dateStr = ToDateString(date);
+  const dateStr = toDateString(date);
   const dayOfWeek = DayOfWeeks[date.getDay()];
   const hourMin = toHourMinutesStr(date);
 
   return `${dateStr}(${dayOfWeek}) ${hourMin}`;
 };
 
-export const GetNowDate = (addDays: number): Date => {
-  const dt = new Date();
+export const getNowDate = (addDays: number): Date => {
+  const dt = getJSTNow();
   dt.setDate(dt.getDate() + addDays);
   return dt;
 };
 
-export const IsFutureFromNow = (date: Date, offsetMinutes: number): boolean => {
-  const now = addMinutes(new Date(), offsetMinutes);
-  return now < date;
+export const isBeforeFromNow = (date: Date, addMinutesOfNow: number): boolean => {
+  const now = addMinutes(getJSTNow(), addMinutesOfNow);
+  return now > date;
 };
 
-export const isFutureFromNowStr = (
-  datetimeStr: string,
-  offsetMinutes: number
-): boolean => {
+export const isBeforeFromNowStr = (datetimeStr: string, addMinutesOfNow: number): boolean => {
   const datetime = toDateTime(datetimeStr);
-  return IsFutureFromNow(datetime, offsetMinutes)
+  return isBeforeFromNow(datetime, addMinutesOfNow)
 };
+
 
 export const GetDateTimeFromStr = (date: string, time: string) => {
-  const tempDate = ToDate(date);
+  const tempDate = toDate(date);
   const tempTime = getDateFromTimeStr(time);
   return new Date(
     tempDate.getFullYear(),
@@ -120,3 +118,7 @@ const getDateFromTimeStr = (time: string): Date => {
 const addMinutes = (date: Date, minutes: number): Date => {
   return new Date(date.getTime() + minutes * 60000);
 };
+
+const getJSTNow = (): Date => {
+  return new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
+}

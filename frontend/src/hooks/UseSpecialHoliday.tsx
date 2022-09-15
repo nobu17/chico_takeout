@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { SpecialHoliday } from "../libs/SpecialHoliday";
 import SpecialHolidayApi from "../libs/apis/specialHoliday";
-import { ToDateString, GetNowDate } from "../libs/util/DateUtil";
+import { toDateString, getNowDate } from "../libs/util/DateUtil";
 import { ApiError } from "../libs/apis/apibase";
 
 const defaultSpecialHoliday: SpecialHoliday = {
   id: "",
   name: "",
-  start: ToDateString(GetNowDate(7)),
-  end: ToDateString(GetNowDate(8)),
+  start: toDateString(getNowDate(7)),
+  end: toDateString(getNowDate(8)),
 };
 
 const api = new SpecialHolidayApi();

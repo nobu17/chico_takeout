@@ -11,7 +11,7 @@ import {
 } from "../../../../libs/ErrorMessages";
 
 import { startDateIsLessThanEndDate } from "../../../../libs/util/TimeCompare";
-import { ToDate, ToDateString } from "../../../../libs/util/DateUtil";
+import { toDate, toDateString } from "../../../../libs/util/DateUtil";
 
 type SpecialHolidayFormProps = {
   editItem: SpecialHoliday;
@@ -36,8 +36,8 @@ const convertInput = (item: SpecialHoliday): SpecialHolidayInput => {
   return {
     id: item.id,
     name: item.name,
-    start: ToDate(item.start),
-    end: ToDate(item.end),
+    start: toDate(item.start),
+    end: toDate(item.end),
   };
 };
 
@@ -45,8 +45,8 @@ const reverseInput = (item: SpecialHolidayInput): SpecialHoliday => {
   return {
     id: item.id,
     name: item.name,
-    start: ToDateString(item.start),
-    end: ToDateString(item.end),
+    start: toDateString(item.start),
+    end: toDateString(item.end),
   };
 };
 

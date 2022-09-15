@@ -15,7 +15,7 @@ import {
 } from "../../../../libs/ErrorMessages";
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
-import { ToDate, ToDateString } from "../../../../libs/util/DateUtil";
+import { toDate, toDateString } from "../../../../libs/util/DateUtil";
 
 type SpecialBusinessHourFormProps = {
   editItem: SpecialBusinessHour;
@@ -43,7 +43,7 @@ const convertInput = (item: SpecialBusinessHour): SpecialBusinessHourInput => {
   return {
     id: item.id,
     name: item.name,
-    date: ToDate(item.date),
+    date: toDate(item.date),
     start: item.start,
     end: item.end,
     businessHourId: item.businessHourId,
@@ -54,7 +54,7 @@ const reverseInput = (item: SpecialBusinessHourInput): SpecialBusinessHour => {
   return {
     id: item.id,
     name: item.name,
-    date: ToDateString(item.date),
+    date: toDateString(item.date),
     start: item.start,
     end: item.end,
     businessHourId: item.businessHourId,

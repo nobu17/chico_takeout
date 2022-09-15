@@ -2,7 +2,7 @@ import * as React from "react";
 import { styled, TextField } from "@mui/material";
 import { StaticDatePicker } from "@mui/x-date-pickers";
 import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
-import { ToDateString } from "../../../../libs/util/DateUtil";
+import { toDateString } from "../../../../libs/util/DateUtil";
 import { UserOrderInfo } from "../../../../libs/apis/order";
 
 type OrderCalendarProps = {
@@ -41,7 +41,7 @@ export default function OrderCalendar(props: OrderCalendarProps) {
       return <PickersDay {...pickersDayProps} />;
     }
 
-    const dateStr = ToDateString(date);
+    const dateStr = toDateString(date);
     let hasOrder = false;
     const foundIndex = props.orders!.findIndex(
       (x) => x.pickupDateTime.startsWith(dateStr)
@@ -66,7 +66,7 @@ export default function OrderCalendar(props: OrderCalendarProps) {
         onChange={(newValue) => {
           setValue(newValue);
           if(newValue) {
-            const dateStr = ToDateString(newValue);
+            const dateStr = toDateString(newValue);
             const sameDates = props.orders!.filter(x => x.pickupDateTime.startsWith(dateStr));
             props.onSelected!(sameDates);
           }

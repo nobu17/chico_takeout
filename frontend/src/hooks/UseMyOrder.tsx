@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../components/contexts/AuthContext";
 import OrderApi, { UserOrderInfo } from "../libs/apis/order";
 import { OffsetMinutesUserCanCancel } from "../libs/Constant";
-import { isFutureFromNowStr } from "../libs/util/DateUtil";
+import { isBeforeFromNowStr } from "../libs/util/DateUtil";
 
 const api = new OrderApi();
 
@@ -50,10 +50,10 @@ export function useMyOrder() {
     // not admin can not cancel before 3 hours
     if (
       !state.isAdmin &&
-      isFutureFromNowStr(target.pickupDateTime, OffsetMinutesUserCanCancel)
+      isBeforeFromNowStr(target.pickupDateTime, OffsetMinutesUserCanCancel)
     ) {
       alert(
-        "直前の予約はできません。お手数ですが店舗にご連絡お願いいたします。"
+        "直前のキャンセルはできません。お手数ですが店舗にご連絡お願いいたします。"
       );
       return;
     }

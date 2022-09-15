@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SpecialBusinessHour } from "../libs/SpecialBusinessHour";
 import SpecialBusinessHourApi from "../libs/apis/specialBusinessHour";
-import { ToDateString } from "../libs/util/DateUtil";
+import { toDateString, getNowDate } from "../libs/util/DateUtil";
 import { ApiError } from "../libs/apis/apibase";
 
 const defaultSpecialBusinessHour: SpecialBusinessHour = {
@@ -9,7 +9,7 @@ const defaultSpecialBusinessHour: SpecialBusinessHour = {
   name: "",
   start: "08:00",
   end: "10:00",
-  date: ToDateString(new Date()),
+  date: toDateString(getNowDate(0)),
   businessHourId: "",
 };
 

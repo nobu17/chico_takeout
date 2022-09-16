@@ -90,7 +90,7 @@ func NewOrderInfo(userId, userName, userEmail, userTelNo, memo, pickupDateTime s
 
 func NewOrderInfoForOrm(id, userId, userName, userEmail, userTelNo, memo, pickupDateTime, orderDateTime string, stockItems []OrderStockItem, foodItems []OrderFoodItem, canceled bool) (*OrderInfo, error) {
 	memoVal, _ := NewMemo(memo, OrderInfoMaxMemoLength)
-	userNameV, _ := NewUserName(userTelNo, UserNameMaxLength)
+	userNameV, _ := NewUserName(userName, UserNameMaxLength)
 	userEmailV, _ := NewEmail(userEmail)
 	userTelNoV, _ := NewTelNo(userTelNo)
 	order := &OrderInfo{

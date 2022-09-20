@@ -19,7 +19,6 @@ type CategoryItems = {
 };
 
 export default function ItemList(props: ItemListProps) {
-  console.log("item list cart:::", props.cart);
   const getQuantity = (itemId: string): number => {
     if (props.cart.items[itemId]) {
       return props.cart.items[itemId].quantity;

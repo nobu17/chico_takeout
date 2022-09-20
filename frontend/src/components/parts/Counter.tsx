@@ -13,7 +13,7 @@ export default function Counter(props: CounterProps) {
   const [count, setCount] = React.useState(props.count);
 
   const handleAdd = () => {
-    if (lessThanMax()) {
+    if (lessThanEqualMax()) {
       const newVal = count + 1;
       setCount(newVal);
       props.onChanged?.(newVal);
@@ -28,11 +28,11 @@ export default function Counter(props: CounterProps) {
     }
   };
 
-  const lessThanMax = (): boolean => {
+  const lessThanEqualMax = (): boolean => {
     if (!props.max) {
       return true;
     }
-    if (count + 1 < props.max) {
+    if (count + 1 <= props.max) {
       return true;
     }
     return false;

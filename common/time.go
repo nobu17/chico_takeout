@@ -29,6 +29,28 @@ func GetNowDate() *time.Time {
 	return &t
 }
 
+func GetNowDateWithOffset(offsetMinutes int) *time.Time {
+	now := now().In(jst)
+	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
+	t = t.Add(time.Duration(offsetMinutes) * time.Minute)
+	return &t
+}
+
+func GetNowTimeStr(offsetMinutes int) string {
+	now := GetNowDate()
+	afterNow := now.Add(time.Duration(offsetMinutes) * time.Minute)
+	return ConvertTimeToTimeStr(afterNow)
+}
+
+func GetRound(t time.Time, roundMinutes int) time.Time {
+	r := t.Round(time.Duration(roundMinutes) * time.Minute)
+
+	if !r.After(t) {
+		r = r.Add(time.Duration(roundMinutes) * time.Minute)
+	}
+	return r
+}
+
 func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	timeLayout := "2006/01/02T15:04"
 	currentTime := now().In(jst)
@@ -39,7 +61,7 @@ func ConvertStrToTime(timeStr string) (*time.Time, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &actualTime, nil
 }
 
@@ -96,6 +118,31 @@ func StartIsBeforeEnd(start, end time.Time, offsetMinutes float64) bool {
 	return diff.Minutes() > offsetMinutes
 }
 
+func StartIsBeforeEndDateStr(startDate, endDate string) (bool, error) {
+	start, err := ConvertStrToDate(startDate)
+	if err != nil {
+		return false, err
+	}
+	end, err := ConvertStrToDate(endDate)
+	if err != nil {
+		return false, err
+	}
+	return start.Before(*end), nil
+}
+
+func StartTimeIsBeforeEndTimeStr(startStr, endStr string, offsetMinutes float64) (bool, error) {
+	// format is hh:mm
+	start, err := ConvertStrToTime(startStr)
+	if err != nil {
+		return false, err
+	}
+	end, err := ConvertStrToTime(endStr)
+	if err != nil {
+		return false, err
+	}
+	return StartIsBeforeEnd(*start, *end, offsetMinutes), nil
+}
+
 func IsOverlap(start1, end1, start2, end2 time.Time) bool {
 	// B.start(start2) < A.end(end1) && A.start(start1) < B.end(end2)
 	return (start2.Before(end1) && start1.Before(end2))
@@ -121,6 +168,23 @@ func IsInRangeTime(startTime, endTime, targetDateTime time.Time) bool {
 	isAfterStart := comDate.After(acStDate)
 	isBeforeEnd := comDate.Before(acEdDate)
 	return isAfterStart && isBeforeEnd
+}
+
+func IsInRangeTimeStr(startTime, endTime, targetTime string) (bool, error) {
+	start, err := ConvertStrToTime(startTime)
+	if err != nil {
+		return false, err
+	}
+	end, err := ConvertStrToTime(endTime)
+	if err != nil {
+		return false, err
+	}
+	target, err := ConvertStrToTime(targetTime)
+	if err != nil {
+		return false, err
+	}
+
+	return IsInRangeTime(*start, *end, *target), nil
 }
 
 func IsAfterFromNow(target time.Time, offsetHour int) bool {

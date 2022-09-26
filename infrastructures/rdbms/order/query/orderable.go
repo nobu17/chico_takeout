@@ -122,7 +122,64 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	data.StartDate = common.ConvertTimeToDateStr(startDate)
 	data.EndDate = common.ConvertTimeToDateStr(endDate)
 	data.PerDayInfo = infoLists
+
+	o.modifyTodayInfo(&data)
+
 	return &data, nil
+}
+
+func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableInfo) error {
+	// add offset minutes (180min) and round as 30 minutes (ex:10:10 => 13:30)
+	now := common.GetRound(*common.GetNowDateWithOffset(common.OffsetMinutesOrderableBefore), 30)
+	today := common.ConvertTimeToDateStr(now)
+	currentTargetTime := common.ConvertTimeToTimeStr(now)
+
+	modifiedOrder := []order.PerDayOrderableInfo{}
+	for _, perDay := range info.PerDayInfo {
+		// if date is before from current, skip
+		isBefore, err := common.StartIsBeforeEndDateStr(perDay.Date, today)
+		if err != nil {
+			return err
+		}
+		if isBefore {
+			fmt.Printf("isBefore Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
+			fmt.Println("")
+			continue
+		}
+		// if date is today. check start and end
+		if perDay.Date == today {
+			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.EndTime, currentTargetTime, 0)
+			if err != nil {
+				return err
+			}
+			// if end is over, not target
+			if isOver {
+				fmt.Printf("isOver Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
+				fmt.Println("")
+				continue
+			}
+			// if in range change start time
+			isInRange, err := common.IsInRangeTimeStr(perDay.StartTime, perDay.EndTime, currentTargetTime)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("isInRange:%t, st:%s, ed:%s, cr:%s", isInRange, perDay.StartTime, perDay.EndTime, currentTargetTime)
+			fmt.Println("")
+			if isInRange {
+				perDay.StartTime = currentTargetTime
+				// if start and end is same. skip
+				if perDay.StartTime == perDay.EndTime {
+					continue
+				}
+			}
+		}
+		fmt.Printf("added Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
+		fmt.Println("")
+		modifiedOrder = append(modifiedOrder, perDay)
+	}
+	// update
+	info.PerDayInfo = modifiedOrder
+	return nil
 }
 
 func (o *OrderableInfoRdbmsQueryService) getStockItems() ([]order.OrderableItemInfo, error) {
@@ -137,7 +194,7 @@ func (o *OrderableInfoRdbmsQueryService) getStockItems() ([]order.OrderableItemI
 	for _, item := range models {
 		if !item.Enabled {
 			continue
-		} 
+		}
 		info := order.OrderableItemInfo{}
 		info.Id = item.ID
 		info.ItemType = "stock"

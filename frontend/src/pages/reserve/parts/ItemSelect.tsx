@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import { ItemInfo, ItemRequest, Cart } from "../../../hooks/UseItemCart";
 import ItemList from "./ItemList";
 import { useMessageDialog } from "../../../hooks/UseMessageDialog";
@@ -42,6 +42,18 @@ export default function ItemSelect(props: ItemSelectProps) {
   };
   return (
     <>
+      <Typography
+        component="h6"
+        variant="h6"
+        align="center"
+        color="error"
+        gutterBottom
+        sx={{
+          mt: 3,
+        }}
+      >
+        ※価格は全て税込みです。
+      </Typography>
       <ItemList
         cart={props.cart}
         allItems={props.allItems}

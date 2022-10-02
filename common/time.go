@@ -36,6 +36,12 @@ func GetNowDateWithOffset(offsetMinutes int) *time.Time {
 	return &t
 }
 
+func GetDateWithOffset(base time.Time, offsetMinutes int) *time.Time {
+	t := time.Date(base.Year(), base.Month(), base.Day(), base.Hour(), base.Minute(), 0, 0, jst)
+	t = t.Add(time.Duration(offsetMinutes) * time.Minute)
+	return &t
+}
+
 func GetNowTimeStr(offsetMinutes int) string {
 	now := GetNowDate()
 	afterNow := now.Add(time.Duration(offsetMinutes) * time.Minute)

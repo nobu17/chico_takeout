@@ -1,7 +1,6 @@
 package order
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -17,7 +16,7 @@ type orderTaskUseCase struct {
 	mailerService SendOrderMailService
 }
 
-func NewOrderTaskUseCase(orderRepos domains.OrderInfoRepository, mailerService SendOrderMailService,) OrderTaskUseCase {
+func NewOrderTaskUseCase(orderRepos domains.OrderInfoRepository, mailerService SendOrderMailService) OrderTaskUseCase {
 	return &orderTaskUseCase{
 		filter: *domains.NewOrderFilter(orderRepos),
 		mailerService: mailerService,
@@ -29,13 +28,17 @@ func (o *orderTaskUseCase) NotifyDailyOrder(start time.Time) error {
 	if err != nil {
 		return err
 	}
+	var mailData *ReservationSummaryMailData;
 	if len(orders) == 0 {
-		fmt.Println("no orders")
-		return nil
-	}
-	mailData, err := NewReservationSummaryMailData(orders, os.Getenv("MAIL_FROM"), start)
-	if err != nil {
-		return err
+		mailData, err = NewNoReservationSummaryMailData(os.Getenv("MAIL_FROM"), start)
+		if err != nil {
+			return err
+		}
+	} else {
+		mailData, err = NewReservationSummaryMailData(orders, os.Getenv("MAIL_FROM"), start)
+		if err != nil {
+			return err
+		}
 	}
 
 	return o.mailerService.SendDailySummary(*mailData)

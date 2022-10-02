@@ -97,7 +97,7 @@ type ReservationSummaryMailData struct {
 }
 
 func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
-	title := fmt.Sprintf("本日のオーダー情報(%s)", common.ConvertTimeToDateStr(startDateTime))
+	title := fmt.Sprintf("(テイクアウト)本日のオーダー情報(%s)", common.ConvertTimeToDateStr(startDateTime))
 
 	b := &strings.Builder{}
 	b.WriteString(fmt.Sprintf("本日のオーダー情報は下記になります。(%s 以降)", common.ConvertTimeToTimeStr(startDateTime)))
@@ -136,6 +136,26 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom string, 
 		b.WriteString(fmt.Sprintf("合計:: %d円", order.GetTotalCost()))
 		b.WriteString("\n\n")
 	}
+
+	message := b.String()
+	sendTo := []string{os.Getenv("MAIL_ADMIN")}
+	bcc := ""
+
+	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
+	if err != nil {
+		return nil, err
+	}
+	return &ReservationSummaryMailData{
+		commonMailData: *comm,
+	}, nil
+}
+
+func NewNoReservationSummaryMailData(sendFrom string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
+	title := fmt.Sprintf("(テイクアウト)本日のオーダーはありません(%s)", common.ConvertTimeToDateStr(startDateTime))
+
+	b := &strings.Builder{}
+	b.WriteString(fmt.Sprintf("本日のオーダーはありません。(%s 以降)", common.ConvertTimeToTimeStr(startDateTime)))
+	b.WriteString("\n\n")
 
 	message := b.String()
 	sendTo := []string{os.Getenv("MAIL_ADMIN")}

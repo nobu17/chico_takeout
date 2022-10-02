@@ -21,9 +21,13 @@ func TestNotifyDailyOrder_NoOrderDate(t *testing.T) {
 
 	date := time.Date(2020, 7, 19, 10, 0, 0, 0, jst)
 	useCase.NotifyDailyOrder(date)
-
-	// ensure mail is not sent
-	assert.Nil(t, mail.DummyData)
+	
+	// ensure no-order mail is sent
+	assert.Equal(t, "from@dummy.co.jp", mail.DummyData.SendFrom)
+	assert.Equal(t, []string{"admin@dummy.co.jp"}, mail.DummyData.SendTo)
+	assert.Equal(t, "", mail.DummyData.Bcc)
+	assert.Equal(t, "本日のオーダーはありません(2020/07/19)", mail.DummyData.Title)
+	assert.Equal(t, true, strings.Contains(mail.DummyData.Message, "本日のオーダーはありません。"))
 }
 
 func TestNotifyDailyOrder_NoOrderTime(t *testing.T) {
@@ -34,8 +38,12 @@ func TestNotifyDailyOrder_NoOrderTime(t *testing.T) {
 	date := time.Date(2050, 12, 10, 12, 1, 0, 0, jst)
 	useCase.NotifyDailyOrder(date)
 
-	// ensure mail is not sent
-	assert.Nil(t, mail.DummyData)
+	// ensure no-order mail is sent
+	assert.Equal(t, "from@dummy.co.jp", mail.DummyData.SendFrom)
+	assert.Equal(t, []string{"admin@dummy.co.jp"}, mail.DummyData.SendTo)
+	assert.Equal(t, "", mail.DummyData.Bcc)
+	assert.Equal(t, "本日のオーダーはありません(2050/12/10)", mail.DummyData.Title)
+	assert.Equal(t, true, strings.Contains(mail.DummyData.Message, "本日のオーダーはありません。"))
 }
 
 func TestNotifyDailyOrder_CanceledOrder_NotSent(t *testing.T) {
@@ -46,8 +54,12 @@ func TestNotifyDailyOrder_CanceledOrder_NotSent(t *testing.T) {
 	date := time.Date(2050, 12, 11, 07, 1, 0, 0, jst)
 	useCase.NotifyDailyOrder(date)
 
-	// ensure mail is not sent
-	assert.Nil(t, mail.DummyData)
+	// ensure no-order mail is sent
+	assert.Equal(t, "from@dummy.co.jp", mail.DummyData.SendFrom)
+	assert.Equal(t, []string{"admin@dummy.co.jp"}, mail.DummyData.SendTo)
+	assert.Equal(t, "", mail.DummyData.Bcc)
+	assert.Equal(t, "本日のオーダーはありません(2050/12/11)", mail.DummyData.Title)
+	assert.Equal(t, true, strings.Contains(mail.DummyData.Message, "本日のオーダーはありません。"))
 }
 
 func TestNotifyDailyOrder_SentMail(t *testing.T) {

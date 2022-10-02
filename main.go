@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"chico/takeout/common"
 	itemHandler "chico/takeout/handlers/item"
 	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
@@ -45,6 +46,7 @@ func main() {
 		port = "80"
 		fmt.Println("failed to get setting run port. run as port 80")
 	}
+	go scheduleTask(db)
 	r.Run(":" + port)
 }
 
@@ -251,11 +253,13 @@ func setUpDb() *gorm.DB {
 	}
 	fmt.Println("db connected: ", &db)
 
-	migrateDb(db)
-
+	sqlDb, err := db.DB()
 	if err != nil {
 		panic(err.Error())
 	}
+	sqlDb.SetConnMaxLifetime(time.Hour)
+
+	migrateDb(db)
 
 	return db
 }
@@ -310,5 +314,33 @@ func migrateDb(db *gorm.DB) {
 	err = db.AutoMigrate(&orderRDBMS.OrderInfoModel{})
 	if err != nil {
 		panic(err.Error())
+	}
+}
+
+func scheduleTask(db *gorm.DB) {
+	mailer := smtp.NewSmtpSendOrderMail()
+	orderRepo, err := orderRDBMS.NewOrderInfoRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	useCase := orderUseCase.NewOrderTaskUseCase(orderRepo, mailer)
+	task, err := common.NewDailySchedularTask("08:00", func() {
+		mErr := useCase.NotifyDailyOrder(*common.GetNowDate())
+		if mErr != nil {
+			fmt.Println("mail send fail", mErr)
+			return
+		}
+	})
+	if err != nil {
+		panic("failed to init schedular")
+	}
+	timer := time.NewTicker(time.Minute * 10)
+	defer timer.Stop()
+
+	for {
+		select {
+		case <-timer.C:
+			task.CheckAndExecTask()
+		}
 	}
 }

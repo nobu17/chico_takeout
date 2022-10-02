@@ -106,9 +106,11 @@ func NewOrderInfoForOrm(id, userId, userName, userEmail, userTelNo, memo, pickup
 		foodItems:      foodItems,
 		canceled:       canceled,
 	}
+	pD, _ := NewDateTime(pickupDateTime)
+	order.pickupDateTime.DateTime = *pD
 
-	order.pickupDateTime.value = pickupDateTime
-	order.orderDateTime.value = orderDateTime
+	oD, _ := NewDateTime(orderDateTime)
+	order.orderDateTime.DateTime = *oD
 
 	return order, nil
 }

@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { getTotal, UserOrderInfo } from "../../../libs/apis/order";
+import { UserOrderInfo } from "../../../libs/apis/order";
 import { AppBar, Toolbar } from "@mui/material";
 
 import ItemTable from "./ItemTable";
@@ -22,7 +22,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 type OrderDetailDialogProps = {
-  order: UserOrderInfo;
+  order: UserOrderInfo | undefined;
   open: boolean;
   onClose: () => void;
 };
@@ -31,6 +31,10 @@ export default function OrderDetailDialog(props: OrderDetailDialogProps) {
   const handleClose = () => {
     props.onClose();
   };
+
+  if (props.order === undefined) {
+    return <></>;
+  }
 
   return (
     <>
@@ -63,9 +67,6 @@ export default function OrderDetailDialog(props: OrderDetailDialogProps) {
           注文商品
         </Typography>
         <ItemTable {...props.order}></ItemTable>
-        <Typography variant="h6" sx={{ px: 2, py: 1 }} textAlign="right">
-          合計金額: ¥ {getTotal(props.order).toLocaleString()}
-        </Typography>
         <Typography textAlign="center" variant="h5" sx={{ py: 2 }}>
           お客様情報
         </Typography>

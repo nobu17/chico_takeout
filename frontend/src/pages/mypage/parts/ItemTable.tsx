@@ -1,5 +1,6 @@
 import * as React from "react";
 import { UserOrderItem } from "../../../libs/apis/order";
+import { getTotalByItems } from "../../../libs/apis/order";
 import {
   Paper,
   Table,
@@ -52,6 +53,17 @@ export default function ItemTable(props: ItemTableProps) {
               </TableRow>
             );
           })}
+          <TableRow key="summary">
+            <TableCell>合計金額</TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell>
+              {getTotalByItems(
+                props.stockItems,
+                props.foodItems
+              ).toLocaleString()}
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </TableContainer>

@@ -6,6 +6,7 @@ import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { Alert } from "@mui/material";
 import ReserveInfoDialog from "../../../mypage/reserve/parts/ReserveInfoDialog";
+import OrderDetailDialog from "../../../mypage/parts/OrderDetailDialog";
 
 export default function CalendarTable() {
   const { orderHistory, loadHistory, cancelOrder, loading, error } =
@@ -78,7 +79,11 @@ export default function CalendarTable() {
           onCancelSelected={handleCancelSelected}
         ></OrderTable>
       </div>
-      <ReserveInfoDialog open={open} item={selectedItem} onClose={onClose} />
+      <OrderDetailDialog
+        open={open}
+        onClose={onClose}
+        order={selectedItem}
+      ></OrderDetailDialog>
       <LoadingSpinner message="Loading..." isLoading={loading} />
     </>
   );

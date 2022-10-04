@@ -1,14 +1,14 @@
-import OrderCalendar from "./OrderCalendar";
 import OrderTable from "../../../../components/parts/OrderTable";
 import { UserOrderInfo } from "../../../../libs/apis/order";
 import { useAdminOrder } from "../../../../hooks/UseAdminOrder";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { Alert } from "@mui/material";
-import ReserveInfoDialog from "../../../mypage/reserve/parts/ReserveInfoDialog";
+import OrderDetailDialog from "../../../mypage/parts/OrderDetailDialog";
 
 export default function OrderTableList() {
-  const { orderHistory, loadHistory, cancelOrder, loading, error } = useAdminOrder();
+  const { orderHistory, loadHistory, cancelOrder, loading, error } =
+    useAdminOrder();
   const [open, setOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<UserOrderInfo>();
 
@@ -68,7 +68,11 @@ export default function OrderTableList() {
           onCancelSelected={handleCancelSelected}
         ></OrderTable>
       </div>
-      <ReserveInfoDialog open={open} item={selectedItem} onClose={onClose} />
+      <OrderDetailDialog
+        open={open}
+        onClose={onClose}
+        order={selectedItem}
+      ></OrderDetailDialog>
       <LoadingSpinner message="Loading..." isLoading={loading} />
     </>
   );

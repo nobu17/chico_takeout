@@ -6,6 +6,7 @@ import { useMyOrder } from "../../../../hooks/UseMyOrder";
 import { UserOrderInfo } from "../../../../libs/apis/order";
 import ReserveInfoDialog from "./ReserveInfoDialog";
 import OrderTable from "../../../../components/parts/OrderTable";
+import OrderDetailDialog from "../../parts/OrderDetailDialog";
 
 export default function ReserveHistoryTable() {
   const { orderHistory, loadHistory, loading, error } = useMyOrder();
@@ -48,7 +49,11 @@ export default function ReserveHistoryTable() {
           onSelected={handleSelect}
         ></OrderTable>
       </div>
-      <ReserveInfoDialog open={open} item={item} onClose={onClose} />
+      <OrderDetailDialog
+        open={open}
+        onClose={onClose}
+        order={item}
+      ></OrderDetailDialog>
       <LoadingSpinner message="Loading..." isLoading={loading} />
     </>
   );

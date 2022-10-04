@@ -7,6 +7,7 @@ type AuthState = {
   isAuthorized: boolean;
   isAdmin: boolean;
   uid: string;
+  email: string;
 };
 
 type ContextType = {
@@ -19,7 +20,12 @@ type ContextType = {
 };
 
 const service = new AuthService();
-const initialState = { isAuthorized: false, isAdmin: false, uid: "" };
+const initialState = {
+  isAuthorized: false,
+  isAdmin: false,
+  uid: "",
+  email: "",
+};
 
 const AuthContext = createContext({} as ContextType);
 
@@ -39,6 +45,7 @@ export const AdminAuthProvider = ({ children }: any) => {
       isAuthorized: result.isSuccessful,
       isAdmin: result.isAdmin,
       uid: result.uid,
+      email: result.email,
     });
     setLoading(false);
     return result;
@@ -71,14 +78,16 @@ export const AdminAuthProvider = ({ children }: any) => {
         isAuthorized: result.isSuccessful,
         isAdmin: result.isAdmin,
         uid: result.uid,
+        email: result.email,
       });
-    })
+    });
     service.onAuthStateChange((result) => {
       setInitializing(false);
       setState({
         isAuthorized: result.isSuccessful,
         isAdmin: result.isAdmin,
         uid: result.uid,
+        email: result.email,
       });
     });
   }, []);

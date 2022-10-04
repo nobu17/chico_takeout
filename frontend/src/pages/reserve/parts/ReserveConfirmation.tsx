@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Stack, Button } from "@mui/material";
+import { Stack, Button, Typography } from "@mui/material";
 import { UserInfo } from "../../../hooks/UseUserInfo";
 import { Cart } from "../../../hooks/UseItemCart";
 import UserInfoConfirmation from "./UserInfoConfirmation";
@@ -21,6 +21,17 @@ interface callbackBack {
 export default function ReserveConfirmation(props: ReserveConfirmationProps) {
   return (
     <>
+      <Typography
+        variant="subtitle1"
+        align="center"
+        color="error"
+        gutterBottom
+        sx={{
+          mt: 3,
+        }}
+      >
+        ※店舗での当日精算になります。
+      </Typography>
       <UserInfoConfirmation userInfo={props.userInfo} />
       <ItemConfirmation cart={props.cart} />
       <Stack direction="row" spacing={2}>

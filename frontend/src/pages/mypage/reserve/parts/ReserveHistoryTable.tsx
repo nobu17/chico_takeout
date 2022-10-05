@@ -4,7 +4,6 @@ import { Alert } from "@mui/material";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { useMyOrder } from "../../../../hooks/UseMyOrder";
 import { UserOrderInfo } from "../../../../libs/apis/order";
-import ReserveInfoDialog from "./ReserveInfoDialog";
 import OrderTable from "../../../../components/parts/OrderTable";
 import OrderDetailDialog from "../../parts/OrderDetailDialog";
 

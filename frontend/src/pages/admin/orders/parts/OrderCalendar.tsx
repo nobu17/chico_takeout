@@ -2,7 +2,7 @@ import * as React from "react";
 import { styled, TextField } from "@mui/material";
 import { StaticDatePicker } from "@mui/x-date-pickers";
 import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
-import { toDateString } from "../../../../libs/util/DateUtil";
+import { toDateString, getNowDate } from "../../../../libs/util/DateUtil";
 import { UserOrderInfo } from "../../../../libs/apis/order";
 
 type OrderCalendarProps = {
@@ -31,7 +31,18 @@ const CustomPickersDay = styled(PickersDay, {
 })) as React.ComponentType<CustomPickerDayProps>;
 
 export default function OrderCalendar(props: OrderCalendarProps) {
-  const [value, setValue] = React.useState<Date | null>(new Date());
+  const [value, setValue] = React.useState<Date | null>(null);
+
+  React.useEffect(() => {
+    const today = getNowDate(0);
+    setValue(today);
+    const dateStr = toDateString(today);
+    const sameDates = props.orders!.filter((x) =>
+      x.pickupDateTime.startsWith(dateStr)
+    );
+    props.onSelected!(sameDates);
+  }, [props.orders]);
+
   const renderDay = (
     date: Date,
     selectedDates: Array<Date | null>,
@@ -43,8 +54,8 @@ export default function OrderCalendar(props: OrderCalendarProps) {
 
     const dateStr = toDateString(date);
     let hasOrder = false;
-    const foundIndex = props.orders!.findIndex(
-      (x) => x.pickupDateTime.startsWith(dateStr)
+    const foundIndex = props.orders!.findIndex((x) =>
+      x.pickupDateTime.startsWith(dateStr)
     );
     if (foundIndex >= 0) {
       hasOrder = true;
@@ -65,9 +76,11 @@ export default function OrderCalendar(props: OrderCalendarProps) {
         value={value}
         onChange={(newValue) => {
           setValue(newValue);
-          if(newValue) {
+          if (newValue) {
             const dateStr = toDateString(newValue);
-            const sameDates = props.orders!.filter(x => x.pickupDateTime.startsWith(dateStr));
+            const sameDates = props.orders!.filter((x) =>
+              x.pickupDateTime.startsWith(dateStr)
+            );
             props.onSelected!(sameDates);
           }
         }}

@@ -2,7 +2,6 @@ package order
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -21,15 +20,15 @@ type OrderCompleteMailData struct {
 	commonMailData
 }
 
-func NewOrderCompleteMailData(order *domains.OrderInfo, sendFrom string) (*OrderCompleteMailData, error) {
+func NewOrderCompleteMailData(order *domains.OrderInfo, sendFrom, adminMail string) (*OrderCompleteMailData, error) {
 	title := "予約完了のお知らせ.(CHICO SPICE)"
 
 	b := &strings.Builder{}
 	b.WriteString("テイクアウトの予約が完了いたしました。")
 	b.WriteString("\n\n")
-	b.WriteString("**ご注文内容に関してはマイページからご確認下さい。**")
+	b.WriteString("※ご注文内容に関してはマイページからご確認下さい。")
 	b.WriteString("\n")
-	b.WriteString("**決済は当日、店舗にて実施させていただきます。**")
+	b.WriteString("※決済は当日、店舗にて実施させていただきます。")
 	b.WriteString("\n\n")
 
 	b.WriteString("--予約情報--")
@@ -46,12 +45,12 @@ func NewOrderCompleteMailData(order *domains.OrderInfo, sendFrom string) (*Order
 	b.WriteString("\n")
 
 	b.WriteString("\n\n")
-	b.WriteString(fmt.Sprintf("本メールに心当たりが無い方は、お手数ですが(%s)宛にご連絡をお願いいたします。(本メールは送信専用アドレスから送信しているため、直接の返信は不可能です。)", sendFrom))
+	b.WriteString(fmt.Sprintf("本メールに心当たりが無い方は、お手数ですが(%s)宛にご連絡をお願いいたします。(本メールは送信専用アドレスから送信しているため、直接の返信は不可能です。)", adminMail))
 	b.WriteString("\n")
 
 	message := b.String()
 	sendTo := []string{order.GetUserEmail()}
-	bcc := os.Getenv("MAIL_ADMIN")
+	bcc := adminMail
 
 	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
 	if err != nil {
@@ -66,7 +65,7 @@ type OrderCancelMailData struct {
 	commonMailData
 }
 
-func NewOrderCancelMailData(order *domains.OrderInfo, sendFrom string) (*OrderCancelMailData, error) {
+func NewOrderCancelMailData(order *domains.OrderInfo, sendFrom, adminMail string) (*OrderCancelMailData, error) {
 	title := "キャンセル完了のお知らせ.(CHICO SPICE)"
 
 	b := &strings.Builder{}
@@ -76,12 +75,12 @@ func NewOrderCancelMailData(order *domains.OrderInfo, sendFrom string) (*OrderCa
 	b.WriteString("\n\n")
 
 	b.WriteString("\n\n")
-	b.WriteString(fmt.Sprintf("本メールに心当たりが無い方は、お手数ですが(%s)宛にご連絡をお願いいたします。(本メールは送信専用アドレスから送信しているため、直接の返信は不可能です。)", sendFrom))
+	b.WriteString(fmt.Sprintf("本メールに心当たりが無い方は、お手数ですが(%s)宛にご連絡をお願いいたします。(本メールは送信専用アドレスから送信しているため、直接の返信は不可能です。)", adminMail))
 	b.WriteString("\n")
 
 	message := b.String()
 	sendTo := []string{order.GetUserEmail()}
-	bcc := os.Getenv("MAIL_ADMIN")
+	bcc := adminMail
 
 	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
 	if err != nil {
@@ -96,7 +95,7 @@ type ReservationSummaryMailData struct {
 	commonMailData
 }
 
-func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
+func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
 	title := fmt.Sprintf("(テイクアウト)本日のオーダー情報(%s)", common.ConvertTimeToDateStr(startDateTime))
 
 	b := &strings.Builder{}
@@ -138,10 +137,10 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom string, 
 	}
 
 	message := b.String()
-	sendTo := []string{os.Getenv("MAIL_ADMIN")}
 	bcc := ""
+	sendToAr := []string{sendTo}
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
+	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendToAr)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +149,7 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom string, 
 	}, nil
 }
 
-func NewNoReservationSummaryMailData(sendFrom string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
+func NewNoReservationSummaryMailData(sendFrom, sendTo string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
 	title := fmt.Sprintf("(テイクアウト)本日のオーダーはありません(%s)", common.ConvertTimeToDateStr(startDateTime))
 
 	b := &strings.Builder{}
@@ -158,10 +157,10 @@ func NewNoReservationSummaryMailData(sendFrom string, startDateTime time.Time) (
 	b.WriteString("\n\n")
 
 	message := b.String()
-	sendTo := []string{os.Getenv("MAIL_ADMIN")}
 	bcc := ""
+	sendToAr := []string{sendTo}
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
+	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendToAr)
 	if err != nil {
 		return nil, err
 	}

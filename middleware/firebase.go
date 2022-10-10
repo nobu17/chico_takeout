@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"chico/takeout/common"
 	"context"
-	"os"
 
 	firebase "firebase.google.com/go/v4"
 	"google.golang.org/api/option"
@@ -23,7 +23,8 @@ type AuthData struct {
 }
 
 func NewFirebaseApp() (*firebaseApp, error) {
-	app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_CREDENTIALS_JSON"))))
+	cfg := common.GetConfig()
+	app, err := firebase.NewApp(context.Background(), nil, option.WithCredentialsJSON([]byte(cfg.GoogleJson)))
 	if err != nil {
 		return nil, err
 	}

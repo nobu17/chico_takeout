@@ -1,9 +1,9 @@
 package order
 
 import (
-	"os"
 	"time"
 
+	"chico/takeout/common"
 	domains "chico/takeout/domains/order"
 )
 
@@ -18,7 +18,7 @@ type orderTaskUseCase struct {
 
 func NewOrderTaskUseCase(orderRepos domains.OrderInfoRepository, mailerService SendOrderMailService) OrderTaskUseCase {
 	return &orderTaskUseCase{
-		filter: *domains.NewOrderFilter(orderRepos),
+		filter:        *domains.NewOrderFilter(orderRepos),
 		mailerService: mailerService,
 	}
 }
@@ -28,14 +28,15 @@ func (o *orderTaskUseCase) NotifyDailyOrder(start time.Time) error {
 	if err != nil {
 		return err
 	}
-	var mailData *ReservationSummaryMailData;
+	cfg := common.GetConfig().Mail
+	var mailData *ReservationSummaryMailData
 	if len(orders) == 0 {
-		mailData, err = NewNoReservationSummaryMailData(os.Getenv("MAIL_FROM"), start)
+		mailData, err = NewNoReservationSummaryMailData(cfg.From, cfg.Admin, start)
 		if err != nil {
 			return err
 		}
 	} else {
-		mailData, err = NewReservationSummaryMailData(orders, os.Getenv("MAIL_FROM"), start)
+		mailData, err = NewReservationSummaryMailData(orders, cfg.From, cfg.Admin, start)
 		if err != nil {
 			return err
 		}

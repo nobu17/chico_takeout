@@ -3,7 +3,6 @@ package order
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"chico/takeout/common"
 	idomains "chico/takeout/domains/item"
@@ -396,7 +395,8 @@ func (o *orderInfoUseCase) UpdateUserInfo(model *OrderUserInfoUpdateModel) error
 }
 
 func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) error {
-	mailData, err := NewOrderCompleteMailData(order, os.Getenv("MAIL_FROM"))
+	cfg := common.GetConfig().Mail
+	mailData, err := NewOrderCompleteMailData(order, cfg.From, cfg.Admin)
 	if err != nil {
 		return err
 	}
@@ -404,7 +404,8 @@ func (o *orderInfoUseCase) sendCompleteMail(order *domains.OrderInfo) error {
 }
 
 func (o *orderInfoUseCase) sendCancelMail(order *domains.OrderInfo) error {
-	mailData, err := NewOrderCancelMailData(order, os.Getenv("MAIL_FROM"))
+	cfg := common.GetConfig().Mail
+	mailData, err := NewOrderCancelMailData(order, cfg.From, cfg.Admin)
 	if err != nil {
 		return err
 	}

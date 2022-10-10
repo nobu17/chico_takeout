@@ -2,22 +2,24 @@ package smtp
 
 import (
 	"net/smtp"
-	"os"
+
+	"chico/takeout/common"
 )
 
 type smtpMail struct {
 }
 
 func (s *smtpMail) sendMail(subject, message, from, bcc string, to []string) error {
+	cfg := common.GetConfig().Mail
 	auth := smtp.PlainAuth(
 		"",
-		os.Getenv("MAIL_USER"),
-		os.Getenv("MAIL_PASS"),
-		os.Getenv("MAIL_HOST"),
+		cfg.User,
+		cfg.Pass,
+		cfg.Host,
 	)
 
 	return smtp.SendMail(
-		os.Getenv("MAIL_HOST")+":"+os.Getenv("MAIL_PORT"),
+		cfg.Host+":"+cfg.Port,
 		auth,
 		from,
 		to,

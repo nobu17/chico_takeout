@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"chico/takeout/common"
@@ -23,14 +22,17 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func main() {
-	loadEnv()
-	db := setUpDb()
+	cfg, err := loadConfig()
+	if err != nil {
+		panic("failed to load config")
+	}
+
+	db := setUpDb(cfg.Db)
 	sqlDb, err := db.DB()
 	if err != nil {
 		panic(err.Error())
@@ -38,29 +40,19 @@ func main() {
 	defer sqlDb.Close()
 
 	auth := initAuthService()
-
 	r := setupRouter(db, auth)
 
-	port := os.Getenv("APP_PORT")
-	if port == "" {
-		port = "80"
-		fmt.Println("failed to get setting run port. run as port 80")
-	}
 	go scheduleTask(db)
-	r.Run(":" + port)
+
+	r.Run(":" + cfg.AppPort)
 }
 
-func loadEnv() {
-	env := os.Getenv("GO_ENV")
-	if env == "" {
-		env = "dev"
+func loadConfig() (*common.Config, error) {
+	if err := common.InitConfig(false); err != nil {
+		return nil, err
 	}
-	fmt.Printf("env:%s\n", env)
-	err := godotenv.Load(fmt.Sprintf("./.env.%s", env))
-	if err != nil {
-		fmt.Println(err)
-		fmt.Println("failed to load env.")
-	}
+	cfg := common.GetConfig()
+	return &cfg, nil
 }
 
 func initAuthService() middleware.AuthService {
@@ -111,6 +103,7 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	r.LoadHTMLGlob("frontend/build/*.html")
 	r.Static("/images", "./frontend/build/images")
 	r.Static("/static", "./frontend/build/static")
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
@@ -238,14 +231,8 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	return r
 }
 
-func setUpDb() *gorm.DB {
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	server := os.Getenv("DB_SERVER")
-	port := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-
-	dsn := "host=" + server + " user=" + user + " password=" + pass + " dbname=" + dbName + " port=" + port + " sslmode=disable"
+func setUpDb(cfg common.DbConfig) *gorm.DB {
+	dsn := "host=" + cfg.Server + " user=" + cfg.User + " password=" + cfg.Pass + " dbname=" + cfg.DbName + " port=" + cfg.Port + " sslmode=disable"
 	// dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

@@ -5,12 +5,16 @@ import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { useEffect, useState } from "react";
 import { Alert } from "@mui/material";
 import OrderDetailDialog from "../../../mypage/parts/OrderDetailDialog";
+import OrderTableDialog from "./OrderTableDialog";
 
 export default function OrderTableList() {
   const { orderHistory, loadHistory, cancelOrder, loading, error } =
     useAdminOrder();
   const [open, setOpen] = useState(false);
+  const [openTable, setOpenTable] = useState(false);
   const [selectedItem, setSelectedItem] = useState<UserOrderInfo>();
+  const [tableItems, setTableItems] = useState<UserOrderInfo[]>([]);
+  const [title, setTitle] = useState("");  
 
   useEffect(() => {
     const init = async () => {
@@ -42,8 +46,18 @@ export default function OrderTableList() {
     }
   };
 
+  const handleUserIdSelected = (item: UserOrderInfo) => {
+    setTableItems(orderHistory.filter((o) => o.userId === item.userId));
+    setTitle(`ユーザーID:${item.userId}`)
+    setOpenTable(true);
+  };
+
   const onClose = () => {
     setOpen(false);
+  };
+
+  const onTableClose = () => {
+    setOpenTable(false);
   };
 
   return (
@@ -55,6 +69,7 @@ export default function OrderTableList() {
           displays={[
             "detailButton",
             "pickupDateTime",
+            "userId",
             "userName",
             "userEmail",
             "userTelNo",
@@ -66,6 +81,7 @@ export default function OrderTableList() {
           ]}
           onSelected={handleDetailSelect}
           onCancelSelected={handleCancelSelected}
+          onUserIdSelected={handleUserIdSelected}
         ></OrderTable>
       </div>
       <OrderDetailDialog
@@ -73,6 +89,12 @@ export default function OrderTableList() {
         onClose={onClose}
         order={selectedItem}
       ></OrderDetailDialog>
+      <OrderTableDialog
+        title="オーダー一覧"
+        open={openTable}
+        onClose={onTableClose}
+        orders={tableItems}
+      />
       <LoadingSpinner message="Loading..." isLoading={loading} />
     </>
   );

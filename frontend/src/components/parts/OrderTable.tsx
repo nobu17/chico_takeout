@@ -1,18 +1,23 @@
-import { Button } from "@mui/material";
+import { Button, Link } from "@mui/material";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { UserOrderInfo } from "../../libs/apis/order";
+import { toShortenString } from "../../libs/util/StringUtil";
 
 type OrderTableProps = {
   orders: UserOrderInfo[];
   displays?: ColumnNames[];
   onSelected: callbackSelected;
   onCancelSelected?: callbackCancelSelected;
+  onUserIdSelected?: callbackUserIdSelected;
 };
 
 interface callbackSelected {
   (item: UserOrderInfo): void;
 }
 interface callbackCancelSelected {
+  (item: UserOrderInfo): void;
+}
+interface callbackUserIdSelected {
   (item: UserOrderInfo): void;
 }
 
@@ -25,6 +30,7 @@ type ColumnNames =
   | "cancel"
   | "cancelButton"
   | "userName"
+  | "userId"
   | "userEmail"
   | "userTelNo";
 
@@ -159,6 +165,30 @@ export default function OrderTable(props: OrderTableProps) {
           field: "userName",
           headerName: "ユーザー名",
           width: 180,
+        });
+        continue;
+      }
+      if (col === "userId") {
+        result.push({
+          field: "userId",
+          width: 130,
+          headerName: "ユーザーID",
+          sortable: false,
+          renderCell: (params: GridRenderCellParams<string>) => {
+            return (
+              <>
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={() => {
+                    props.onUserIdSelected?.(params.row);
+                  }}
+                >
+                  {params.value ? toShortenString(params.value, 8) : ""}
+                </Link>
+              </>
+            );
+          },
         });
         continue;
       }

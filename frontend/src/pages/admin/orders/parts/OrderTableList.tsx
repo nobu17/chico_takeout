@@ -14,7 +14,7 @@ export default function OrderTableList() {
   const [openTable, setOpenTable] = useState(false);
   const [selectedItem, setSelectedItem] = useState<UserOrderInfo>();
   const [tableItems, setTableItems] = useState<UserOrderInfo[]>([]);
-  const [title, setTitle] = useState("");  
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
     const init = async () => {
@@ -48,7 +48,7 @@ export default function OrderTableList() {
 
   const handleUserIdSelected = (item: UserOrderInfo) => {
     setTableItems(orderHistory.filter((o) => o.userId === item.userId));
-    setTitle(`ユーザーID:${item.userId}`)
+    setTitle(`ユーザーID:${item.userId}`);
     setOpenTable(true);
   };
 
@@ -90,7 +90,7 @@ export default function OrderTableList() {
         order={selectedItem}
       ></OrderDetailDialog>
       <OrderTableDialog
-        title="オーダー一覧"
+        title={title}
         open={openTable}
         onClose={onTableClose}
         orders={tableItems}

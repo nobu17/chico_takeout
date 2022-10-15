@@ -1,7 +1,6 @@
 package query
 
 import (
-	"fmt"
 	"time"
 
 	"chico/takeout/common"
@@ -142,8 +141,6 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 			return err
 		}
 		if isBefore {
-			fmt.Printf("isBefore Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
-			fmt.Println("")
 			continue
 		}
 		// if date is today. check start and end
@@ -154,8 +151,6 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 			}
 			// if end is over, not target
 			if isOver {
-				fmt.Printf("isOver Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
-				fmt.Println("")
 				continue
 			}
 			// if in range change start time
@@ -163,8 +158,6 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 			if err != nil {
 				return err
 			}
-			fmt.Printf("isInRange:%t, st:%s, ed:%s, cr:%s", isInRange, perDay.StartTime, perDay.EndTime, currentTargetTime)
-			fmt.Println("")
 			if isInRange {
 				perDay.StartTime = currentTargetTime
 				// if start and end is same. skip
@@ -173,8 +166,6 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 				}
 			}
 		}
-		fmt.Printf("added Date:%s, st:%s, end:%s", perDay.Date, perDay.StartTime, perDay.EndTime)
-		fmt.Println("")
 		modifiedOrder = append(modifiedOrder, perDay)
 	}
 	// update
@@ -255,10 +246,6 @@ func (o *OrderableInfoRdbmsQueryService) getPerDateFoodOrder(startDate, endDate 
 	 group by food_order.food_item_model_id, order_info.pick_up_date) as food_order_quantity
 	 left join food_item_models as food_models on food_order_quantity.food_item_model_id = food_models.id
 	 order by pick_up_date`, startDate, endDate).Scan(&models)
-
-	for _, ite := range models {
-		fmt.Println("model", ite.Id, ite.PickUpDate, ite.Quantity)
-	}
 
 	return models, nil
 }

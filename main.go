@@ -213,7 +213,17 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 		order.PUT("user/:userId/:orderId", handler.PutUpdateUserInfo)
 		order.GET("/admin_all/", middleware.CheckAdmin(), handler.GetAll)
 		order.GET("/active/:date", middleware.CheckAdmin(), handler.GetActiveByDate)
+		statistic := order.Group("/statistic")
+		{
+			qService := orderQueryRDBMS.NewOrderStatisticQueryService(db)
+			sUseCase := orderQueryUseCase.NewOrderStatisticUseCase(qService)
+			sHandler := orderHandler.NewStatisticInfoHandler(sUseCase)
+			statistic.Use(middleware.CheckAuthInfo(auth))
+			statistic.Use(middleware.CheckAdmin())
+			statistic.GET("/month", sHandler.GetMonthly)
+		}
 	}
+
 	orderable := r.Group("/orderable")
 	{
 		orderable.Use(middleware.CheckAuthInfo(auth))

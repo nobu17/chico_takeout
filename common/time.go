@@ -14,6 +14,7 @@ const dateHyphenLayout = "2006-01-02"
 const dateLayout = "2006/01/02"
 const dateTimeLayout = "2006/01/02 15:04"
 const timeLayout = "15:04"
+const monthLayout = "2006/01"
 
 // for UT
 func MockNow(mock func() time.Time) {
@@ -75,6 +76,10 @@ func ConvertTimeToTimeStr(target time.Time) string {
 	return target.Format(timeLayout)
 }
 
+func ConvertTimeToMonthStr(target time.Time) string {
+	return target.Format(monthLayout)
+}
+
 func ConvertStrToDate(dateStr string) (*time.Time, error) {
 	actualTime, err := time.ParseInLocation(dateLayout, dateStr, jst)
 	if err != nil {
@@ -104,6 +109,15 @@ func ConvertDateTimeStrToDateStr(dateTimeStr string) (string, error) {
 
 func ConvertStrToDateTime(dateTimeStr string) (*time.Time, error) {
 	actualTime, err := time.ParseInLocation(dateTimeLayout, dateTimeStr, jst)
+	if err != nil {
+		return nil, err
+	}
+
+	return &actualTime, nil
+}
+
+func ConvertStrToMonth(monthStr string) (*time.Time, error) {
+	actualTime, err := time.ParseInLocation(monthLayout, monthStr, jst)
 	if err != nil {
 		return nil, err
 	}
@@ -216,6 +230,26 @@ func ListUpDates(startDate, endDate time.Time) ([]time.Time, error) {
 	}
 
 	return dates, nil
+}
+
+func ListUpMonths(startMonth, endMonth time.Time) ([]time.Time, error) {
+	actStart := time.Date(startMonth.Year(), startMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
+	actEnd := time.Date(endMonth.Year(), endMonth.Month(), 1, 0, 0, 0, 1, time.UTC)
+
+	if actStart.After(actEnd) {
+		return nil, fmt.Errorf("start month is after than end month. start:%s end:%s", startMonth, endMonth)
+	}
+
+	months := []time.Time{}
+
+	currentMonth := actStart
+	for currentMonth.Before(actEnd) {
+		month := time.Date(currentMonth.Year(), currentMonth.Month(), currentMonth.Day(), 0, 0, 0, 0, time.UTC)
+		months = append(months, month)
+		currentMonth = currentMonth.AddDate(0, 1, 0)
+	}
+	
+	return months, nil
 }
 
 func DateEqual(date1, date2 time.Time) bool {

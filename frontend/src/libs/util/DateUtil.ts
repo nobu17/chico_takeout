@@ -5,6 +5,12 @@ export const toDateString = (date: Date): string => {
   return y + "/" + m + "/" + d;
 };
 
+export const toMonthString = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = ("00" + (date.getMonth() + 1)).slice(-2);
+  return y + "/" + m;
+};
+
 export const toDate = (strDate: string): Date => {
   const splitted = strDate.split("/");
   const year = Number(splitted[0]);
@@ -37,6 +43,12 @@ export const toDateTimeStrWithDayOfWeek = (date: Date): string => {
 export const getNowDate = (addDays: number): Date => {
   const dt = getJSTNow();
   dt.setDate(dt.getDate() + addDays);
+  return dt;
+};
+
+export const getNowDateByMonthOffset = (addMonth: number): Date => {
+  const dt = getJSTNow();
+  dt.setMonth(dt.getMonth() + addMonth);
   return dt;
 };
 

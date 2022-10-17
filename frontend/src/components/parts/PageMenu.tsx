@@ -9,12 +9,13 @@ import Stack from "@mui/material/Stack";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import CoffeeIcon from "@mui/icons-material/Coffee";
 import AppleIcon from "@mui/icons-material/Apple";
+import ScienceIcon from '@mui/icons-material/Science';
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Typography } from "@mui/material";
 
 export type PageMenuProps = {
   title: string;
-  icon: string;
+  icon: Icon;
   pageInfos: PageInfo[];
 };
 
@@ -24,7 +25,9 @@ export type PageInfo = {
   disabled?: boolean;
 };
 
-const getIcon = (input: string) => {
+export type Icon = "coffee" | "apple" | "calendar" | "science"
+
+const getIcon = (input: Icon) => {
   switch (input) {
     case "coffee": {
       return <CoffeeIcon />;
@@ -35,6 +38,9 @@ const getIcon = (input: string) => {
     case "calendar": {
       return <CalendarMonthIcon />;
     }
+    case "science": {
+      return <ScienceIcon />;
+    } 
     default: {
       return <CoffeeIcon />;
     }

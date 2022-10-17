@@ -4,11 +4,11 @@ import Grid from "@mui/material/Grid";
 
 import PageTitle from "../../components/parts/PageTitle";
 import { useMyOrder } from "../../hooks/UseMyOrder";
-import PageMenu from "../../components/parts/PageMenu";
+import PageMenu, { PageMenuProps } from "../../components/parts/PageMenu";
 import ReserveInfoCardList from "./parts/ReserveInfoCardList";
 import { useConfirmDialog } from "../../hooks/UseConfirmDialog";
 
-const myMenu = {
+const myMenu: PageMenuProps = {
   title: "マイメニュー",
   icon: "coffee",
   pageInfos: [

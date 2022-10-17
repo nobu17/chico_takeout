@@ -13,9 +13,9 @@ type MonthlyStatisticResponse struct {
 
 type MonthlyData struct {
 	Month         string `json:"month" binding:"required"`
-	OrderTotal    int    `json:"order_total" binding:"required"`
-	QuantityTotal int    `json:"quantity_total" binding:"required"`
-	MoneyTotal    int    `json:"money_total" binding:"required"`
+	OrderTotal    int    `json:"orderTotal" binding:"required"`
+	QuantityTotal int    `json:"quantityTotal" binding:"required"`
+	MoneyTotal    int    `json:"moneyTotal" binding:"required"`
 }
 
 func newMonthlyStatisticResponse(m queryUseCases.MonthlyStatisticData) *MonthlyStatisticResponse {

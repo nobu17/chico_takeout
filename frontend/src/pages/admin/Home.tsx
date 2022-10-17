@@ -1,8 +1,8 @@
 import Grid from "@mui/material/Grid";
 import PageTitle from "../../components/parts/PageTitle";
-import PageMenu from "../../components/parts/PageMenu";
+import PageMenu, { PageMenuProps } from "../../components/parts/PageMenu";
 
-const itemMenu = {
+const itemMenu: PageMenuProps = {
   title: "商品管理",
   icon: "apple",
   pageInfos: [
@@ -13,7 +13,7 @@ const itemMenu = {
   ],
 };
 
-const storeMenu = {
+const storeMenu: PageMenuProps = {
   title: "店舗設定",
   icon: "calendar",
   pageInfos: [
@@ -23,7 +23,7 @@ const storeMenu = {
   ],
 };
 
-const orderMenu = {
+const orderMenu: PageMenuProps = {
   title: "注文関係",
   icon: "coffee",
   pageInfos: [
@@ -32,19 +32,28 @@ const orderMenu = {
   ],
 };
 
+const statisticsMenu: PageMenuProps = {
+  title: "集計",
+  icon: "science",
+  pageInfos: [{ title: "集計(月別)", url: "/admin/statistics/monthly" }],
+};
+
 export default function AdminHome() {
   return (
     <>
       <PageTitle title="管理メニュー" />
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
+          <PageMenu {...orderMenu}></PageMenu>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <PageMenu {...statisticsMenu}></PageMenu>
+        </Grid>
+        <Grid item xs={12} md={6}>
           <PageMenu {...itemMenu}></PageMenu>
         </Grid>
         <Grid item xs={12} md={6}>
           <PageMenu {...storeMenu}></PageMenu>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <PageMenu {...orderMenu}></PageMenu>
         </Grid>
       </Grid>
     </>

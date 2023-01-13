@@ -24,7 +24,7 @@ type ItemKindCreateModel struct {
 	Priority int
 }
 
-type ItemKinddUpdateModel struct {
+type ItemKindUpdateModel struct {
 	Id       string
 	Name     string
 	Priority int
@@ -34,7 +34,7 @@ type ItemKindUseCase interface {
 	Find(id string) (*ItemKindModel, error)
 	FindAll() ([]ItemKindModel, error)
 	Create(model *ItemKindCreateModel) (string, error)
-	Update(model *ItemKinddUpdateModel) error
+	Update(model *ItemKindUpdateModel) error
 	Delete(id string) error
 }
 
@@ -83,7 +83,7 @@ func (i *itemKindUseCase) Create(model *ItemKindCreateModel) (string, error) {
 	return i.repository.Create(item)
 }
 
-func (i *itemKindUseCase) Update(model *ItemKinddUpdateModel) error {
+func (i *itemKindUseCase) Update(model *ItemKindUpdateModel) error {
 	item, err := i.repository.Find(model.Id)
 	if err != nil {
 		return err

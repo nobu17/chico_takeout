@@ -25,8 +25,8 @@ type ItemKindUpdateRequest struct {
 	Priority int    `json:"priority" binding:"required"`
 }
 
-func (i *ItemKindUpdateRequest) toModel(id string) *usecase.ItemKinddUpdateModel {
-	return &usecase.ItemKinddUpdateModel{Id: id, Name: i.Name, Priority: i.Priority}
+func (i *ItemKindUpdateRequest) toModel(id string) *usecase.ItemKindUpdateModel {
+	return &usecase.ItemKindUpdateModel{Id: id, Name: i.Name, Priority: i.Priority}
 }
 
 type ItemKindData struct {

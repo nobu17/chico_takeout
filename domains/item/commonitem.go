@@ -11,7 +11,7 @@ import (
 const (
 	CommonItemMaxPrice             = 20000
 	CommonItemDescriptionMaxLength = 150
-	CommonItemNameMaxLength        = 15
+	CommonItemNameMaxLength        = 25
 )
 
 type commonItem struct {

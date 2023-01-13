@@ -50,7 +50,7 @@ var stockItemInputs = []stockItemTest{
 		hasValidationErr: true,
 	},
 	{name: "error:irregular name(length 16)",
-		args:             stockItemTestArgs{name: tests.MakeRandomStr(16), priority: 3, maxOrder: 4, price: 140, description: "ttt", kindId: "abc", enabled: false, imageUrl: "http://google.com"},
+		args:             stockItemTestArgs{name: tests.MakeRandomStr(26), priority: 3, maxOrder: 4, price: 140, description: "ttt", kindId: "abc", enabled: false, imageUrl: "http://google.com"},
 		want:             stockItemTestArgs{},
 		hasValidationErr: true,
 	},

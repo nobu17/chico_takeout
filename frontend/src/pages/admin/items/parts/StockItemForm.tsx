@@ -111,7 +111,7 @@ export default function StockItemForm(props: StockItemFormProps) {
             label="名称"
             {...register("name", {
               required: { value: true, message: RequiredErrorMessage },
-              maxLength: { value: 15, message: MaxLengthErrorMessage(15) },
+              maxLength: { value: 25, message: MaxLengthErrorMessage(25) },
             })}
             error={Boolean(errors.name)}
             helperText={errors.name && errors.name.message}
@@ -159,7 +159,7 @@ export default function StockItemForm(props: StockItemFormProps) {
               valueAsNumber: true,
               required: { value: true, message: RequiredErrorMessage },
               min: { value: 1, message: MinErrorMessage(1) },
-              max: { value: 10, message: MaxErrorMessage(10) },
+              max: { value: 30, message: MaxErrorMessage(30) },
             })}
             error={Boolean(errors.priority)}
             helperText={errors.priority && errors.priority.message}

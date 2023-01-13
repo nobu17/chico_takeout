@@ -1,4 +1,3 @@
-import Counter from "../../../components/parts/Counter";
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -6,6 +5,9 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+
+import LineBreak from "../../../components/parts/LineBreak";
+import Counter from "../../../components/parts/Counter";
 import { ItemInfo, ItemRequest } from "../../../hooks/UseItemCart";
 import { getImageUrl } from "../../../libs/util/ImageUtil";
 
@@ -37,7 +39,7 @@ export default function ItemCard(props: ItemCardProps) {
           {props.item.name}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {props.item.memo}
+          <LineBreak msg={props.item.memo} />
         </Typography>
       </CardContent>
       <CardActions>

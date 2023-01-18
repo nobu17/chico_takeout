@@ -9,6 +9,7 @@ type ItemKindModel struct {
 	Id       string
 	Name     string
 	Priority int
+	OptionItemIds []string
 }
 
 func newItemKindModel(item *domains.ItemKind) *ItemKindModel {
@@ -16,18 +17,21 @@ func newItemKindModel(item *domains.ItemKind) *ItemKindModel {
 		Id:       item.GetId(),
 		Name:     item.GetName(),
 		Priority: item.GetPriority(),
+		OptionItemIds: item.GetOptionItemIds(),
 	}
 }
 
 type ItemKindCreateModel struct {
-	Name     string
-	Priority int
+	Name          string
+	Priority      int
+	OptionItemIds []string
 }
 
 type ItemKindUpdateModel struct {
-	Id       string
-	Name     string
-	Priority int
+	Id            string
+	Name          string
+	Priority      int
+	OptionItemIds []string
 }
 
 type ItemKindUseCase interface {
@@ -40,11 +44,13 @@ type ItemKindUseCase interface {
 
 type itemKindUseCase struct {
 	repository domains.ItemKindRepository
+	optionItemRepository domains.OptionItemRepository
 }
 
-func NewItemKindUseCase(repository domains.ItemKindRepository) ItemKindUseCase {
+func NewItemKindUseCase(repository domains.ItemKindRepository, optionItemRepository domains.OptionItemRepository) ItemKindUseCase {
 	return &itemKindUseCase{
 		repository: repository,
+		optionItemRepository: optionItemRepository,
 	}
 }
 
@@ -76,7 +82,12 @@ func (i *itemKindUseCase) FindAll() ([]ItemKindModel, error) {
 }
 
 func (i *itemKindUseCase) Create(model *ItemKindCreateModel) (string, error) {
-	item, err := domains.NewItemKind(model.Name, model.Priority)
+	err := i.checkOptionItemExists(model.OptionItemIds)
+	if err != nil {
+		return "", err
+	}
+
+	item, err := domains.NewItemKind(model.Name, model.Priority, model.OptionItemIds)
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +104,12 @@ func (i *itemKindUseCase) Update(model *ItemKindUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
-	err = item.Set(model.Name, model.Priority)
+	err = i.checkOptionItemExists(model.OptionItemIds)
+	if err != nil {
+		return err
+	}
+
+	err = item.Set(model.Name, model.Priority, model.OptionItemIds)
 	if err != nil {
 		return err
 	}
@@ -110,4 +126,17 @@ func (i *itemKindUseCase) Delete(id string) error {
 	}
 
 	return i.repository.Delete(id)
+}
+
+func (i *itemKindUseCase) checkOptionItemExists(ids []string) error {
+	for _, id := range ids {
+		item, err := i.optionItemRepository.Find(id)
+		if err != nil {
+			return err
+		}
+		if item == nil {
+			return common.NewRelatedItemNotFoundError(id)
+		}
+	}
+	return nil
 }

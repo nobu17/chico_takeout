@@ -30,25 +30,51 @@ type CommonItemOrderModel struct {
 	Name     string
 	Price    int
 	Quantity int
+	Options  []OptionItemOrderModel
 }
 
-func newCommonItemOrderModel(itemId, name string, price, quantity int) *CommonItemOrderModel {
+type OptionItemOrderModel struct {
+	ItemId string
+	Name   string
+	Price  int
+}
+
+func newCommonItemOrderModel(itemId, name string, price, quantity int, options []OptionItemOrderModel) *CommonItemOrderModel {
 	return &CommonItemOrderModel{
 		ItemId:   itemId,
 		Name:     name,
 		Price:    price,
 		Quantity: quantity,
+		Options: options,
+	}
+}
+
+func newOptionItemOrderModel(itemId, name string, price int) *OptionItemOrderModel {
+	return &OptionItemOrderModel{
+		ItemId:   itemId,
+		Name:     name,
+		Price:    price,
 	}
 }
 
 func newOrderInfoModel(item *domains.OrderInfo) *OrderInfoModel {
 	stocks := []CommonItemOrderModel{}
 	for _, stock := range item.GetStockItems() {
-		stocks = append(stocks, *newCommonItemOrderModel(stock.GetItemId(), stock.GetName(), stock.GetPrice(), stock.GetQuantity()))
+		options := []OptionItemOrderModel{}
+		for _, opt := range stock.GetOptionItems() {
+			op := newOptionItemOrderModel(opt.GetId(), opt.GetName(), opt.GetPrice())
+			options = append(options, *op)
+		}
+		stocks = append(stocks, *newCommonItemOrderModel(stock.GetItemId(), stock.GetName(), stock.GetPrice(), stock.GetQuantity(), options))
 	}
 	foods := []CommonItemOrderModel{}
 	for _, food := range item.GetFoodItems() {
-		foods = append(foods, *newCommonItemOrderModel(food.GetItemId(), food.GetName(), food.GetPrice(), food.GetQuantity()))
+		options := []OptionItemOrderModel{}
+		for _, opt := range food.GetOptionItems() {
+			op := newOptionItemOrderModel(opt.GetId(), opt.GetName(), opt.GetPrice())
+			options = append(options, *op)
+		}
+		foods = append(foods, *newCommonItemOrderModel(food.GetItemId(), food.GetName(), food.GetPrice(), food.GetQuantity(), options))
 	}
 	return &OrderInfoModel{
 		Id:             item.GetId(),
@@ -103,12 +129,30 @@ func NewOrderUserInfoUpdateModel(orderId, userId, userName, userEmail, userTelNo
 type CommonItemOrderCreateModel struct {
 	ItemId   string
 	Quantity int
+	Options  []OptionItemOrderCreateModel
 }
 
-func newCommonItemOrderCreateModel(itemId string, quantity int) *CommonItemOrderCreateModel {
+func (c *CommonItemOrderCreateModel) toOptionIds() []string {
+	ids := []string{}
+	for _, opt := range c.Options {
+		ids = append(ids, opt.ItemId)
+	}
+	return ids
+}
+
+type OptionItemOrderCreateModel struct {
+	ItemId string
+}
+
+func newCommonItemOrderCreateModel(itemId string, quantity int, options []string) *CommonItemOrderCreateModel {
+	optionsArr := []OptionItemOrderCreateModel{}
+	for _, opt := range options {
+		optionsArr = append(optionsArr, OptionItemOrderCreateModel{ItemId: opt})
+	}
 	return &CommonItemOrderCreateModel{
 		ItemId:   itemId,
 		Quantity: quantity,
+		Options:  optionsArr,
 	}
 }
 
@@ -142,6 +186,8 @@ func NewOrderInfoUseCase(
 	orderInfoRepository domains.OrderInfoRepository,
 	stockRepo idomains.StockItemRepository,
 	foodRepo idomains.FoodItemRepository,
+	kindRepo idomains.ItemKindRepository,
+	optionRepo idomains.OptionItemRepository,
 	busRepo sdomains.BusinessHoursRepository,
 	spBusRepo sdomains.SpecialBusinessHourRepository,
 	spHolidayRepo sdomains.SpecialHolidayRepository,
@@ -154,7 +200,7 @@ func NewOrderInfoUseCase(
 		busRepo:               busRepo,
 		spBusRepo:             spBusRepo,
 		spHolidayRepo:         spHolidayRepo,
-		factory:               *domains.NewOrderInfoFactory(stockRepo, foodRepo),
+		factory:               *domains.NewOrderInfoFactory(stockRepo, foodRepo, kindRepo, optionRepo),
 		stockConsumer:         *domains.NewStockItemRemainCheckAndConsumer(stockRepo),
 		foodRemainChecker:     *domains.NewFoodItemRemainChecker(orderInfoRepository, foodRepo),
 		orderDuplicateChecker: *domains.NewOrderDuplicateChecker(orderInfoRepository),
@@ -262,11 +308,11 @@ func (o *orderInfoUseCase) Create(model *OrderInfoCreateModel) (string, error) {
 
 	stockOrders := []domains.ItemOrder{}
 	for _, item := range model.StockItems {
-		stockOrders = append(stockOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
+		stockOrders = append(stockOrders, *domains.NewItemOrder(item.ItemId, item.Quantity, item.toOptionIds()))
 	}
 	foodOrders := []domains.ItemOrder{}
 	for _, item := range model.FoodItems {
-		foodOrders = append(foodOrders, *domains.NewItemOrder(item.ItemId, item.Quantity))
+		foodOrders = append(foodOrders, *domains.NewItemOrder(item.ItemId, item.Quantity, item.toOptionIds()))
 	}
 	// factory check each item id existence also (will return error)
 	// factory check pickup date time is past or not

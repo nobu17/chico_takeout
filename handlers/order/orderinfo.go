@@ -24,29 +24,53 @@ type OrderInfoData struct {
 }
 
 type CommonItemOrderData struct {
-	ItemId   string `json:"itemId" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Price    int    `json:"price" binding:"required"`
-	Quantity int    `json:"quantity" binding:"required"`
+	ItemId   string                `json:"itemId" binding:"required"`
+	Name     string                `json:"name" binding:"required"`
+	Price    int                   `json:"price" binding:"required"`
+	Quantity int                   `json:"quantity" binding:"required"`
+	Options  []OptionItemOrderData `json:"options" binding:"required"`
 }
 
-func newCommonItemOrderData(itemId, name string, price, quantity int) *CommonItemOrderData {
+type OptionItemOrderData struct {
+	ItemId string `json:"itemId" binding:"required"`
+	Name   string `json:"name" binding:"required"`
+	Price  int    `json:"price" binding:"required"`
+}
+
+func newCommonItemOrderData(itemId, name string, price, quantity int, options []OptionItemOrderData) *CommonItemOrderData {
 	return &CommonItemOrderData{
 		ItemId:   itemId,
 		Name:     name,
 		Price:    price,
 		Quantity: quantity,
+		Options: options,
+	}
+}
+
+func newOptionItemOrderData(itemId, name string, price int) *OptionItemOrderData {
+	return &OptionItemOrderData{
+		ItemId:   itemId,
+		Name:     name,
+		Price:    price,
 	}
 }
 
 func newOrderInfoData(item *usecases.OrderInfoModel) *OrderInfoData {
 	stocks := []CommonItemOrderData{}
 	for _, stock := range item.StockItems {
-		stocks = append(stocks, *newCommonItemOrderData(stock.ItemId, stock.Name, stock.Price, stock.Quantity))
+		options := []OptionItemOrderData{}
+		for _, opt := range stock.Options {
+			options = append(options, *newOptionItemOrderData(opt.ItemId, opt.Name, opt.Price))
+		}
+		stocks = append(stocks, *newCommonItemOrderData(stock.ItemId, stock.Name, stock.Price, stock.Quantity, options))
 	}
 	foods := []CommonItemOrderData{}
-	for _, stock := range item.FoodItems {
-		foods = append(foods, *newCommonItemOrderData(stock.ItemId, stock.Name, stock.Price, stock.Quantity))
+	for _, food := range item.FoodItems {
+		options := []OptionItemOrderData{}
+		for _, opt := range food.Options {
+			options = append(options, *newOptionItemOrderData(opt.ItemId, opt.Name, opt.Price))
+		}
+		foods = append(foods, *newCommonItemOrderData(food.ItemId, food.Name, food.Price, food.Quantity, options))
 	}
 	return &OrderInfoData{
 		Id:             item.Id,
@@ -100,8 +124,13 @@ type OrderInfoCreateResponse struct {
 }
 
 type CommonItemOrderRequest struct {
-	ItemId   string `json:"itemId" binding:"required"`
-	Quantity int    `json:"quantity" binding:"required"`
+	ItemId   string                   `json:"itemId" binding:"required"`
+	Quantity int                      `json:"quantity" binding:"required"`
+	Options  []OptionItemOrderRequest `json:"options" binding:"required"`
+}
+
+type OptionItemOrderRequest struct {
+	ItemId string `json:"itemId" binding:"required"`
 }
 
 type OrderInfoCancelRequest struct {
@@ -109,9 +138,14 @@ type OrderInfoCancelRequest struct {
 }
 
 func (c *CommonItemOrderRequest) toModel() *usecases.CommonItemOrderCreateModel {
+	options := []usecases.OptionItemOrderCreateModel{}
+	for _, opt := range c.Options {
+		options = append(options, usecases.OptionItemOrderCreateModel{ItemId: opt.ItemId})
+	}
 	return &usecases.CommonItemOrderCreateModel{
 		ItemId:   c.ItemId,
 		Quantity: c.Quantity,
+		Options:  options,
 	}
 }
 

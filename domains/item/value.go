@@ -109,7 +109,7 @@ func NewMaxOrderPerDay(value int, maxOrder MaxOrder) (*MaxOrderPerDay, error) {
 		return nil, err
 	}
 	if value < maxOrder.GetValue() {
-		return nil, common.NewValidationError("MaxOrderPerDay", fmt.Sprintf("need less than maxOrderPerday:%d maxOrder:%d", value, maxOrder.GetValue()))
+		return nil, common.NewValidationError("MaxOrderPerDay", fmt.Sprintf("need less than maxOrderPerDay:%d maxOrder:%d", value, maxOrder.GetValue()))
 	}
 
 	return &MaxOrderPerDay{IntValue: shared.NewIntValue(value)}, nil
@@ -120,7 +120,7 @@ type Description struct {
 }
 
 func NewDescription(value string, maxLength int) (*Description, error) {
-	validator := validator.NewStingLength("Descritpion", maxLength)
+	validator := validator.NewStingLength("Description", maxLength)
 	if err := validator.Validate(value); err != nil {
 		return nil, err
 	}

@@ -13,6 +13,22 @@ func AssertMaps(t *testing.T, got map[string]interface{}, want map[string]interf
 	}
 }
 
+func AssertMapsWithIgnoreKeys(t *testing.T, got map[string]interface{}, want map[string]interface{}, ignoreKeys []string) {
+	for k, v := range want {
+		ignore := false
+		for _, ignoreKey := range ignoreKeys {
+			if k == ignoreKey {
+				ignore = true
+				break
+			}
+		}
+		if ignore {
+			continue
+		}
+		AssertMap(t, got, k, v)
+	}
+}
+
 func AssertMap(t *testing.T, maps map[string]interface{}, key string, want interface{}) {
 	value, exists := maps[key]
 	if !exists {

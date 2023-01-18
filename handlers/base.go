@@ -25,7 +25,7 @@ func (b *BaseHandler) HandleError(c *gin.Context, e error) {
 	}
 	var rErr *common.RelatedItemNotFoundError
 	if errors.As(e, &rErr) {
-		c.String(http.StatusInternalServerError, rErr.Error())
+		c.String(http.StatusBadRequest, rErr.Error())
 		return
 	}
 	var utErr *common.UpdateTargetRelatedNotFoundError

@@ -133,7 +133,7 @@ var foodItemInputs = []foodItemTest{
 		hasValidationErr: true,
 	},
 	{name: "error:not url format ImageUrl",
-		args:             foodItemTestArgs{name: "test2", priority: 1, maxOrder: 31, price: 140, description: "ttt", kindId: "abc", enabled: false, scheduleIds: []string{"1", "2"}, maxOrderPerDay: 10, imageUrl: "hogehoge"},
+		args:             foodItemTestArgs{name: "test2", priority: 1, maxOrder: 31, price: 140, description: "ttt", kindId: "abc", enabled: false, scheduleIds: []string{"1", "2"}, maxOrderPerDay: 10, imageUrl: "incorrect"},
 		want:             foodItemTestArgs{},
 		hasValidationErr: true,
 	},

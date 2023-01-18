@@ -6,6 +6,7 @@ const defaultItemKind: ItemKind = {
   id: "",
   name: "",
   priority: 1,
+  optionItemIds: [],
 };
 
 const api = new ItemKindApi();

@@ -82,7 +82,7 @@ func setUpUseCase() (order.OrderTaskUseCase, *memory.MemorySendOrderMail) {
 	orders := repo.GetMemory()
 	// create additional order
 	foodOrders1 := []domains.OrderFoodItem{}
-	foodOrder1, err := domains.NewOrderFoodItem("abc", "food123", 210, 3)
+	foodOrder1, err := domains.NewOrderFoodItem("abc", "food123", 210, 3, []domains.OptionItemInfo{})
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")

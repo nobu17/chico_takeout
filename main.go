@@ -111,11 +111,24 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
 
+	optionItemRepos := itemRDBMS.NewOptionItemRepository(db)
+	optionItem := r.Group("/item/option")
+	{
+		optionItem.Use(middleware.CheckAuthInfo(auth))
+		useCase := itemUseCase.NewOptionItemUseCase(optionItemRepos)
+		handler := itemHandler.NewOptionItemHandler(useCase)
+		optionItem.GET("/:id", handler.Get)
+		optionItem.GET("/", handler.GetAll)
+		optionItem.POST("/", middleware.CheckAdmin(), handler.Post)
+		optionItem.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		optionItem.DELETE("/:id", middleware.CheckAdmin(), handler.Delete)
+	}
+
 	kindRepo := itemRDBMS.NewItemKindRepository(db)
 	kind := r.Group("/item/kind")
 	{
 		kind.Use(middleware.CheckAuthInfo(auth))
-		useCase := itemUseCase.NewItemKindUseCase(kindRepo)
+		useCase := itemUseCase.NewItemKindUseCase(kindRepo, optionItemRepos)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
@@ -200,7 +213,7 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	order := r.Group("/order")
 	{
 		mailer := smtp.NewSmtpSendOrderMail()
-		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
+		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, kindRepo, optionItemRepos, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 
 		order.Use(middleware.CheckAuthInfo(auth))
@@ -266,6 +279,10 @@ func migrateDb(db *gorm.DB) {
 	if err != nil {
 		panic(err.Error())
 	}
+	err = db.AutoMigrate(&itemRDBMS.OptionItemModel{})
+	if err != nil {
+		panic(err.Error())
+	}
 	err = db.AutoMigrate(&itemRDBMS.StockItemModel{})
 	if err != nil {
 		panic(err.Error())
@@ -290,7 +307,6 @@ func migrateDb(db *gorm.DB) {
 	if err != nil {
 		panic(err.Error())
 	}
-
 	err = db.AutoMigrate(&orderRDBMS.OrderedStockItemModel{})
 	if err != nil {
 		panic(err.Error())

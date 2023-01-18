@@ -1,6 +1,7 @@
 package order
 
 import (
+	"fmt"
 	"strings"
 
 	"chico/takeout/common"
@@ -225,8 +226,8 @@ type OrderStockItem struct {
 	commonItemInfo
 }
 
-func NewOrderStockItem(itemId, name string, price, quantity int) (*OrderStockItem, error) {
-	item, err := newCommonItemInfo(itemId, name, price, quantity)
+func NewOrderStockItem(itemId, name string, price, quantity int, options []OptionItemInfo) (*OrderStockItem, error) {
+	item, err := newCommonItemInfo(itemId, name, price, quantity, options)
 	if err != nil {
 		return nil, err
 	}
@@ -239,8 +240,8 @@ type OrderFoodItem struct {
 	commonItemInfo
 }
 
-func NewOrderFoodItem(itemId, name string, price, quantity int) (*OrderFoodItem, error) {
-	item, err := newCommonItemInfo(itemId, name, price, quantity)
+func NewOrderFoodItem(itemId, name string, price, quantity int, options []OptionItemInfo) (*OrderFoodItem, error) {
+	item, err := newCommonItemInfo(itemId, name, price, quantity, options)
 	if err != nil {
 		return nil, err
 	}
@@ -254,10 +255,53 @@ type commonItemInfo struct {
 	name     item.Name
 	price    Price
 	quantity Quantity
+	options  []OptionItemInfo
+}
+
+type OptionItemInfo struct {
+	itemId string
+	name   item.Name
+	price  Price
+}
+
+func (o *OptionItemInfo) GetId() string {
+	return o.itemId
+}
+
+func (o *OptionItemInfo) GetName() string {
+	return o.name.GetValue()
+}
+
+func (o *OptionItemInfo) GetPrice() int {
+	return o.price.value
+}
+
+func NewOptionItemInfo(itemId, name string, price int) (*OptionItemInfo, error) {
+	if strings.TrimSpace(itemId) == "" {
+		return nil, common.NewValidationError("itemId", "required")
+	}
+
+	nameV, err := item.NewName(name, item.CommonItemNameMaxLength)
+	if err != nil {
+		return nil, err
+	}
+	priceV, err := NewPrice(price)
+	if err != nil {
+		return nil, err
+	}
+	return &OptionItemInfo{
+		itemId: itemId,
+		name:   *nameV,
+		price:  *priceV,
+	}, nil
 }
 
 func (c *commonItemInfo) HasSameId(id string) bool {
 	return c.itemId == id
+}
+
+func (c *commonItemInfo) GetOptionItems() []OptionItemInfo {
+	return c.options
 }
 
 func (c *commonItemInfo) GetItemId() string {
@@ -280,7 +324,7 @@ func (c *commonItemInfo) GetTotalCost() int {
 	return c.price.value * c.quantity.value
 }
 
-func newCommonItemInfo(itemId, name string, price, quantity int) (*commonItemInfo, error) {
+func newCommonItemInfo(itemId, name string, price, quantity int, options []OptionItemInfo) (*commonItemInfo, error) {
 	if strings.TrimSpace(itemId) == "" {
 		return nil, common.NewValidationError("itemId", "required")
 	}
@@ -297,10 +341,31 @@ func newCommonItemInfo(itemId, name string, price, quantity int) (*commonItemInf
 	if err != nil {
 		return nil, err
 	}
+
+	err = checkOptionItem(options)
+	if err != nil {
+		return nil, err
+	}
+	
 	return &commonItemInfo{
 		itemId:   itemId,
 		name:     *nameV,
 		price:    *priceV,
 		quantity: *quantityV,
+		options:  options,
 	}, nil
+}
+
+func checkOptionItem(options []OptionItemInfo) error {
+	ids := []string{}
+	for _, opt := range options {
+		opt.GetId()
+		for _, id := range ids {
+			if id == opt.GetId() {
+				return common.NewValidationError("OptionItemInfo.Id", fmt.Sprintf("duplicate Id:%s", id))			
+			}
+		}
+		ids = append(ids, opt.GetId())
+	}
+	return nil
 }

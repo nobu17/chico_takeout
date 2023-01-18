@@ -22,10 +22,12 @@ func SetupKindRouter() *gin.Engine {
 	r := gin.Default()
 	kind := r.Group("/item/kind")
 	{
+		optionRepos := memory.NewOptionItemMemoryRepository()
+		optionRepos.Reset()
 		repo := memory.NewItemKindMemoryRepository()
 		repo.Reset()
 		kindMemoryMaps = repo.GetMemory()
-		useCase := itemUseCase.NewItemKindUseCase(repo)
+		useCase := itemUseCase.NewItemKindUseCase(repo, optionRepos)
 		handler := itemHandler.NewItemKindHandler(useCase)
 		kind.GET("/:id", handler.Get)
 		kind.GET("/", handler.GetAll)
@@ -36,7 +38,7 @@ func SetupKindRouter() *gin.Engine {
 	return r
 }
 
-func TestItemKindHandler_GETALL(t *testing.T) {
+func TestItemKindHandler_GET_ALL(t *testing.T) {
 	r := SetupKindRouter()
 	req, _ := http.NewRequest("GET", "/item/kind/", nil)
 	w := httptest.NewRecorder()
@@ -55,9 +57,10 @@ func TestItemKindHandler_GETALL(t *testing.T) {
 	}
 	// var want []map[string]interface{}
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "item1"},
-		{"priority": 2, "name": "item2"},
+		{"priority": 1, "name": "item1", "optionItemIds": []string{}},
+		{"priority": 2, "name": "item2", "optionItemIds": []string{}},
 	}
+	fmt.Println("response", response)
 	for index, item := range response {
 		fmt.Println("item", item)
 		AssertMaps(t, item, wants[index])
@@ -68,8 +71,8 @@ func TestItemKindHandler_GET(t *testing.T) {
 	r := SetupKindRouter()
 
 	wants := map[string]map[string]interface{}{
-		"item1": {"priority": 1, "name": "item1"},
-		"item2": {"priority": 2, "name": "item2"},
+		"item1": {"priority": 1, "name": "item1", "optionItemIds": []string{}},
+		"item2": {"priority": 2, "name": "item2", "optionItemIds": []string{}},
 	}
 
 	for id := range kindMemoryMaps {
@@ -110,10 +113,11 @@ func TestItemKindHandler_GET_NotFound(t *testing.T) {
 func TestItemKindHandler_POST(t *testing.T) {
 	r := SetupKindRouter()
 
-	want := map[string]interface{}{"priority": 4, "name": "add"}
+	want := map[string]interface{}{"priority": 4, "name": "add", "optionItemIds": []string{"1", "2"}}
 	body := map[string]interface{}{
-		"name":     "add",
-		"priority": 4,
+		"name":          "add",
+		"priority":      4,
+		"optionItemIds": []string{"1", "2"},
 	}
 	jBytes, err := json.Marshal(body)
 	if err != nil {
@@ -166,8 +170,11 @@ func TestItemKindHandler_POST_BadRequest(t *testing.T) {
 	r := SetupKindRouter()
 
 	inputs := []input{
-		{name: "only name", args: map[string]interface{}{"name": "added"}, want: 2},
-		{name: "only priority", args: map[string]interface{}{"priority": 3}, want: 2},
+		{name: "lack priority", args: map[string]interface{}{"name": "added", "optionItemIds": []string{}}, want: 2},
+		{name: "lack name", args: map[string]interface{}{"priority": 3, "optionItemIds": []string{}}, want: 2},
+		{name: "lack optionItemIds", args: map[string]interface{}{"name": "added", "priority": 3}, want: 2},
+		{name: "duplicate optionItemIds", args: map[string]interface{}{"name": "added", "priority": 3, "optionItemIds": []string{"1", "2", "1"}}, want: 2},
+		{name: "not exits optionItemIds", args: map[string]interface{}{"name": "added", "priority": 3, "optionItemIds": []string{"1", "2", "123"}}, want: 2},
 		{name: "empty", args: map[string]interface{}{}, want: 2},
 	}
 
@@ -188,6 +195,7 @@ func TestItemKindHandler_POST_BadRequest(t *testing.T) {
 			t.Errorf("Status Code should be BadRequest:%d", w.Code)
 			return
 		}
+		fmt.Println(param.name, w.Body)
 
 		// confirm result
 		getReq, _ := http.NewRequest("GET", "/item/kind/", nil)
@@ -196,7 +204,6 @@ func TestItemKindHandler_POST_BadRequest(t *testing.T) {
 		if http.StatusOK != w.Code {
 			t.Errorf("Status Code should be OK:%d", w.Code)
 		}
-		fmt.Println("response", w.Body)
 
 		var response []map[string]interface{}
 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
@@ -216,10 +223,11 @@ func TestItemKindHandler_PUT(t *testing.T) {
 		ids = append(ids, id)
 	}
 
-	want := map[string]interface{}{"priority": 3, "name": "changed"}
+	want := map[string]interface{}{"priority": 3, "name": "changed", "optionItemIds": []string{"1"}}
 	body := map[string]interface{}{
-		"name":     "changed",
-		"priority": 3,
+		"name":          "changed",
+		"priority":      3,
+		"optionItemIds": []string{"1"},
 	}
 	jBytes, err := json.Marshal(body)
 	if err != nil {
@@ -312,8 +320,9 @@ func TestItemKindHandler_PUT_BadRequest(t *testing.T) {
 func TestItemKindHandler_PUT_NotFound(t *testing.T) {
 
 	body := map[string]interface{}{
-		"name":     "changed",
-		"priority": 3,
+		"name":          "changed",
+		"priority":      3,
+		"optionItemIds": []string{},
 	}
 
 	r := SetupKindRouter()

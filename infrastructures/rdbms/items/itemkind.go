@@ -21,12 +21,17 @@ func NewItemKindRepository(db *gorm.DB) *ItemKindRepository {
 
 type ItemKindModel struct {
 	rdbms.BaseModel
-	Name     string
-	Priority int
+	Name             string
+	Priority         int
+	OptionItemModels []OptionItemModel `gorm:"many2many:itemKind_optionItems;"`
 }
 
 func (i *ItemKindModel) toDomain() (*domains.ItemKind, error) {
-	model, err := domains.NewItemKindForOrm(i.ID, i.Name, i.Priority)
+	ids := []string{}
+	for _, optionModel := range i.OptionItemModels {
+		ids = append(ids, optionModel.ID)
+	}
+	model, err := domains.NewItemKindForOrm(i.ID, i.Name, i.Priority, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +44,22 @@ func newItemModel(i *domains.ItemKind) *ItemKindModel {
 	model.Name = i.GetName()
 	model.Priority = i.GetPriority()
 
+	options := []OptionItemModel{}
+	for _, id := range i.GetOptionItemIds() {
+		opt := OptionItemModel{}
+		opt.ID = id
+		options = append(options, opt)
+	}
+
+	model.OptionItemModels = options
+
 	return &model
 }
 
 func (i *ItemKindRepository) Find(id string) (*domains.ItemKind, error) {
 	model := ItemKindModel{}
 
-	err := i.db.First(&model, "ID=?", id).Error
+	err := i.db.Preload("OptionItemModels").First(&model, "ID=?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +74,7 @@ func (i *ItemKindRepository) Find(id string) (*domains.ItemKind, error) {
 func (i *ItemKindRepository) FindAll() ([]domains.ItemKind, error) {
 	models := []ItemKindModel{}
 
-	err := i.db.Find(&models).Error
+	err := i.db.Preload("OptionItemModels").Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +102,22 @@ func (i *ItemKindRepository) Create(item *domains.ItemKind) (string, error) {
 
 func (i *ItemKindRepository) Update(item *domains.ItemKind) error {
 	model := newItemModel(item)
-	err := i.db.Save(&model).Error
-	return err
+
+	var gError error = nil
+	i.db.Transaction(func(tx *gorm.DB) error {
+		err := i.db.Model(&model).Association("OptionItemModels").Replace(model.OptionItemModels)
+		if err != nil {
+			gError = err
+			return err
+		}
+		err = i.db.Save(&model).Error
+		if err != nil {
+			gError = err
+			return err
+		}
+		return nil
+	})
+	return gError
 }
 
 func (i *ItemKindRepository) Delete(id string) error {

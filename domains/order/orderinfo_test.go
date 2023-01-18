@@ -15,7 +15,38 @@ type commonItemInfoArgs struct {
 	name     string
 	price    int
 	quantity int
+	options  []optionItemInfo
 }
+
+type optionItemInfo struct {
+	itemId string
+	name   string
+	price  int
+}
+
+type optionItemInfoInput struct {
+	name             string
+	args             optionItemInfo
+	want             optionItemInfo
+	hasValidationErr bool
+}
+
+func (o *commonItemInfoArgs) toOptions() ([]OptionItemInfo, error) {
+	opts := []OptionItemInfo{}
+	for _, op := range o.options {
+		opt, err := op.toOption()
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, *opt)
+	}
+	return opts, nil
+}
+
+func (o *optionItemInfo) toOption() (*OptionItemInfo, error) {
+	return NewOptionItemInfo(o.itemId, o.name, o.price)
+}
+
 type commonItemInfoInput struct {
 	name             string
 	args             commonItemInfoArgs
@@ -46,41 +77,130 @@ func assertCommonItemInfo(t *testing.T, want commonItemInfoArgs, got *commonItem
 	assert.Equal(t, want.itemId, got.GetItemId())
 	assert.Equal(t, want.quantity, got.GetQuantity())
 	assert.Equal(t, want.price, got.GetPrice())
+	if len(want.options) != len(got.GetOptionItems()) {
+		assert.Fail(t, "option length is not same.(got=%d, want=%d)", len(want.options), len(got.options))
+	}
+	gotOps := got.GetOptionItems()
+	for i, wantOp := range want.options {
+		assertOptionItemInfo(t, wantOp, gotOps[i])
+	}
+}
+
+func assertOptionItemInfo(t *testing.T, want optionItemInfo, got OptionItemInfo) {
+	assert.Equal(t, want.name, got.GetName())
+	assert.Equal(t, want.itemId, got.GetId())
+	assert.Equal(t, want.price, got.GetPrice())
+}
+
+func TestNewOptionItemInfo(t *testing.T) {
+	inputs := []optionItemInfoInput{
+		{
+			name:             "normal",
+			args:             optionItemInfo{itemId: "1", name: "opt1", price: 10},
+			want:             optionItemInfo{itemId: "1", name: "opt1", price: 10},
+			hasValidationErr: false,
+		},
+		{
+			name:             "edge limit name(25)",
+			args:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 10},
+			want:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 10},
+			hasValidationErr: false,
+		},
+		{
+			name:             "empty item id",
+			args:             optionItemInfo{itemId: "", name: "opt1", price: 10},
+			want:             optionItemInfo{},
+			hasValidationErr: true,
+		},
+		{
+			name:             "empty name",
+			args:             optionItemInfo{itemId: "1", name: "", price: 10},
+			want:             optionItemInfo{},
+			hasValidationErr: true,
+		},
+		{
+			name:             "zero price",
+			args:             optionItemInfo{itemId: "1", name: "opt1", price: 0},
+			want:             optionItemInfo{},
+			hasValidationErr: true,
+		},
+		{
+			name:             "minus price",
+			args:             optionItemInfo{itemId: "1", name: "opt1", price: -1},
+			want:             optionItemInfo{},
+			hasValidationErr: true,
+		},
+		{
+			name:             "over limit name(26)",
+			args:             optionItemInfo{itemId: "1", name: "12345678901234567890123456", price: 10},
+			want:             optionItemInfo{},
+			hasValidationErr: true,
+		},
+	}
+	for _, tt := range inputs {
+		fmt.Println("name:", tt.name)
+
+		opts, err := tt.args.toOption()
+		if tt.hasValidationErr {
+			fmt.Println("err:", err)
+			assert.Error(t, err, "should have error")
+			assert.IsType(t, common.NewValidationError("", ""), err)
+			continue
+		}
+		assert.NoError(t, err, "no error should be")
+		assertOptionItemInfo(t, tt.want, *opts)
+	}
 }
 
 func TestNewCommonItemInfo(t *testing.T) {
 	inputs := []commonItemInfoInput{
 		{name: "normal check",
 			args: commonItemInfoArgs{
+				name: "test", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
+			},
+			want: commonItemInfoArgs{
+				name: "test", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "normal check(with option item)",
+			args: commonItemInfoArgs{
 				name: "test", itemId: "12", price: 100, quantity: 10,
+				options: []optionItemInfo{
+					{itemId: "1", name: "opt1", price: 10},
+				},
 			},
 			want: commonItemInfoArgs{
 				name: "test", itemId: "12", price: 100, quantity: 10,
+				options: []optionItemInfo{
+					{itemId: "1", name: "opt1", price: 10},
+				},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "normal check(edge)",
 			args: commonItemInfoArgs{
-				name: "123456789012345", itemId: "12", price: 100, quantity: 10,
+				name: "1234567890123456789012345", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
 			},
 			want: commonItemInfoArgs{
-				name: "123456789012345", itemId: "12", price: 100, quantity: 10,
+				name: "1234567890123456789012345", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "error empty name",
 			args: commonItemInfoArgs{
-				name: "", itemId: "12", price: 100, quantity: 10,
+				name: "", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
 		},
-		{name: "error overlimit name(16)",
+		{name: "error over limit name(26)",
 			args: commonItemInfoArgs{
-				name: "1234567890123456", itemId: "12", price: 100, quantity: 10,
+				name: "12345678901234567890123456", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,
@@ -88,7 +208,7 @@ func TestNewCommonItemInfo(t *testing.T) {
 		},
 		{name: "error empty itemId",
 			args: commonItemInfoArgs{
-				name: "123456789", itemId: "", price: 100, quantity: 10,
+				name: "123456789", itemId: "", price: 100, quantity: 10, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,
@@ -96,7 +216,7 @@ func TestNewCommonItemInfo(t *testing.T) {
 		},
 		{name: "error price(0)",
 			args: commonItemInfoArgs{
-				name: "123456789", itemId: "12", price: 0, quantity: 10,
+				name: "123456789", itemId: "12", price: 0, quantity: 10, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,
@@ -104,7 +224,7 @@ func TestNewCommonItemInfo(t *testing.T) {
 		},
 		{name: "error quantity(0)",
 			args: commonItemInfoArgs{
-				name: "123456789", itemId: "12", price: 10, quantity: 0,
+				name: "123456789", itemId: "12", price: 10, quantity: 0, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,
@@ -114,7 +234,10 @@ func TestNewCommonItemInfo(t *testing.T) {
 
 	for _, tt := range inputs {
 		fmt.Println("name:", tt.name)
-		got, err := newCommonItemInfo(tt.args.itemId, tt.args.name, tt.args.price, tt.args.quantity)
+
+		opts, err := tt.args.toOptions()
+		assert.NoError(t, err)
+		got, err := newCommonItemInfo(tt.args.itemId, tt.args.name, tt.args.price, tt.args.quantity, opts)
 		assertCommonItemInfoRoot(t, tt, got, err)
 	}
 }
@@ -206,6 +329,53 @@ func TestNewOrderInfo(t *testing.T) {
 				foodItems: []commonItemInfoArgs{
 					{
 						name: "item2", itemId: "13", price: 200, quantity: 1,
+					},
+				},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "normal check(with option item)",
+			args: orderInfoArgs{
+				userId: "abc", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+						options: []optionItemInfo{
+							{itemId: "1", name: "opt1", price: 10},
+							{itemId: "2", name: "opt2", price: 11},
+						},
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+						options: []optionItemInfo{
+							{itemId: "3", name: "opt3", price: 12},
+							{itemId: "4", name: "opt4", price: 13},
+						},
+					},
+				},
+			},
+			want: orderInfoArgs{
+				userId: "abc", userName: "ユーザーABC", memo: "12", pickupDateTime: "2160/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				canceled: false,
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+						options: []optionItemInfo{
+							{itemId: "1", name: "opt1", price: 10},
+							{itemId: "2", name: "opt2", price: 11},
+						},
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+						options: []optionItemInfo{
+							{itemId: "3", name: "opt3", price: 12},
+							{itemId: "4", name: "opt4", price: 13},
+						},
 					},
 				},
 			},
@@ -435,6 +605,51 @@ func TestNewOrderInfo(t *testing.T) {
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
 		},
+		{name: "option stock item is duplicated",
+			args: orderInfoArgs{
+				userId: "123", userName: "ユーザーABC", memo: "123", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+						options: []optionItemInfo{
+							{itemId: "1", name: "opt1", price: 10},
+							{itemId: "2", name: "opt2", price: 11},
+							{itemId: "2", name: "opt2", price: 11},
+						},
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+					},
+				},
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "option food item is duplicated",
+			args: orderInfoArgs{
+				userId: "123", userName: "ユーザーABC", memo: "123", pickupDateTime: "2120/12/10 10:15", userEmail: "user1@hoge.com", userTelNo: "123456789",
+				stockItems: []commonItemInfoArgs{
+					{
+						name: "item1", itemId: "12", price: 100, quantity: 10,
+						options: []optionItemInfo{},
+					},
+				},
+				foodItems: []commonItemInfoArgs{
+					{
+						name: "item2", itemId: "13", price: 200, quantity: 1,
+						options: []optionItemInfo{
+							{itemId: "1", name: "opt1", price: 10},
+							{itemId: "2", name: "opt2", price: 11},
+							{itemId: "2", name: "opt2", price: 11},
+						},
+					},
+				},
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
 	}
 
 	for _, tt := range inputs {
@@ -442,18 +657,24 @@ func TestNewOrderInfo(t *testing.T) {
 
 		fOrders := []OrderFoodItem{}
 		for _, food := range tt.args.foodItems {
-			forder, err := NewOrderFoodItem(food.itemId, food.name, food.price, food.quantity)
+			opts, err := food.toOptions()
+			assert.NoError(t, err)
+			fOrder, err := NewOrderFoodItem(food.itemId, food.name, food.price, food.quantity, opts)
 			if err != nil {
-				assert.Fail(t, "failed to init OrderFoodItem")
+				assertOderInfoRoot(t, tt, nil, err)
+				// assert.Fail(t, "failed to init OrderFoodItem")
 				return
 			}
-			fOrders = append(fOrders, *forder)
+			fOrders = append(fOrders, *fOrder)
 		}
 		sOrders := []OrderStockItem{}
 		for _, stock := range tt.args.stockItems {
-			order, err := NewOrderStockItem(stock.itemId, stock.name, stock.price, stock.quantity)
+			opts, err := stock.toOptions()
+			assert.NoError(t, err)
+			order, err := NewOrderStockItem(stock.itemId, stock.name, stock.price, stock.quantity, opts)
 			if err != nil {
-				assert.Fail(t, "failed to init OrderStockItem")
+				assertOderInfoRoot(t, tt, nil, err)
+				// assert.Fail(t, "failed to init OrderStockItem")
 				return
 			}
 			sOrders = append(sOrders, *order)
@@ -500,28 +721,32 @@ func TestOrderInfoSetCancel(t *testing.T) {
 	for _, tt := range inputs {
 		fmt.Println("name:", tt.name)
 
-		fOrders := []OrderFoodItem{}
+		foodOrders := []OrderFoodItem{}
 		for _, food := range tt.args.foodItems {
-			forder, err := NewOrderFoodItem(food.itemId, food.name, food.price, food.quantity)
+			opts, err := food.toOptions()
+			assert.NoError(t, err)
+			foodOrder, err := NewOrderFoodItem(food.itemId, food.name, food.price, food.quantity, opts)
 			if err != nil {
 				assert.Fail(t, "failed to init OrderFoodItem")
 				return
 			}
-			fOrders = append(fOrders, *forder)
+			foodOrders = append(foodOrders, *foodOrder)
 		}
 		sOrders := []OrderStockItem{}
 		for _, stock := range tt.args.stockItems {
-			order, err := NewOrderStockItem(stock.itemId, stock.name, stock.price, stock.quantity)
+			opts, err := stock.toOptions()
+			assert.NoError(t, err)
+			order, err := NewOrderStockItem(stock.itemId, stock.name, stock.price, stock.quantity, opts)
 			if err != nil {
 				assert.Fail(t, "failed to init OrderStockItem")
 				return
 			}
 			sOrders = append(sOrders, *order)
 		}
-		got, err := NewOrderInfo(tt.args.userId, tt.args.userName, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, fOrders)
+		got, err := NewOrderInfo(tt.args.userId, tt.args.userName, tt.args.userEmail, tt.args.userTelNo, tt.args.memo, tt.args.pickupDateTime, sOrders, foodOrders)
 		if err == nil {
 			got.SetCancel()
-		}	
+		}
 		assertOderInfoRoot(t, tt, got, err)
 	}
 }

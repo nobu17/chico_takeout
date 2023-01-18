@@ -1,12 +1,17 @@
 package order
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 
 	"chico/takeout/common"
 	domains "chico/takeout/domains/order"
 	"chico/takeout/infrastructures/rdbms"
 	"chico/takeout/infrastructures/rdbms/items"
+
+	"database/sql/driver"
 
 	"gorm.io/gorm"
 )
@@ -43,6 +48,32 @@ type OrderedStockItemModel struct {
 	Name             string
 	Price            int
 	Quantity         int
+	Options          []OrderedStockOptionItemModel `gorm:"serializer:json"`
+}
+
+type OrderedStockOptionItemModel struct {
+	OptionItemModelID       string
+	Name                    string
+	Price                   int
+	Quantity                int
+}
+
+func (r *OrderedStockOptionItemModel) Scan(value interface{}) error {
+	val, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal string value:", value))
+	}
+
+	return json.Unmarshal([]byte(val), r)
+}
+
+func (r OrderedStockOptionItemModel) Value() (driver.Value, error) {
+	val, err := json.Marshal(&r)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
 }
 
 type OrderedFoodItemModel struct {
@@ -51,6 +82,32 @@ type OrderedFoodItemModel struct {
 	Name             string
 	Price            int
 	Quantity         int
+	Options          []OrderedFoodOptionItemModel `gorm:"serializer:json"`
+}
+
+type OrderedFoodOptionItemModel struct {
+	OptionItemModelID      string
+	Name                   string
+	Price                  int
+	Quantity               int
+}
+
+func (r *OrderedFoodOptionItemModel) Scan(value interface{}) error {
+	val, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal string value:", value))
+	}
+
+	return json.Unmarshal([]byte(val), r)
+}
+
+func (r OrderedFoodOptionItemModel) Value() (driver.Value, error) {
+	val, err := json.Marshal(&r)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
 }
 
 func newOrderInfoModel(order *domains.OrderInfo) (*OrderInfoModel, error) {
@@ -74,21 +131,23 @@ func newOrderInfoModel(order *domains.OrderInfo) (*OrderInfoModel, error) {
 	model.OrderDateTime = *orderDateTime
 	model.PickupDateTime = *pickupDateTime
 
-	stockModels := []items.StockItemModel{}
-	for _, stock := range model.StockItemModels {
-		stockModel := items.StockItemModel{}
-		stockModel.ID = stock.ID
-		stockModels = append(stockModels, stockModel)
-	}
-	model.StockItemModels = stockModels
+	// below data is not needed to insert
 
-	foodModels := []items.FoodItemModel{}
-	for _, food := range model.FoodItemModels {
-		foodModel := items.FoodItemModel{}
-		foodModel.ID = food.ID
-		foodModels = append(foodModels, foodModel)
-	}
-	model.FoodItemModels = foodModels
+	// stockModels := []items.StockItemModel{}
+	// for _, stock := range order.GetStockItems() {
+	// 	stockModel := items.StockItemModel{}
+	// 	stockModel.ID = stock.GetItemId()
+	// 	stockModels = append(stockModels, stockModel)
+	// }
+	// model.StockItemModels = stockModels
+
+	// foodModels := []items.FoodItemModel{}
+	// for _, food := range order.GetFoodItems() {
+	// 	foodModel := items.FoodItemModel{}
+	// 	foodModel.ID = food.GetItemId()
+	// 	foodModels = append(foodModels, foodModel)
+	// }
+	// model.FoodItemModels = foodModels
 
 	return model, nil
 }
@@ -96,7 +155,11 @@ func newOrderInfoModel(order *domains.OrderInfo) (*OrderInfoModel, error) {
 func (s *OrderInfoModel) toDomain(stocks []OrderedStockItemModel, foods []OrderedFoodItemModel) (*domains.OrderInfo, error) {
 	stockDoms := []domains.OrderStockItem{}
 	for _, stock := range stocks {
-		stockDom, err := domains.NewOrderStockItem(stock.StockItemModelID, stock.Name, stock.Price, stock.Quantity)
+		opts, err := s.toStockOptDomain(stock.Options)
+		if err != nil {
+			return nil, err
+		}
+		stockDom, err := domains.NewOrderStockItem(stock.StockItemModelID, stock.Name, stock.Price, stock.Quantity, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +167,11 @@ func (s *OrderInfoModel) toDomain(stocks []OrderedStockItemModel, foods []Ordere
 	}
 	foodDoms := []domains.OrderFoodItem{}
 	for _, food := range foods {
-		foodDom, err := domains.NewOrderFoodItem(food.FoodItemModelID, food.Name, food.Price, food.Quantity)
+		opts, err := s.toFoodOptDomain(food.Options)
+		if err != nil {
+			return nil, err
+		}
+		foodDom, err := domains.NewOrderFoodItem(food.FoodItemModelID, food.Name, food.Price, food.Quantity, opts)
 		if err != nil {
 			return nil, err
 		}
@@ -118,6 +185,29 @@ func (s *OrderInfoModel) toDomain(stocks []OrderedStockItemModel, foods []Ordere
 		return nil, err
 	}
 	return dom, nil
+}
+
+func (o *OrderInfoModel) toFoodOptDomain(opts []OrderedFoodOptionItemModel) ([]domains.OptionItemInfo, error) {
+	options := []domains.OptionItemInfo{}
+	for _, opt := range opts {
+		op, err := domains.NewOptionItemInfo(opt.OptionItemModelID, opt.Name, opt.Price)
+		if err != nil {
+			return nil, err
+		}
+		options = append(options, *op)
+	}
+	return options, nil
+}
+func (o *OrderInfoModel) toStockOptDomain(opts []OrderedStockOptionItemModel) ([]domains.OptionItemInfo, error) {
+	options := []domains.OptionItemInfo{}
+	for _, opt := range opts {
+		op, err := domains.NewOptionItemInfo(opt.OptionItemModelID, opt.Name, opt.Price)
+		if err != nil {
+			return nil, err
+		}
+		options = append(options, *op)
+	}
+	return options, nil
 }
 
 func (o *OrderInfoRepository) Find(id string) (*domains.OrderInfo, error) {
@@ -150,7 +240,10 @@ func (o *OrderInfoRepository) FindAll() ([]domains.OrderInfo, error) {
 	models := []OrderInfoModel{}
 
 	// until 1000 order by ordered time(latest ordered item)
-	err := o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Preload("StockItemModels").Preload("FoodItemModels").Limit(maxLimit).Order("order_date_time desc").Find(&models).Error
+	err := o.Db.Preload("OrderedStockItemModels").
+		Preload("OrderedFoodItemModels").
+		Preload("StockItemModels").
+		Preload("FoodItemModels").Limit(maxLimit).Order("order_date_time desc").Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +267,8 @@ func (o *OrderInfoRepository) FindByPickupDate(date string) ([]domains.OrderInfo
 	pickupDateEnd := pickupDateStart.AddDate(0, 0, 1)
 
 	models := []OrderInfoModel{}
-	err = o.Db.Preload("OrderedStockItemModels").Preload("OrderedFoodItemModels").Where("pickup_date_time >= ? and pickup_date_time<= ?", pickupDateStart, pickupDateEnd).Find(&models).Error
+	err = o.Db.Preload("OrderedStockItemModels").
+		Preload("OrderedFoodItemModels").Where("pickup_date_time >= ? and pickup_date_time<= ?", pickupDateStart, pickupDateEnd).Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
@@ -235,11 +329,6 @@ func (o *OrderInfoRepository) Create(order *domains.OrderInfo) (string, error) {
 	}
 	var gError error = nil
 	o.Db.Transaction(func(tx *gorm.DB) error {
-		err = o.Db.Create(&model).Error
-		if err != nil {
-			gError = err
-			return err
-		}
 		stocks := []OrderedStockItemModel{}
 		for _, stock := range order.GetStockItems() {
 			stockModel := OrderedStockItemModel{}
@@ -248,15 +337,18 @@ func (o *OrderInfoRepository) Create(order *domains.OrderInfo) (string, error) {
 			stockModel.Name = stock.GetName()
 			stockModel.Price = stock.GetPrice()
 			stockModel.Quantity = stock.GetQuantity()
+			options := []OrderedStockOptionItemModel{}
+			for _, opt := range stock.GetOptionItems() {
+				option := OrderedStockOptionItemModel{}
+				option.OptionItemModelID = opt.GetId()
+				option.Name = opt.GetName()
+				option.Price = opt.GetPrice()
+				options = append(options, option)
+			}
+			stockModel.Options = options
 			stocks = append(stocks, stockModel)
 		}
-		if len(stocks) > 0 {
-			err = o.Db.Create(&stocks).Error
-			if err != nil {
-				gError = err
-				return err
-			}
-		}
+		model.OrderedStockItemModels = stocks
 
 		foods := []OrderedFoodItemModel{}
 		for _, food := range order.GetFoodItems() {
@@ -266,14 +358,23 @@ func (o *OrderInfoRepository) Create(order *domains.OrderInfo) (string, error) {
 			foodModel.Name = food.GetName()
 			foodModel.Price = food.GetPrice()
 			foodModel.Quantity = food.GetQuantity()
+			options := []OrderedFoodOptionItemModel{}
+			for _, opt := range food.GetOptionItems() {
+				option := OrderedFoodOptionItemModel{}
+				option.OptionItemModelID = opt.GetId()
+				option.Name = opt.GetName()
+				option.Price = opt.GetPrice()
+				options = append(options, option)
+			}
+			foodModel.Options = options
 			foods = append(foods, foodModel)
 		}
-		if len(foods) > 0 {
-			err = o.Db.Create(&foods).Error
-			if err != nil {
-				gError = err
-				return err
-			}
+		model.OrderedFoodItemModels = foods
+
+		err = o.Db.Create(&model).Error
+		if err != nil {
+			gError = err
+			return err
 		}
 
 		return nil

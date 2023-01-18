@@ -8,8 +8,9 @@ import (
 )
 
 type ItemKindCreateRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Priority int    `form:"priority" binding:"required"`
+	Name          string   `json:"name" binding:"required"`
+	Priority      int      `json:"priority" binding:"required"`
+	OptionItemIds []string `json:"optionItemIds" binding:"required"`
 }
 
 type ItemKindCreateResponse struct {
@@ -17,29 +18,32 @@ type ItemKindCreateResponse struct {
 }
 
 func (i *ItemKindCreateRequest) toModel() *usecase.ItemKindCreateModel {
-	return &usecase.ItemKindCreateModel{Name: i.Name, Priority: i.Priority}
+	return &usecase.ItemKindCreateModel{Name: i.Name, Priority: i.Priority, OptionItemIds: i.OptionItemIds}
 }
 
 type ItemKindUpdateRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Priority int    `json:"priority" binding:"required"`
+	Name          string   `json:"name" binding:"required"`
+	Priority      int      `json:"priority" binding:"required"`
+	OptionItemIds []string `json:"optionItemIds" binding:"required"`
 }
 
 func (i *ItemKindUpdateRequest) toModel(id string) *usecase.ItemKindUpdateModel {
-	return &usecase.ItemKindUpdateModel{Id: id, Name: i.Name, Priority: i.Priority}
+	return &usecase.ItemKindUpdateModel{Id: id, Name: i.Name, Priority: i.Priority, OptionItemIds: i.OptionItemIds}
 }
 
 type ItemKindData struct {
-	Id       string `json:"id"`
-	Name     string `json:"name" binding:"required"`
-	Priority int    `json:"priority" binding:"required"`
+	Id            string   `json:"id"`
+	Name          string   `json:"name" binding:"required"`
+	Priority      int      `json:"priority" binding:"required"`
+	OptionItemIds []string `json:"optionItemIds" binding:"required"`
 }
 
 func newItemKindData(item *usecase.ItemKindModel) *ItemKindData {
 	return &ItemKindData{
-		Id:       item.Id,
-		Name:     item.Name,
-		Priority: item.Priority,
+		Id:            item.Id,
+		Name:          item.Name,
+		Priority:      item.Priority,
+		OptionItemIds: item.OptionItemIds,
 	}
 }
 

@@ -43,13 +43,13 @@ func resetOrderInfoMemory() {
 
 	// order1
 	foodOrders1 := []domains.OrderFoodItem{}
-	foodOrder1, err := domains.NewOrderFoodItem(allFoods[0].GetId(), allFoods[0].GetName(), allFoods[0].GetPrice(), 3)
+	foodOrder1, err := domains.NewOrderFoodItem(allFoods[0].GetId(), allFoods[0].GetName(), allFoods[0].GetPrice(), 3, []domains.OptionItemInfo{})
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
 	}
 	foodOrders1 = append(foodOrders1, *foodOrder1)
-	foodOrder2, err := domains.NewOrderFoodItem(allFoods[1].GetId(), allFoods[1].GetName(), allFoods[1].GetPrice(), 1)
+	foodOrder2, err := domains.NewOrderFoodItem(allFoods[1].GetId(), allFoods[1].GetName(), allFoods[1].GetPrice(), 1, []domains.OptionItemInfo{})
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -57,7 +57,7 @@ func resetOrderInfoMemory() {
 	foodOrders1 = append(foodOrders1, *foodOrder2)
 
 	stockOrders1 := []domains.OrderStockItem{}
-	order1, err := domains.NewOrderInfo("user1", "ユーザー1", "user1@hoge.com", "123456789", "memo1", "2050/12/10 12:00", stockOrders1, foodOrders1)
+	order1, err := domains.NewOrderInfoForOrm("o1", "user1", "ユーザー1", "user1@hoge.com", "123456789", "memo1", "2050/12/10 12:00", "2050/12/08 12:00", stockOrders1, foodOrders1, true)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create stock order")
@@ -66,7 +66,7 @@ func resetOrderInfoMemory() {
 
 	// order2
 	foodOrders2 := []domains.OrderFoodItem{}
-	foodOrder3, err := domains.NewOrderFoodItem(allFoods[0].GetId(), allFoods[0].GetName(), allFoods[0].GetPrice(), 1)
+	foodOrder3, err := domains.NewOrderFoodItem(allFoods[0].GetId(), allFoods[0].GetName(), allFoods[0].GetPrice(), 1, []domains.OptionItemInfo{})
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -74,13 +74,13 @@ func resetOrderInfoMemory() {
 	foodOrders2 = append(foodOrders2, *foodOrder3)
 
 	stockOrders2 := []domains.OrderStockItem{}
-	stockOrder1, err := domains.NewOrderStockItem(allStocks[0].GetId(), allStocks[0].GetName(), allStocks[0].GetPrice(), 2)
+	stockOrder1, err := domains.NewOrderStockItem(allStocks[0].GetId(), allStocks[0].GetName(), allStocks[0].GetPrice(), 2, []domains.OptionItemInfo{})
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
 	}
 	stockOrders2 = append(stockOrders2, *stockOrder1)
-	order2, err := domains.NewOrderInfo("user2", "ユーザー2", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", stockOrders2, foodOrders2)
+	order2, err := domains.NewOrderInfoForOrm("o2", "user2", "ユーザー2", "user2@hoge.com", "987654321", "memo2", "2050/12/14 12:00", "2050/12/11 10:00", stockOrders2, foodOrders2, true)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create food order")
@@ -139,7 +139,7 @@ func (o *OrderInfoMemoryRepository) FindActiveByUserId(userId string) ([]domains
 	items := []domains.OrderInfo{}
 	for _, item := range o.inMemory {
 		// not canceled
-		if item.GetUserId() == userId && !item.GetCanceled(){
+		if item.GetUserId() == userId && !item.GetCanceled() {
 			// if time is future, add.
 			pickUpDateTime, err := common.ConvertStrToDateTime(item.GetPickupDateTime())
 			if err != nil {
@@ -175,7 +175,6 @@ func (o *OrderInfoMemoryRepository) UpdateUserInfo(item *domains.OrderInfo) erro
 	}
 	return fmt.Errorf("update target not exists")
 }
-
 
 func (o *OrderInfoMemoryRepository) Transact(fc func() error) error {
 	return fc()

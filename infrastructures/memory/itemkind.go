@@ -21,9 +21,11 @@ func (i *ItemKindMemoryRepository) GetMemory() map[string]*domains.ItemKind {
 
 func resetKindMemory() {
 	memory = map[string]*domains.ItemKind{}
-	item1, _ := domains.NewItemKind("item1", 1)
+	ids1 := []string{}
+	item1, _ := domains.NewItemKind("item1", 1, ids1)
 	memory[item1.GetId()] = item1
-	item2, _ := domains.NewItemKind("item2", 2)
+	ids2 := []string{}
+	item2, _ := domains.NewItemKind("item2", 2, ids2)
 	memory[item2.GetId()] = item2
 }
 

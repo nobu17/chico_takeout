@@ -35,6 +35,7 @@ import AdminHome from "./pages/admin/Home";
 import AdminLogin from "./pages/admin/Login";
 
 import ItemKind from "./pages/admin/items/ItemKind";
+import OptionItem from "./pages/admin/items/OptionItem";
 import StockItem from "./pages/admin/items/StockItem";
 import StockItemRemain from "./pages/admin/items/StockItemRemain";
 import FoodItem from "./pages/admin/items/FoodItem";
@@ -88,6 +89,7 @@ function App() {
                 <Route element={<AdminAuthLayout />}>
                   <Route path="/admin" element={<AdminHome />} />
                   <Route path="/admin/items/kind" element={<ItemKind />} />
+                  <Route path="/admin/items/option" element={<OptionItem />} />
                   <Route path="/admin/items/stock" element={<StockItem />} />
                   <Route
                     path="/admin/items/stock/remain"

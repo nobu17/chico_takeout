@@ -7,6 +7,7 @@ const itemMenu: PageMenuProps = {
   icon: "apple",
   pageInfos: [
     { title: "アイテム種別編集", url: "/admin/items/kind" },
+    { title: "アイテム編集(オプション)", url: "/admin/items/option" },
     { title: "アイテム編集(在庫タイプ)", url: "/admin/items/stock" },
     { title: "アイテム在庫数変更", url: "/admin/items/stock/remain" },
     { title: "アイテム編集(フード)", url: "/admin/items/food" },

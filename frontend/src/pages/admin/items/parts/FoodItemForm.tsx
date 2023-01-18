@@ -58,7 +58,6 @@ type HourSelects = {
 };
 
 const convertInput = (item: FoodItem): FoodItemInput => {
-  console.log("convertInput", item);
   const kindId = item.kind ? item.kind.id : "";
   return {
     id: item.id,

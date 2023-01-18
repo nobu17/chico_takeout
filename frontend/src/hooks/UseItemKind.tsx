@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ItemKind } from "../libs/ItemKind";
 import ItemKindApi from "../libs/apis/itemKind";
+import { OptionItem } from "../libs/OptionItem";
+import OptionItemApi from "../libs/apis/optionItem";
 
 const defaultItemKind: ItemKind = {
   id: "",
@@ -10,9 +12,11 @@ const defaultItemKind: ItemKind = {
 };
 
 const api = new ItemKindApi();
+const optionApi = new OptionItemApi();
 
 export default function useItemKind() {
   const [itemKinds, setItemKinds] = useState<ItemKind[]>([]);
+  const [optionItems, setOptionItems] = useState<OptionItem[]>([]);
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
 
@@ -88,6 +92,8 @@ export default function useItemKind() {
       setLoading(true);
       const result = await api.getAll();
       setItemKinds(result.data);
+      const optionResults = await optionApi.getAll();
+      setOptionItems(optionResults.data);
     } catch (e: any) {
       setError(e);
     } finally {
@@ -97,6 +103,7 @@ export default function useItemKind() {
 
   return {
     itemKinds,
+    optionItems,
     defaultItemKind,
     addNewItemKind,
     updateItemKind,

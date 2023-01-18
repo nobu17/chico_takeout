@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Container, Stack, TextField } from "@mui/material";
 import { ItemKind } from "../../../../libs/ItemKind";
+import { OptionItem } from "../../../../libs/OptionItem";
 import { SubmitHandler, useForm } from "react-hook-form";
 import SubmitButtons from "../../../../components/parts/SubmitButtons";
 
@@ -10,10 +11,11 @@ import {
   MaxErrorMessage,
   MinErrorMessage,
 } from "../../../../libs/ErrorMessages";
-
+import { RhfSelects } from "../../../../components/parts/Rhf/RhfSelects";
 
 type ItemKindFormProps = {
   editItem: ItemKind;
+  optionItems: OptionItem[];
   onSubmit: callbackSubmit;
   onCancel: callbackCancel;
 };
@@ -24,10 +26,23 @@ interface callbackCancel {
   (): void;
 }
 
+type OptionItemSelect = {
+  name: string;
+  value: string;
+};
+
+const convertOptionItemSelect = (options: OptionItem[]): OptionItemSelect[] => {
+  return options.map((val) => ({
+    name: val.name,
+    value: val.id,
+  }));
+};
+
 export default function ItemKindForm(props: ItemKindFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<ItemKind>({ defaultValues: props.editItem });
   const onSubmit: SubmitHandler<ItemKind> = (data) => {
@@ -36,6 +51,8 @@ export default function ItemKindForm(props: ItemKindFormProps) {
   const onCancel = () => {
     props.onCancel();
   };
+
+  const optionList = convertOptionItemSelect(props.optionItems);
   return (
     <>
       <Container maxWidth="sm" sx={{ pt: 5 }}>
@@ -60,6 +77,14 @@ export default function ItemKindForm(props: ItemKindFormProps) {
             })}
             error={Boolean(errors.priority)}
             helperText={errors.priority && errors.priority.message}
+          />
+          <RhfSelects
+            label="選択可能オプション"
+            name="optionItemIds"
+            allowNoSelect={true}
+            multiple={true}
+            itemList={optionList}
+            control={control}
           />
           <SubmitButtons
             onSubmit={handleSubmit(onSubmit)}

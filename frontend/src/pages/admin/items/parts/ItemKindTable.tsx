@@ -10,6 +10,7 @@ import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 export default function ItemKindTable() {
   const {
     itemKinds,
+    optionItems,
     defaultItemKind,
     addNewItemKind,
     updateItemKind,
@@ -50,7 +51,30 @@ export default function ItemKindTable() {
     },
     { field: "priority", headerName: "表示順序", width: 100 },
     { field: "name", headerName: "アイテム名", width: 330 },
+    {
+      field: "schedules",
+      headerName: "選択可能オプション",
+      width: 290,
+      valueGetter: (params) => {
+        if (params.row.optionItemIds) {
+          return getOptionItemNames(params.row.optionItemIds)
+        }
+        return "";
+      },
+    },
   ];
+
+  const getOptionItemNames = (ids: string[]): string => {
+    const names: string[] = [];
+    for (const id of ids) {
+      for (const opt of optionItems) {
+        if (opt.id === id) {
+          names.push(opt.name);
+        }
+      }
+    }
+    return names.join(",");
+  }
 
   const handleRemove = (item: ItemKind) => {
     const result = window.confirm("削除してもよろしいですか？");
@@ -108,7 +132,7 @@ export default function ItemKindTable() {
           editMode="row"
           hideFooter
         />
-        <ItemKindFormDialog open={open} editItem={item} onClose={onClose} />
+        <ItemKindFormDialog open={open} editItem={item} optionItems={optionItems} onClose={onClose} />
       </div>
       <LoadingSpinner message="Loading..." isLoading={loading} />
     </>

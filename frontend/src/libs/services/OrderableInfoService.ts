@@ -2,6 +2,7 @@ import OrderableInfoApi, { ItemInfo } from "../apis/orderable";
 import FoodItemApi from "../apis/foodItem";
 import StockItemApi from "../apis/stockItem";
 import ItemKindApi from "../apis/itemKind";
+import ItemKindService from "./ItemKindService";
 import {
   PerDayOrderableInfo,
   OrderableItemInfo,
@@ -9,12 +10,13 @@ import {
 } from "../OrderableInfo";
 import { FoodItem } from "../FoodItem";
 import { StockItem } from "../StockItem";
-import { ItemKind } from "../ItemKind";
+import { AggregatedItemKind } from "../ItemKind";
 
 export default class OrderableInfoService {
   private orderableApi: OrderableInfoApi;
   private foodApi: FoodItemApi;
   private stockApi: StockItemApi;
+  private itemKindService: ItemKindService;
   private kindApi: ItemKindApi;
 
   constructor(public baseUrl: string = "") {
@@ -22,13 +24,14 @@ export default class OrderableInfoService {
     this.foodApi = new FoodItemApi(baseUrl);
     this.stockApi = new StockItemApi(baseUrl);
     this.kindApi = new ItemKindApi(baseUrl);
+    this.itemKindService = new ItemKindService(baseUrl);
   }
 
   async get(): Promise<PerDayOrderableInfo[]> {
     const orderable = await this.orderableApi.get();
     const foods = await this.foodApi.getAll();
     const stocks = await this.stockApi.getAll();
-    const kinds = await this.kindApi.getAll();
+    const kinds = await this.itemKindService.getAggregatedItemKinds();
 
     const lists: PerDayOrderableInfo[] = [];
     for (const perDay of orderable.data.perDayInfo) {
@@ -41,7 +44,7 @@ export default class OrderableInfoService {
           perDay.items,
           foods.data,
           stocks.data,
-          kinds.data
+          kinds
         ),
       };
       lists.push(perDayInfo);
@@ -54,7 +57,7 @@ export default class OrderableInfoService {
     items: ItemInfo[],
     foodItems: FoodItem[],
     stockItems: StockItem[],
-    kinds: ItemKind[]
+    kinds: AggregatedItemKind[]
   ): CategoryItemInfo[] {
     const perKindItems: { [kindId: string]: OrderableItemInfo[] } = {};
     for (const item of items) {
@@ -73,6 +76,7 @@ export default class OrderableInfoService {
             max:
               item.remain > foodItem.maxOrder ? foodItem.maxOrder : item.remain,
             imageUrl: foodItem.imageUrl,
+            options: [],
           });
         }
       } else if (item.itemType === "stock") {
@@ -92,6 +96,7 @@ export default class OrderableInfoService {
                 ? stockItem.maxOrder
                 : item.remain,
             imageUrl: stockItem.imageUrl,
+            options: [],
           });
         }
       }
@@ -107,6 +112,8 @@ export default class OrderableInfoService {
           priority: kind.priority,
           items: perKindItems[key],
         };
+        // set option item from kind
+        category.items.forEach(i => i.options = kind.options)
         categories.push(category);
       }
     });

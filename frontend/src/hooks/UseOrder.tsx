@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../components/contexts/AuthContext";
-import OrderApi from "../libs/apis/order";
+import OrderApi, { OrderOptionItem } from "../libs/apis/order";
 import { OrderInfo, OrderItem } from "../libs/apis/order";
 import { Cart, ItemRequest } from "./UseItemCart";
 import { PickupDate } from "./UsePickupDate";
@@ -13,7 +13,7 @@ export function useOrder() {
   const [loading, setLoading] = useState(false);
   const { state } = useAuth();
 
-  const checkOrderExists = async () : Promise<(Error | undefined)> => {
+  const checkOrderExists = async (): Promise<Error | undefined> => {
     if (!state.isAuthorized) {
       return new Error("ユーザー認証がされていません。");
     }
@@ -27,12 +27,16 @@ export function useOrder() {
       const res = result.data;
       if (res && res.length > 0) {
         // active order exists
-        return new Error("同時に予約可能な数は1つになります。再度予約したい場合は先にキャンセルをお願いします。");
+        return new Error(
+          "同時に予約可能な数は1つになります。再度予約したい場合は先にキャンセルをお願いします。"
+        );
       } else {
         return undefined;
       }
     } catch (e: any) {
-      return new Error("エラーが発生しました。お手数ですが直接お問い合わせいただくか、再度時間をおいてご利用ください。");
+      return new Error(
+        "エラーが発生しました。お手数ですが直接お問い合わせいただくか、再度時間をおいてご利用ください。"
+      );
     } finally {
       setLoading(false);
     }
@@ -89,9 +93,16 @@ const getItems = (
       orders.push({
         itemId: items[key].item.id,
         quantity: items[key].quantity,
+        options: getOptions(items[key]),
       });
     }
   });
 
   return orders;
+};
+
+const getOptions = (req: ItemRequest): OrderOptionItem[] => {
+  return req.selectOptions.map((s) => {
+    return { itemId: s.id };
+  });
 };

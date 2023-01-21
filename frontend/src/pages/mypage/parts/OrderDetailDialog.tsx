@@ -7,8 +7,7 @@ import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { UserOrderInfo } from "../../../libs/apis/order";
 import { AppBar, Toolbar } from "@mui/material";
-
-import ItemTable from "./ItemTable";
+import OrderDetailTable from "../../../components/parts/OrderDetailTable";
 import UserInfoTable from "./UserInfoTable";
 import { convertDateTimeStrToIncludeDayOfWeeKStr } from "../../../libs/util/DateUtil";
 
@@ -66,7 +65,9 @@ export default function OrderDetailDialog(props: OrderDetailDialogProps) {
         <Typography textAlign="center" variant="h5" sx={{ py: 2 }}>
           注文商品
         </Typography>
-        <ItemTable {...props.order}></ItemTable>
+        <OrderDetailTable
+          items={props.order.foodItems.concat(props.order.stockItems)}
+        ></OrderDetailTable>
         <Typography textAlign="center" variant="h5" sx={{ py: 2 }}>
           お客様情報
         </Typography>

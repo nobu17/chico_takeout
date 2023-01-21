@@ -2,7 +2,7 @@ import * as React from "react";
 import { Grid } from "@mui/material";
 import ItemCard from "./ItemCard";
 import Typography from "@mui/material/Typography";
-import { Cart, ItemInfo, ItemRequest } from "../../../hooks/UseItemCart";
+import { Cart, ItemInfo, ItemRequest, OptionItemInfo } from "../../../hooks/UseItemCart";
 
 type ItemListProps = {
   allItems: CategoryItems[];
@@ -24,6 +24,12 @@ export default function ItemList(props: ItemListProps) {
       return props.cart.items[itemId].quantity;
     }
     return 0;
+  };
+  const getSelectedOptions = (itemId: string): OptionItemInfo[] => {
+    if (props.cart.items[itemId]) {
+      return props.cart.items[itemId].selectOptions;
+    }
+    return [];
   };
   return (
     <>
@@ -49,7 +55,8 @@ export default function ItemList(props: ItemListProps) {
                     <ItemCard
                       item={item}
                       quantity={getQuantity(item.id)}
-                      onCountChanged={props.onRequestChanged}
+                      selectedOptions={getSelectedOptions(item.id)}
+                      onChanged={props.onRequestChanged}
                     ></ItemCard>
                   </Grid>
                 );

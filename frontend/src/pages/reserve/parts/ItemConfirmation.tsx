@@ -1,64 +1,52 @@
 import * as React from "react";
-import { Cart } from "../../../hooks/UseItemCart";
-import {
-  Table,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Cart, OptionItemInfo } from "../../../hooks/UseItemCart";
+import OrderDetailTable from "../../../components/parts/OrderDetailTable";
 
 type ItemConfirmationProps = {
   cart: Cart;
 };
 
-export default function ItemConfirmation(props: ItemConfirmationProps) {
-  const getTotalPrice = (cart: Cart): string => {
-    let total = 0;
-    Object.keys(props.cart.items).forEach((key, index) => {
-      total +=
-        props.cart.items[key].item.price * props.cart.items[key].quantity;
+type OrderItem = {
+  itemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  options: OrderOptionItem[];
+};
+
+type OrderOptionItem = {
+  itemId: string;
+  name: string;
+  price: number;
+};
+
+const convertOrderItem = (cart: Cart): OrderItem[] => {
+  let items: OrderItem[] = [];
+  Object.keys(cart.items).forEach((key) => {
+    const cartItem = cart.items[key];
+    items.push({
+      itemId: cartItem.item.id,
+      name: cartItem.item.name,
+      price: cartItem.item.price,
+      quantity: cartItem.quantity,
+      options: convertOptionItem(cartItem.selectOptions),
     });
-    return total.toLocaleString();
-  };
+  });
+  return items;
+};
+
+const convertOptionItem = (items: OptionItemInfo[]): OrderOptionItem[] => {
+  return items.map((item) => {
+    return {
+      itemId: item.id,
+      name: item.name,
+      price: item.price,
+    };
+  });
+};
+
+export default function ItemConfirmation(props: ItemConfirmationProps) {
   return (
-    <TableContainer component={Paper}>
-      <Typography gutterBottom variant="h6" align="center" color="text.primary">
-        注文情報
-      </Typography>
-      <Table aria-label="注文情報">
-        <TableHead>
-          <TableRow>
-            <TableCell>商品名</TableCell>
-            <TableCell>個数</TableCell>
-            <TableCell>価格</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {Object.keys(props.cart.items).map((key) => {
-            return (
-              <TableRow key={key}>
-                <TableCell>{props.cart.items[key].item.name}</TableCell>
-                <TableCell>{props.cart.items[key].quantity}</TableCell>
-                <TableCell>
-                  {(
-                    props.cart.items[key].item.price *
-                    props.cart.items[key].quantity
-                  ).toLocaleString()}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-          <TableRow>
-            <TableCell>合計</TableCell>
-            <TableCell></TableCell>
-            <TableCell>¥ {getTotalPrice(props.cart)}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <OrderDetailTable items={convertOrderItem(props.cart)}></OrderDetailTable>
   );
 }

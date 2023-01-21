@@ -7,6 +7,7 @@ export type Cart = {
 export type ItemRequest = {
   item: ItemInfo;
   quantity: number;
+  selectOptions: OptionItemInfo[];
 };
 
 export type ItemInfo = {
@@ -17,6 +18,14 @@ export type ItemInfo = {
   memo: string;
   price: number;
   max: number;
+  options: OptionItemInfo[];
+};
+
+export type OptionItemInfo = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
 };
 
 const defaultCart: Cart = {

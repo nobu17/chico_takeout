@@ -21,7 +21,7 @@ export default function UserInfoConfirmation(props: UserInfoConfirmationProps) {
       <Typography gutterBottom variant="h6" align="center" color="text.primary">
         お客様情報
       </Typography>
-      <Table aria-label="お客様情報">
+      <Table aria-label="お客様情報" size="small">
         <TableHead>
           <TableRow>
             <TableCell>項目</TableCell>

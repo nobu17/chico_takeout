@@ -35,6 +35,11 @@ export type OrderInfo = {
 export type OrderItem = {
   itemId: string;
   quantity: number;
+  options: OrderOptionItem[];
+};
+
+export type OrderOptionItem = {
+  itemId: string;
 };
 
 export type UserOrderInfo = {
@@ -56,6 +61,13 @@ export type UserOrderItem = {
   name: string;
   price: number;
   quantity: number;
+  options: UserOrderOptionItem[];
+};
+
+export type UserOrderOptionItem = {
+  itemId: string;
+  name: string;
+  price: number;
 };
 
 export const getTotal = (order: UserOrderInfo): number => {

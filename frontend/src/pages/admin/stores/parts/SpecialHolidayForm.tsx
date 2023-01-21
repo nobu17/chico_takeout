@@ -10,7 +10,7 @@ import {
   MaxLengthErrorMessage,
 } from "../../../../libs/ErrorMessages";
 
-import { startDateIsLessThanEndDate } from "../../../../libs/util/TimeCompare";
+import { startDateIsLessThanOrEqualEndDate } from "../../../../libs/util/TimeCompare";
 import { toDate, toDateString } from "../../../../libs/util/DateUtil";
 
 type SpecialHolidayFormProps = {
@@ -63,9 +63,9 @@ export default function SpecialHolidayForm(props: SpecialHolidayFormProps) {
   });
   const onSubmit: SubmitHandler<SpecialHolidayInput> = (data) => {
     const converted = reverseInput(data);
-    if (!startDateIsLessThanEndDate(converted.start, converted.end)) {
-      setError(`start`, { message: "開始日時が終了時刻よりも大きいです。" });
-      setError(`end`, { message: "開始日時が終了時刻よりも大きいです。" });
+    if (!startDateIsLessThanOrEqualEndDate(converted.start, converted.end)) {
+      setError(`start`, { message: "開始日時 <= 終了時刻にして下さい。" });
+      setError(`end`, { message: "開始日時 <= 終了時刻にして下さい。" });
       return;
     }
     props.onSubmit(converted);

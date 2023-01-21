@@ -20,8 +20,9 @@ export const startDateIsLessThanEndDate = (start: string, end: string): boolean 
   const starts = parseStrDateToNumber(start);
   const ends = parseStrDateToNumber(end);
 
-  const startDate = new Date(starts[0], starts[1], starts[2]);
-  const endDate = new Date(ends[0], ends[1], ends[2]);
+  // month need -1
+  const startDate = new Date(starts[0], starts[1] -1, starts[2]);
+  const endDate = new Date(ends[0], ends[1] -1, ends[2]);
 
   return startDate.getTime() < endDate.getTime();
 };

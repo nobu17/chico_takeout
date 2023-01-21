@@ -1,7 +1,6 @@
 import OrderableInfoApi, { ItemInfo } from "../apis/orderable";
 import FoodItemApi from "../apis/foodItem";
 import StockItemApi from "../apis/stockItem";
-import ItemKindApi from "../apis/itemKind";
 import ItemKindService from "./ItemKindService";
 import {
   PerDayOrderableInfo,
@@ -17,13 +16,11 @@ export default class OrderableInfoService {
   private foodApi: FoodItemApi;
   private stockApi: StockItemApi;
   private itemKindService: ItemKindService;
-  private kindApi: ItemKindApi;
 
   constructor(public baseUrl: string = "") {
     this.orderableApi = new OrderableInfoApi(baseUrl);
     this.foodApi = new FoodItemApi(baseUrl);
     this.stockApi = new StockItemApi(baseUrl);
-    this.kindApi = new ItemKindApi(baseUrl);
     this.itemKindService = new ItemKindService(baseUrl);
   }
 

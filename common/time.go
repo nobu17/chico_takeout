@@ -213,9 +213,9 @@ func IsAfterFromNow(target time.Time, offsetHour int) bool {
 	return target.After(actualTime)
 }
 
-func ListUpDates(startDate, endDate time.Time) ([]time.Time, error) {
-	actStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
-	actEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 1, 0, 0, 0, time.UTC) // add 1minutes to compare
+func ListUpDates(startDate, endDate time.Time, loc *time.Location) ([]time.Time, error) {
+	actStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, loc)
+	actEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 1, 0, 0, 0, loc) // add 1minutes to compare
 
 	if startDate.After(endDate) {
 		return nil, fmt.Errorf("start date is after than end date. start:%s end:%s", startDate, endDate)
@@ -224,7 +224,7 @@ func ListUpDates(startDate, endDate time.Time) ([]time.Time, error) {
 	dates := []time.Time{}
 	currentDate := actStart
 	for currentDate.Before(actEnd) {
-		date := time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, time.UTC)
+		date := time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, loc)
 		dates = append(dates, date)
 		currentDate = currentDate.AddDate(0, 0, 1)
 	}

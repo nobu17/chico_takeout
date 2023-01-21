@@ -26,13 +26,14 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	// get holidays
 	holidays := []store.SpecialHolidayModel{}
 	// end is need escape
-	err := o.db.Where("start <= ? and \"end\" >= ?", startDate, endDate).Find(&holidays).Error
+	// get period in range record
+	err := o.db.Where("start <= ? and \"end\" >= ?", endDate, startDate).Find(&holidays).Error
 	if err != nil {
 		return nil, err
 	}
 	// get special business hour
 	specialHours := []store.SpecialBusinessHourModel{}
-	err = o.db.Preload("BusinessHourModel").Where("date <= ? and date >= ?", startDate, endDate).Find(&specialHours).Error
+	err = o.db.Debug().Preload("BusinessHourModel").Where("date <= ? and date >= ?", endDate, startDate).Find(&specialHours).Error
 	if err != nil {
 		return nil, err
 	}
@@ -44,18 +45,22 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	}
 
 	availableDates := []time.Time{}
-	dates, err := common.ListUpDates(startDate, endDate)
+	dates, err := common.ListUpDates(startDate, endDate, startDate.Location())
 	if err != nil {
 		return nil, err
 	}
 	// at first check holiday or not
 	for _, date := range dates {
+		isHoliday := false
 		for _, holiday := range holidays {
-			if common.IsInRangeTime(*holiday.Start, *holiday.End, date) {
-				continue
+			if common.IsInRange(*holiday.Start, *holiday.End, date) {
+				isHoliday = true
+				break
 			}
 		}
-		availableDates = append(availableDates, date)
+		if !isHoliday {
+			availableDates = append(availableDates, date)
+		}
 	}
 
 	stocks, err := o.getStockItems()
@@ -88,8 +93,8 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 				info := order.PerDayOrderableInfo{
 					Date:       common.ConvertTimeToDateStr(date),
 					HourTypeId: specialHour.BusinessHourModelID,
-					StartTime:  common.ConvertTimeToTimeStr(*specialHour.BusinessHourModel.Start),
-					EndTime:    common.ConvertTimeToTimeStr(*specialHour.BusinessHourModel.End),
+					StartTime:  common.ConvertTimeToTimeStr(*specialHour.Start),
+					EndTime:    common.ConvertTimeToTimeStr(*specialHour.End),
 					Items:      allItems,
 				}
 				infoLists = append(infoLists, info)

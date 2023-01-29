@@ -10,6 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import { Typography, AppBar, Toolbar, IconButton, Slide } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { OptionItemInfo } from "../../../hooks/UseItemCart";
+import LineBreak from "../../../components/parts/LineBreak";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -111,7 +112,7 @@ export default function OptionItemSelectDialog(
                     id={labelId}
                     primary={`${item.name} : ¥ ${item.price.toLocaleString()}`}
                     secondary={
-                      <React.Fragment>{item.description}</React.Fragment>
+                      <React.Fragment><LineBreak msg={item.description} /></React.Fragment>
                     }
                   />
                 </ListItemButton>

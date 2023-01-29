@@ -62,9 +62,6 @@ export default function OrderDetailDialog(props: OrderDetailDialogProps) {
           受取日時:{" "}
           {convertDateTimeStrToIncludeDayOfWeeKStr(props.order.pickupDateTime)}
         </Typography>
-        <Typography textAlign="center" variant="h5" sx={{ py: 2 }}>
-          注文商品
-        </Typography>
         <OrderDetailTable
           items={props.order.foodItems.concat(props.order.stockItems)}
         ></OrderDetailTable>

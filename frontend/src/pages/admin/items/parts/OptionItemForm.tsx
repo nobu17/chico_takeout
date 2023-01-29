@@ -61,7 +61,7 @@ export default function OptionItemForm(props: OptionItemFormProps) {
             rows={5}
             {...register("description", {
               required: { value: true, message: RequiredErrorMessage },
-              maxLength: { value: 150, message: MaxLengthErrorMessage(150) },
+              maxLength: { value: 50, message: MaxLengthErrorMessage(50) },
             })}
             error={Boolean(errors.description)}
             helperText={errors.description && errors.description.message}

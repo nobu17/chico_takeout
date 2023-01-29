@@ -50,8 +50,8 @@ const getSubTotalNumber = (item: OrderItem): number => {
 export default function OrderDetailTable(props: OrderDetailTableProps) {
   return (
     <TableContainer component={Paper}>
-      <Typography gutterBottom variant="h6" align="center" color="text.primary">
-        注文情報
+      <Typography textAlign="center" variant="h5" sx={{ py: 2 }}>
+        注文商品
       </Typography>
       <Table aria-label="注文情報" size="small">
         <TableHead>

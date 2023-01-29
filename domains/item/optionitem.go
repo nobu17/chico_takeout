@@ -24,7 +24,7 @@ type OptionItem struct {
 const (
 	OptionItemMaxPrice             = 20000
 	OptionItemDescriptionMaxLength = 150
-	OptionItemNameMaxLength        = 25
+	OptionItemNameMaxLength        = 50
 )
 
 func NewOptionItem(name, description string, priority, price int, enabled bool) (*OptionItem, error) {

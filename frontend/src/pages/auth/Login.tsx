@@ -13,15 +13,41 @@ import { useMessageDialog } from "../../hooks/UseMessageDialog";
 export default function UserLogin() {
   const { showMessageDialog, renderDialog } = useMessageDialog();
   const navigate = useNavigate();
-  const { signIn, loading, signInWithGoogle, signInWithTwitter } = useAuth();
+  const {
+    signIn,
+    loading,
+    signInWithGoogle,
+    signInWithTwitter,
+    signInWithGoogleWithPopup,
+    signInWithTwitterWithPopup,
+  } = useAuth();
   const handleSignIn = async (input: LoginInput) => {
     const result = await signIn(input.email, input.password);
     if (result.isSuccessful) {
       navigate("/my_page");
     } else if (!result.emailVerified) {
-      await showMessageDialog("エラー", "メール認証が完了していません。先にメール認証を進めてください。");
+      await showMessageDialog(
+        "エラー",
+        "メール認証が完了していません。先にメール認証を進めてください。"
+      );
+    } else {
+      await showMessageDialog("エラー", "ログインに失敗しました。");
     }
-    else {
+  };
+
+  const handleSignInWithGoogleWithPopup = async () => {
+    const result = await signInWithGoogleWithPopup();
+    if (result.isSuccessful) {
+      navigate("/my_page");
+    } else {
+      await showMessageDialog("エラー", "ログインに失敗しました。");
+    }
+  };
+  const handleSignInWithTwitterWithPopup = async () => {
+    const result = await signInWithTwitterWithPopup();
+    if (result.isSuccessful) {
+      navigate("/my_page");
+    } else {
       await showMessageDialog("エラー", "ログインに失敗しました。");
     }
   };
@@ -39,8 +65,8 @@ export default function UserLogin() {
           <LoginForm
             input={{ email: "", password: "" }}
             onSubmit={handleSignIn}
-            onGoogleSubmit={handleSignInWithGoogle}
-            onTwitterSubmit={handleSignInWithTwitter}
+            onGoogleSubmit={handleSignInWithGoogleWithPopup}
+            onTwitterSubmit={handleSignInWithTwitterWithPopup}
           ></LoginForm>
           <LoadingSpinner message="Loading..." isLoading={loading} />
         </Grid>

@@ -15,7 +15,9 @@ type ContextType = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signInWithGoogle: () => Promise<void>;
+  signInWithGoogleWithPopup: () => Promise<AuthResult>;
   signInWithTwitter: () => Promise<void>;
+  signInWithTwitterWithPopup: () => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
@@ -57,10 +59,36 @@ export const AdminAuthProvider = ({ children }: any) => {
     setLoading(false);
   }
 
+  async function signInWithGoogleWithPopup(): Promise<AuthResult> {
+    setLoading(true);
+    const result = await service.signInWithGoogleWithPopup();
+    setState({
+      isAuthorized: result.isSuccessful,
+      isAdmin: result.isAdmin,
+      uid: result.uid,
+      email: result.email,
+    });
+    setLoading(false);
+    return result;
+  }
+
   async function signInWithTwitter(): Promise<void> {
     setLoading(true);
     await service.signInWithTwitter();
     setLoading(false);
+  }
+
+  async function signInWithTwitterWithPopup(): Promise<AuthResult> {
+    setLoading(true);
+    const result = await service.signInWithTwitterWithPopup();
+    setState({
+      isAuthorized: result.isSuccessful,
+      isAdmin: result.isAdmin,
+      uid: result.uid,
+      email: result.email,
+    });
+    setLoading(false);
+    return result;
   }
 
   async function signOut(): Promise<void> {
@@ -98,6 +126,8 @@ export const AdminAuthProvider = ({ children }: any) => {
     signIn,
     signOut,
     signInWithGoogle,
+    signInWithGoogleWithPopup,
+    signInWithTwitterWithPopup,
     signInWithTwitter,
   };
 

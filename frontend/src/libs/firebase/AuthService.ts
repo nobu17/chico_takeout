@@ -8,6 +8,7 @@ import {
   googleAuthProvider,
   twitterAuthProvider,
   signInRedirect,
+  signInPopup,
   getRedirect,
 } from "./Firebase";
 
@@ -99,9 +100,37 @@ export class AuthService {
     // provider.addScope("email");
   }
 
+  async signInWithGoogleWithPopup(): Promise<AuthResult> {
+    const provider = new googleAuthProvider();
+    const result = await signInPopup(auth, provider);
+    // const credential = googleAuthProvider.credentialFromResult(result);
+    // const token = credential?.accessToken;
+    return new AuthResult(
+      true,
+      false,
+      result.user.uid,
+      this.getEmail(result.user),
+      "",
+      true
+    );
+  }
+
   async signInWithTwitter() {
     const provider = new twitterAuthProvider();
     await signInRedirect(auth, provider);
+  }
+
+  async signInWithTwitterWithPopup() {
+    const provider = new twitterAuthProvider();
+    const result = await signInPopup(auth, provider);
+    return new AuthResult(
+      true,
+      false,
+      result.user.uid,
+      this.getEmail(result.user),
+      "",
+      true
+    );
   }
 
   async getRedirectResult(callback: (data: AuthResult) => void) {

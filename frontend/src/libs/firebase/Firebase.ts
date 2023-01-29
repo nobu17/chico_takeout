@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   signInWithEmailAndPassword,
-  EmailAuthProvider,
   sendEmailVerification,
   sendPasswordResetEmail,
   getAdditionalUserInfo,
   createUserWithEmailAndPassword,
   getRedirectResult,
   signInWithRedirect,
+  signInWithPopup,
   GoogleAuthProvider,
   TwitterAuthProvider,
 } from "firebase/auth";
@@ -44,6 +44,7 @@ export const googleAuthProvider = GoogleAuthProvider;
 export const twitterAuthProvider = TwitterAuthProvider;
 export const getRedirect = getRedirectResult
 export const signInRedirect = signInWithRedirect
+export const signInPopup = signInWithPopup
 export const getAdditionalUser = getAdditionalUserInfo;
 export const signIn = signInWithEmailAndPassword;
 export const signUp = createUserWithEmailAndPassword;

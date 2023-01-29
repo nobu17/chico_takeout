@@ -21,7 +21,8 @@ export type OrderableItemInfo = {
   memo: string;
   price: number;
   max: number;
-  options: OrderableOptionItemInfo[]
+  options: OrderableOptionItemInfo[];
+  priority: number;
 };
 
 export type OrderableOptionItemInfo = {

@@ -74,6 +74,7 @@ export default class OrderableInfoService {
               item.remain > foodItem.maxOrder ? foodItem.maxOrder : item.remain,
             imageUrl: foodItem.imageUrl,
             options: [],
+            priority: foodItem.priority,
           });
         }
       } else if (item.itemType === "stock") {
@@ -94,6 +95,7 @@ export default class OrderableInfoService {
                 : item.remain,
             imageUrl: stockItem.imageUrl,
             options: [],
+            priority: stockItem.priority,
           });
         }
       }
@@ -110,7 +112,13 @@ export default class OrderableInfoService {
           items: perKindItems[key],
         };
         // set option item from kind
-        category.items.forEach(i => i.options = kind.options)
+        category.items.forEach((i) => (i.options = kind.options));
+        // sort each item by priority
+        category.items.sort((a, b) => {
+          if (a.priority < b.priority) return -1;
+          if (a.priority > b.priority) return 1;
+          return 0;
+        });
         categories.push(category);
       }
     });

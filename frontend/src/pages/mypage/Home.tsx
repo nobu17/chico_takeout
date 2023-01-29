@@ -7,6 +7,7 @@ import { useMyOrder } from "../../hooks/UseMyOrder";
 import PageMenu, { PageMenuProps } from "../../components/parts/PageMenu";
 import ReserveInfoCardList from "./parts/ReserveInfoCardList";
 import { useConfirmDialog } from "../../hooks/UseConfirmDialog";
+import { useReloadTimer } from "../../hooks/UseTimer";
 
 const myMenu: PageMenuProps = {
   title: "マイメニュー",
@@ -18,9 +19,16 @@ const myMenu: PageMenuProps = {
 };
 
 export default function MyHome() {
+  useReloadTimer(30);
   const { showConfirmDialog, renderConfirmDialog } = useConfirmDialog();
-  const { activeOrders, loadActive, cancelActive, loading, error, renderDialog } =
-    useMyOrder();
+  const {
+    activeOrders,
+    loadActive,
+    cancelActive,
+    loading,
+    error,
+    renderDialog,
+  } = useMyOrder();
 
   useEffect(() => {
     const init = async () => {

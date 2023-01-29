@@ -1,5 +1,6 @@
 import PageTitle from "./PageTitle";
 import PageHeader from "./PageHeader";
+import { useReloadTimer } from "../../hooks/UseTimer";
 
 type AdminPageProps = {
   title: string;
@@ -15,6 +16,7 @@ type PageLink = {
 const defaultLinks = [{ title: "管理ページ", url: "/admin" }];
 
 export default function AdminPage(props: AdminPageProps) {
+  useReloadTimer(30);
   const link = props.links ? props.links : defaultLinks;
   return (
     <>

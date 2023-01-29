@@ -1,6 +1,7 @@
 import Grid from "@mui/material/Grid";
 import PageTitle from "../../components/parts/PageTitle";
 import PageMenu, { PageMenuProps } from "../../components/parts/PageMenu";
+import { useReloadTimer } from "../../hooks/UseTimer";
 
 const itemMenu: PageMenuProps = {
   title: "商品管理",
@@ -40,6 +41,7 @@ const statisticsMenu: PageMenuProps = {
 };
 
 export default function AdminHome() {
+  useReloadTimer(30);
   return (
     <>
       <PageTitle title="管理メニュー" />

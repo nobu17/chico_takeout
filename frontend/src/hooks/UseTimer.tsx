@@ -55,3 +55,9 @@ export function useTimer(timeoutMinutes: number, callback: Callback): void {
     };
   }, [handleFocus]);
 }
+
+export function useReloadTimer(timeoutMinutes: number): void {
+  useTimer(timeoutMinutes, () => {
+    window.location.reload();
+  });
+}

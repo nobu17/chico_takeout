@@ -1,6 +1,7 @@
 import OrderableInfoApi, { ItemInfo } from "../apis/orderable";
 import FoodItemApi from "../apis/foodItem";
 import StockItemApi from "../apis/stockItem";
+import BusinessHourApi from "../apis/businessHour";
 import ItemKindService from "./ItemKindService";
 import {
   PerDayOrderableInfo,
@@ -16,12 +17,14 @@ export default class OrderableInfoService {
   private foodApi: FoodItemApi;
   private stockApi: StockItemApi;
   private itemKindService: ItemKindService;
+  private businessHourApi: BusinessHourApi;
 
   constructor(public baseUrl: string = "") {
     this.orderableApi = new OrderableInfoApi(baseUrl);
     this.foodApi = new FoodItemApi(baseUrl);
     this.stockApi = new StockItemApi(baseUrl);
     this.itemKindService = new ItemKindService(baseUrl);
+    this.businessHourApi = new BusinessHourApi(baseUrl);
   }
 
   async get(): Promise<PerDayOrderableInfo[]> {
@@ -29,12 +32,17 @@ export default class OrderableInfoService {
     const foods = await this.foodApi.getAll();
     const stocks = await this.stockApi.getAll();
     const kinds = await this.itemKindService.getAggregatedItemKinds();
+    const businessHours = await this.businessHourApi.getAll();
 
     const lists: PerDayOrderableInfo[] = [];
     for (const perDay of orderable.data.perDayInfo) {
+      const hourName = businessHours.data.schedules.find(
+        (x) => x.id === perDay.hourTypeId
+      );
       const perDayInfo = {
         date: perDay.date,
         hourTypeId: perDay.hourTypeId,
+        hourName: hourName?.name ?? "不明",
         startTime: perDay.startTime,
         endTime: perDay.endTime,
         categories: this.getCategoriesItem(

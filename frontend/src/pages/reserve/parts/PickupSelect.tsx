@@ -2,7 +2,7 @@ import * as React from "react";
 import { Stack, TextField, Button } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { RhfSelects } from "../../../components/parts/Rhf/RhfSelects";
+import { RhfGroupSelects } from "../../../components/parts/Rhf/RhfGroupSelects";
 
 import { PickupDate } from "../../../hooks/UsePickupDate";
 import {
@@ -26,10 +26,12 @@ type SelectableDateTimeInfo = {
   date: string; // yyyy/MM/dd
   startTime: string; // HH:MM
   endTime: string; // HH:MM
+  hourName: string;
 };
 
-type SelectValue = {
-  value: string;
+type SelectTimeValue = {
+  groupName: string;
+  value: string[];
 };
 
 export default function PickupSelect(props: PickupSelectProps) {
@@ -37,7 +39,9 @@ export default function PickupSelect(props: PickupSelectProps) {
     defaultValues: props.selectedInfo,
   });
 
-  const [timeList, setTimeList] = React.useState<SelectValue[]>([]);
+  const [categoryTimes, setCategoryTimes] = React.useState<SelectTimeValue[]>(
+    []
+  );
   // for retain date picker value
   // const [selectedDate, setSelectedDate] = React.useState<Date>();
   const onSubmit: SubmitHandler<PickupDate> = (data) => {
@@ -57,7 +61,7 @@ export default function PickupSelect(props: PickupSelectProps) {
   };
 
   React.useEffect(() => {
-    updateTimeList(props.selectedInfo.date);
+    updateCategoryTimes(props.selectedInfo.date);
     setValue("time", props.selectedInfo.time);
   }, []);
 
@@ -66,10 +70,10 @@ export default function PickupSelect(props: PickupSelectProps) {
     setValue("date", dateStr);
     // reset selectable times
     setValue("time", "");
-    updateTimeList(dateStr);
+    updateCategoryTimes(dateStr);
   };
 
-  const updateTimeList = (dateStr: string) => {
+  const updateCategoryTimes = (dateStr: string) => {
     const sameDates = props.selectableInfo
       .filter((item) => item.date === dateStr)
       .sort((a, b) => {
@@ -79,14 +83,14 @@ export default function PickupSelect(props: PickupSelectProps) {
       });
     if (sameDates) {
       // list up all times
-      let times: string[] = [];
+      let times: SelectTimeValue[] = [];
       for (const date of sameDates) {
-        const time = GetTimeList(date.startTime, date.endTime, 30);
-        times = times.concat(time);
+        const timeList = GetTimeList(date.startTime, date.endTime, 30);
+        times.push({ groupName: date.hourName, value: timeList });
       }
-      setTimeList(times.map((t) => ({ value: t })));
+      setCategoryTimes(times);
     } else {
-      setTimeList([]);
+      setCategoryTimes([]);
     }
   };
 
@@ -137,11 +141,11 @@ export default function PickupSelect(props: PickupSelectProps) {
           );
         }}
       />
-      <RhfSelects
+      <RhfGroupSelects
         label="受取時間帯"
         name="time"
         multiple={false}
-        itemList={timeList}
+        itemList={categoryTimes}
         control={control}
       />
       <Stack direction="row" spacing={2}>

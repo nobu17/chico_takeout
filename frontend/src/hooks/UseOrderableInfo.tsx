@@ -7,6 +7,7 @@ const defaultPerDayOrderableInfo: PerDayOrderableInfo[] = [
   {
     date: "",
     hourTypeId: "",
+    hourName: "",
     startTime: "",
     endTime: "",
     categories: [],

@@ -1,6 +1,7 @@
 export type PerDayOrderableInfo = {
   date: string;
   hourTypeId: string;
+  hourName: string;
   startTime: string;
   endTime: string;
   categories: CategoryItemInfo[];

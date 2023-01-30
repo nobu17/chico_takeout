@@ -56,11 +56,11 @@ export default function OrderDetailTable(props: OrderDetailTableProps) {
       <Table aria-label="注文情報" size="small">
         <TableHead>
           <TableRow>
-            <TableCell style={{ width: "50%" }}>商品名</TableCell>
-            <TableCell style={{ width: "20%" }} align="right">
+            <TableCell style={{ width: "47%" }}>商品名</TableCell>
+            <TableCell style={{ width: "25%" }} align="right">
               個数
             </TableCell>
-            <TableCell style={{ width: "30%" }} align="right">
+            <TableCell style={{ width: "28%" }} align="right">
               価格
             </TableCell>
           </TableRow>

@@ -1,6 +1,6 @@
 import { Button, Stack, Typography } from "@mui/material";
 import { ItemInfo, ItemRequest, Cart } from "../../../hooks/UseItemCart";
-import ItemList from "./ItemList";
+import ItemSelectTabs from "./ItemSelectTabs";
 import { useMessageDialog } from "../../../hooks/UseMessageDialog";
 
 type ItemSelectProps = {
@@ -54,11 +54,11 @@ export default function ItemSelect(props: ItemSelectProps) {
       >
         ※価格は全て税込みです。
       </Typography>
-      <ItemList
+      <ItemSelectTabs
         cart={props.cart}
         allItems={props.allItems}
         onRequestChanged={props.onRequestChanged}
-      ></ItemList>
+      ></ItemSelectTabs>
       <Stack direction="row" spacing={2}>
         <Button onClick={handleSubmit} variant="contained">
           次へ

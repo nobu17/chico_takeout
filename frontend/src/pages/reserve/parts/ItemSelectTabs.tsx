@@ -45,7 +45,7 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
 
   return (
     <>
-      <Box sx={{ maxWidth: { xs: 320, sm: 1000 }, bgcolor: "background.paper" }}>
+      <Box sx={{ maxWidth: { xs: 320, sm: 1000 }, position: 'sticky', top: 0, bgcolor: "background.paper" }}>
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}

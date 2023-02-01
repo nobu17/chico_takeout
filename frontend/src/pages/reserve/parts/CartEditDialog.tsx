@@ -122,7 +122,7 @@ export default function CartEditDialog(props: CartEditDialogProps) {
         </Stack>
         <DialogActions>
           {props.open ? (
-            <CartItemSummaryCard cart={props.cart}></CartItemSummaryCard>
+            <CartItemSummaryCard cart={cart}></CartItemSummaryCard>
           ) : (
             <></>
           )}

@@ -49,6 +49,12 @@ const getOptionTotal = (options: OptionItemInfo[]): string => {
 export default function ItemCard(props: ItemCardProps) {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = React.useState(props.selectedOptions);
+
+  // need update from cart button update
+  React.useEffect(() => {
+    setOptions(props.selectedOptions);
+  },[props.selectedOptions])
+
   const onCountChanged = (count: number) => {
     props.onChanged?.({
       item: props.item,

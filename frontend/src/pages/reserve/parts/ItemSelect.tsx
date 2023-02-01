@@ -7,11 +7,15 @@ type ItemSelectProps = {
   allItems: CategoryItems[];
   cart: Cart;
   onRequestChanged?: callbackRequest;
+  onCartUpdated: callbackCartUpdated;
   onSubmit?: callbackSubmit;
   onBack?: callbackBack;
 };
 interface callbackRequest {
   (item: ItemRequest): void;
+}
+interface callbackCartUpdated {
+  (cart: Cart): void;
 }
 interface callbackSubmit {
   (): void;
@@ -58,6 +62,7 @@ export default function ItemSelect(props: ItemSelectProps) {
         cart={props.cart}
         allItems={props.allItems}
         onRequestChanged={props.onRequestChanged}
+        onCartUpdated={props.onCartUpdated}
       ></ItemSelectTabs>
       <Stack direction="row" spacing={2}>
         <Button onClick={handleSubmit} variant="contained">

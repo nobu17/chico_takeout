@@ -32,10 +32,8 @@ const defaultCart: Cart = {
   items: {},
 };
 
-export function useItemCart() {
-  const [cart, setCart] = useState<Cart>(
-    JSON.parse(JSON.stringify(defaultCart))
-  );
+export function useItemCart(init: Cart = defaultCart) {
+  const [cart, setCart] = useState<Cart>(JSON.parse(JSON.stringify(init)));
   const updateCart = (request: ItemRequest) => {
     const newCarts: Cart = { ...cart };
     if (request.quantity > 0) {
@@ -46,13 +44,33 @@ export function useItemCart() {
     setCart(newCarts);
   };
 
-  const resetCart = () => {
-    setCart(JSON.parse(JSON.stringify(defaultCart)));
+  // this method allow quantity 0. for draft usage
+  const updateCartAsDraft = (request: ItemRequest) => {
+    const newCarts: Cart = { ...cart };
+    newCarts.items[request.item.id] = request;
+    setCart(newCarts);
+  };
+
+  // remove quantity zero item
+  const getActivatedCartFromDraft = (): Cart => {
+    const newCart: Cart = { ...cart };
+    Object.keys(cart.items).forEach((key) => {
+      if (cart.items[key].quantity <= 0) {
+        delete newCart.items[key];
+      }
+    });
+    return newCart;
+  };
+
+  const resetCart = (init: Cart = defaultCart) => {
+    setCart(JSON.parse(JSON.stringify(init)));
   };
 
   return {
     cart,
     updateCart,
+    updateCartAsDraft,
+    getActivatedCartFromDraft,
     resetCart,
   };
 }

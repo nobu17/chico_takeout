@@ -10,6 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 
+import { getTotalPrice, getSubTotalPrice } from "../../libs/util/ItemCalc";
+
 type OrderDetailTableProps = {
   items: OrderItem[];
 };
@@ -26,25 +28,6 @@ type OrderOptionItem = {
   itemId: string;
   name: string;
   price: number;
-};
-
-const getTotalPrice = (items: OrderItem[]): string => {
-  let total = 0;
-  items.forEach((item) => {
-    total += getSubTotalNumber(item);
-  });
-  return total.toLocaleString();
-};
-const getSubTotal = (item: OrderItem): string => {
-  return getSubTotalNumber(item).toLocaleString();
-};
-
-const getSubTotalNumber = (item: OrderItem): number => {
-  const optTotal = item.options.reduce(
-    (acc: number, current: OrderOptionItem): number => acc + current.price,
-    0
-  );
-  return (item.price + optTotal) * item.quantity;
 };
 
 export default function OrderDetailTable(props: OrderDetailTableProps) {
@@ -90,7 +73,9 @@ export default function OrderDetailTable(props: OrderDetailTableProps) {
                 <TableRow>
                   <TableCell />
                   <TableCell>小計</TableCell>
-                  <TableCell align="right">¥ {getSubTotal(item)}</TableCell>
+                  <TableCell align="right">
+                    ¥ {getSubTotalPrice(item)}
+                  </TableCell>
                 </TableRow>
               </React.Fragment>
             );

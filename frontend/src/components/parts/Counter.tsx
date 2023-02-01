@@ -12,10 +12,15 @@ type CounterProps = {
 export default function Counter(props: CounterProps) {
   const [count, setCount] = React.useState(props.count);
 
+  // need for display update
+  React.useEffect(()=> {
+    setCount(props.count);
+  },[props.count])
+
   const handleAdd = () => {
     if (lessThanEqualMax()) {
       const newVal = count + 1;
-      setCount(newVal);
+      // setCount(newVal);
       props.onChanged?.(newVal);
     }
   };
@@ -23,7 +28,7 @@ export default function Counter(props: CounterProps) {
   const handleRemove = () => {
     if (count > 0) {
       const newVal = count - 1;
-      setCount(newVal);
+      // setCount(newVal);
       props.onChanged?.(newVal);
     }
   };

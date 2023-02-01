@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Grid, Box, Tabs, Tab } from "@mui/material";
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import ItemCard from "./ItemCard";
 import Typography from "@mui/material/Typography";
 import {
@@ -9,11 +9,13 @@ import {
   ItemRequest,
   OptionItemInfo,
 } from "../../../hooks/UseItemCart";
+import CartButton from "./CartButton";
 
 type ItemSelectTabsProps = {
   allItems: CategoryItems[];
   cart: Cart;
   onRequestChanged?: callback;
+  onCartUpdated: (cart: Cart) => void;
 };
 interface callback {
   (item: ItemRequest): void;
@@ -43,9 +45,20 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
     setSelectedTab(newValue);
   };
 
+  const handleCartUpdated = (cart: Cart) => {
+    props.onCartUpdated(cart);
+  };
+
   return (
     <>
-      <Box sx={{ maxWidth: { xs: 320, sm: 1000 }, position: 'sticky', top: 0, bgcolor: "background.paper" }}>
+      <Box
+        sx={{
+          maxWidth: { xs: 320, sm: 1000 },
+          position: "sticky",
+          top: 0,
+          bgcolor: "background.paper",
+        }}
+      >
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
@@ -55,7 +68,13 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
           aria-label="item"
         >
           {props.allItems.map((items, index) => {
-            return <Tab label={items.title} key={index} icon={<ContentPasteIcon />} />;
+            return (
+              <Tab
+                label={items.title}
+                key={index}
+                icon={<ContentPasteIcon />}
+              />
+            );
           })}
         </Tabs>
       </Box>
@@ -95,6 +114,11 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
           </div>
         );
       })}
+      <CartButton
+        allItems={props.allItems}
+        cart={props.cart}
+        onUpdated={handleCartUpdated}
+      />
     </>
   );
 }

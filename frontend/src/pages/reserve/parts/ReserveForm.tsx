@@ -83,7 +83,10 @@ export default function ReserveForm() {
   };
 
   const handleConfirmSubmit = async () => {
-    const confirmResult = await showConfirmDialog("確認", "注文を確定します。よろしいですか？");
+    const confirmResult = await showConfirmDialog(
+      "確認",
+      "注文を確定します。よろしいですか？"
+    );
     if (!confirmResult) {
       return;
     }
@@ -115,6 +118,7 @@ export default function ReserveForm() {
           onRequestChanged={updateCart}
           onSubmit={handleNext}
           onBack={handleBack}
+          onCartUpdated={resetCart}
         ></ItemSelect>
       );
     }

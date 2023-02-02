@@ -128,12 +128,17 @@ export default function CartEditDialog(props: CartEditDialogProps) {
           <Button
             variant="contained"
             color="primary"
-            sx={{ mr: 2, ml: 4 }}
+            sx={{ mr: 1, ml: 1, width: 100 }}
             onClick={handleSubmit}
           >
             確定
           </Button>
-          <Button variant="contained" color="error" onClick={handleCancel}>
+          <Button
+            variant="contained"
+            sx={{ width: 110 }}
+            color="error"
+            onClick={handleCancel}
+          >
             キャンセル
           </Button>
         </DialogActions>
@@ -284,7 +289,7 @@ function CartItemSummaryCard(props: CartItemSummaryCardProps) {
         px: isMobileSize ? 1 : 3,
       }}
     >
-      <Typography variant="h5" component="div" align="right">
+      <Typography variant="subtitle1" component="div" align="left">
         合計 ¥ {getTotalPriceFromCart(props.cart)}
       </Typography>
     </Paper>

@@ -273,12 +273,12 @@ function ItemSelectDialog(props: ItemSelectDialogProps) {
           <Button
             variant="contained"
             color="primary"
-            sx={{ mr: 2 }}
+            sx={{ mr: 1, width: 110 }}
             onClick={handleSubmit}
           >
             確定
           </Button>
-          <Button variant="contained" color="error" onClick={handleCancel}>
+          <Button variant="contained" sx={{ width: 110 }} color="error" onClick={handleCancel}>
             キャンセル
           </Button>
         </DialogActions>

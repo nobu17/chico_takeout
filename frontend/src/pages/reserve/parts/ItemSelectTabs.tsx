@@ -1,8 +1,7 @@
 import * as React from "react";
 import { Grid, Box, Tabs, Tab } from "@mui/material";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import ItemCard from "./ItemCard";
-import Typography from "@mui/material/Typography";
+import ItemSelectCard from "./ItemSelectCard";
 import {
   Cart,
   ItemInfo,
@@ -14,7 +13,7 @@ import CartButton from "./CartButton";
 type ItemSelectTabsProps = {
   allItems: CategoryItems[];
   cart: Cart;
-  onRequestChanged?: callback;
+  onRequestChanged: callback;
   onCartUpdated: (cart: Cart) => void;
 };
 interface callback {
@@ -83,28 +82,16 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
           <div key={index} role="tabpanel" hidden={selectedTab !== index}>
             {selectedTab === index && (
               <>
-                <Typography
-                  component="h3"
-                  variant="h4"
-                  align="center"
-                  color="text.primary"
-                  gutterBottom
-                  sx={{
-                    mt: 3,
-                  }}
-                >
-                  {items.title}
-                </Typography>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} alignItems="stretch">
                   {items.items.map((item, index) => {
                     return (
-                      <Grid item xs={12} md={6} key={index + "item"}>
-                        <ItemCard
+                      <Grid item xs={6} md={4} key={index + "item"}>
+                        <ItemSelectCard
                           item={item}
                           quantity={getQuantity(item.id)}
                           selectedOptions={getSelectedOptions(item.id)}
                           onChanged={props.onRequestChanged}
-                        ></ItemCard>
+                        ></ItemSelectCard>
                       </Grid>
                     );
                   })}

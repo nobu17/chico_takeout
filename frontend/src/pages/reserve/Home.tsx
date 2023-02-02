@@ -6,7 +6,7 @@ export default function ReserveHome() {
   return (
     <>
       <PageTitle title="予約" />
-      <Grid container spacing={2}>
+      <Grid container>
         <ReserveForm/>
       </Grid>
     </>

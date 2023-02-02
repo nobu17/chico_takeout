@@ -6,7 +6,7 @@ import { useMessageDialog } from "../../../hooks/UseMessageDialog";
 type ItemSelectProps = {
   allItems: CategoryItems[];
   cart: Cart;
-  onRequestChanged?: callbackRequest;
+  onRequestChanged: callbackRequest;
   onCartUpdated: callbackCartUpdated;
   onSubmit?: callbackSubmit;
   onBack?: callbackBack;

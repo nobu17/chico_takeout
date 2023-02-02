@@ -70,7 +70,7 @@ function App() {
         <AdminAuthProvider>
           <BrowserRouter>
             <Header />
-            <Container maxWidth="lg">
+            <Container maxWidth="lg" disableGutters>
               <Routes>
                 <Route element={<UserLoginLayout />}>
                   <Route path="/auth/sign_in" element={<UserLogin />} />

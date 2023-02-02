@@ -1,5 +1,7 @@
 import PageTitle from "./PageTitle";
 import PageHeader from "./PageHeader";
+import Container from "@mui/material/Container";
+
 import { useReloadTimer } from "../../hooks/UseTimer";
 
 type AdminPageProps = {
@@ -19,10 +21,10 @@ export default function AdminPage(props: AdminPageProps) {
   useReloadTimer(30);
   const link = props.links ? props.links : defaultLinks;
   return (
-    <>
+    <Container>
       <PageHeader currentTitle={props.title} links={link} />
       <PageTitle title={props.title} />
       {props.children}
-    </>
+    </Container>
   );
 }

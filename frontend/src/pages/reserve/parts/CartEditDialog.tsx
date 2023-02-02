@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   DialogActions,
+  DialogContent,
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { TransitionProps } from "@mui/material/transitions";
@@ -77,6 +78,10 @@ export default function CartEditDialog(props: CartEditDialogProps) {
     resetCart(props.cart);
     props.onCancel();
   };
+  const handleReset = () => {
+    // clear all items
+    resetCart();
+  };
   return (
     <>
       <Dialog
@@ -86,46 +91,51 @@ export default function CartEditDialog(props: CartEditDialogProps) {
         fullScreen={isMobileSize}
         TransitionComponent={Transition}
       >
-        <AppBar sx={{ position: "relative" }}>
+        <AppBar sx={{ position: "relative", mb: 1 }}>
           <Toolbar>
             <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
               カート情報
             </Typography>
-            <Button
-              variant="contained"
-              color="secondary"
-              sx={{ mr: 2 }}
-              onClick={handleSubmit}
-            >
-              確定
-            </Button>
-            <Button variant="contained" color="error" onClick={handleCancel}>
-              キャンセル
+            <Button variant="contained" color="secondary" onClick={handleReset}>
+              空にする
             </Button>
           </Toolbar>
         </AppBar>
-        <Stack spacing={1}>
-          {props.open ? (
-            Object.keys(cart.items).map((key) => {
-              const req = cart.items[key];
-              return (
-                <CartItemEditCard
-                  key={key}
-                  item={req}
-                  onUpdate={handleUpdate}
-                ></CartItemEditCard>
-              );
-            })
-          ) : (
-            <></>
-          )}
-        </Stack>
+        <DialogContent dividers={true} sx={{ px: 1, py: 0, m: 0 }}>
+          <Stack spacing={1}>
+            {props.open ? (
+              Object.keys(cart.items).map((key) => {
+                const req = cart.items[key];
+                return (
+                  <CartItemEditCard
+                    key={key}
+                    item={req}
+                    onUpdate={handleUpdate}
+                  ></CartItemEditCard>
+                );
+              })
+            ) : (
+              <></>
+            )}
+          </Stack>
+        </DialogContent>
         <DialogActions>
           {props.open ? (
             <CartItemSummaryCard cart={cart}></CartItemSummaryCard>
           ) : (
             <></>
           )}
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mr: 2, ml: 4 }}
+            onClick={handleSubmit}
+          >
+            確定
+          </Button>
+          <Button variant="contained" color="error" onClick={handleCancel}>
+            キャンセル
+          </Button>
         </DialogActions>
       </Dialog>
     </>
@@ -185,7 +195,7 @@ function CartItemEditCard(props: CartItemEditCardProps) {
             <Grid item xs>
               <Typography
                 gutterBottom
-                variant="subtitle1"
+                variant="subtitle2"
                 component="div"
                 sx={{ mr: 2 }}
               >

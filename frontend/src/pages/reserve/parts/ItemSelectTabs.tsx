@@ -56,6 +56,7 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
           position: "sticky",
           top: 0,
           bgcolor: "background.paper",
+          zIndex: 2,
         }}
       >
         <Tabs
@@ -63,7 +64,6 @@ export default function ItemSelectTabs(props: ItemSelectTabsProps) {
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons
-          allowScrollButtonsMobile
           aria-label="item"
         >
           {props.allItems.map((items, index) => {

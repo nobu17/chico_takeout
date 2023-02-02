@@ -125,7 +125,7 @@ function CartBadge(props: CartBadgeProps) {
     <StyledBadge
       badgeContent={props.count}
       color="secondary"
-      sx={{ mr: 1, marginLeft: "auto" }}
+      sx={{ mr: 1, marginLeft: "auto", zIndex: 0, }}
     >
       <ShoppingCartIcon sx={{ mr: 0 }} />
     </StyledBadge>

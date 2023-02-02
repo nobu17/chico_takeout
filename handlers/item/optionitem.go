@@ -10,7 +10,7 @@ import (
 type OptionItemCreateRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Priority    int    `json:"priority" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
+	Price       *int    `json:"price" binding:"required,number,gte=0"`
 	Description string `json:"description" binding:"required"`
 	Enabled     *bool   `json:"enabled" binding:"required"`
 }
@@ -20,19 +20,19 @@ type OptionItemCreateResponse struct {
 }
 
 func (i *OptionItemCreateRequest) toModel() *usecase.OptionItemCreateModel {
-	return &usecase.OptionItemCreateModel{Name: i.Name, Description: i.Description, Priority: i.Priority, Price: i.Price, Enabled: *i.Enabled}
+	return &usecase.OptionItemCreateModel{Name: i.Name, Description: i.Description, Priority: i.Priority, Price: *i.Price, Enabled: *i.Enabled}
 }
 
 type OptionItemUpdateRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Priority    int    `json:"priority" binding:"required"`
-	Price       int    `json:"price" binding:"required"`
+	Price       *int    `json:"price" binding:"required,number,gte=0"`
 	Description string `json:"description" binding:"required"`
 	Enabled     *bool   `json:"enabled" binding:"required"`
 }
 
 func (i *OptionItemUpdateRequest) toModel(id string) *usecase.OptionItemUpdateModel {
-	return &usecase.OptionItemUpdateModel{Id: id, Name: i.Name, Description: i.Description, Priority: i.Priority, Price: i.Price, Enabled: *i.Enabled}
+	return &usecase.OptionItemUpdateModel{Id: id, Name: i.Name, Description: i.Description, Priority: i.Priority, Price: *i.Price, Enabled: *i.Enabled}
 }
 
 type OptionItemData struct {

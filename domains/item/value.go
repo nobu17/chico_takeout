@@ -60,6 +60,16 @@ func NewPrice(value, maxValue int) (*Price, error) {
 	return &Price{IntValue: shared.NewIntValue(value)}, nil
 }
 
+func NewPriceAllowZero(value, maxValue int) (*Price, error) {
+	validator := validator.NewRangeInteger("Price", 0, maxValue)
+	if err := validator.Validate(value); err != nil {
+		return nil, err
+	}
+
+	return &Price{IntValue: shared.NewIntValue(value)}, nil
+}
+
+
 type StockRemain struct {
 	maxValue int
 	shared.IntValue

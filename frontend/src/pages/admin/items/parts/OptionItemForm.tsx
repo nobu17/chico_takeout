@@ -84,7 +84,7 @@ export default function OptionItemForm(props: OptionItemFormProps) {
             {...register("price", {
               valueAsNumber: true,
               required: { value: true, message: RequiredErrorMessage },
-              min: { value: 1, message: MinErrorMessage(1) },
+              min: { value: 0, message: MinErrorMessage(0) },
               max: { value: 9999, message: MaxErrorMessage(999) },
             })}
             error={Boolean(errors.price)}

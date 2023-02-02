@@ -84,8 +84,8 @@ func (o *OptionItem) Set(name, description string, priority, price int, enabled 
 	if err != nil {
 		return err
 	}
-
-	priceV, err := NewPrice(price, OptionItemMaxPrice)
+	// allow zero at option
+	priceV, err := NewPriceAllowZero(price, OptionItemMaxPrice)
 	if err != nil {
 		return err
 	}

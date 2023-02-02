@@ -98,8 +98,8 @@ func TestOptionItemHandler_GET_NotFound(t *testing.T) {
 func TestOptionItemHandler_POST(t *testing.T) {
 	r := SetupOptionItemRouter()
 
-	want := map[string]interface{}{"priority": 1, "name": "itemP", "description": "memoP", "price": 123, "enabled": true}
-	body := map[string]interface{}{"priority": 1, "name": "itemP", "description": "memoP", "price": 123, "enabled": true}
+	want := map[string]interface{}{"priority": 1, "name": "itemP", "description": "memoP", "price": 0, "enabled": true}
+	body := map[string]interface{}{"priority": 1, "name": "itemP", "description": "memoP", "price": 0, "enabled": true}
 	jBytes, err := json.Marshal(body)
 	if err != nil {
 		t.Errorf("failed to marshal json for test.:%s", err)
@@ -113,6 +113,7 @@ func TestOptionItemHandler_POST(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if http.StatusOK != w.Code {
+		fmt.Println(w.Body);
 		t.Errorf("Status Code should be OK:%d", w.Code)
 		return
 	}
@@ -156,13 +157,13 @@ func TestOptionItemHandler_POST_BadRequest(t *testing.T) {
 		{name: "lack description", args: map[string]interface{}{"name": "1", "priority": 1, "price": 123, "enabled": true}, want: 3},
 		{name: "lack price", args: map[string]interface{}{"name": "1", "priority": 1, "description": "123", "enabled": true}, want: 3},
 		{name: "lack enabled", args: map[string]interface{}{"name": "1", "priority": 1, "description": "123", "price": 123}, want: 3},
-		{name: "long name(26)", args: map[string]interface{}{"name": "12345678901234567890123455", "priority": 1, "description": "memoP", "price": 123, "enabled": true}, want: 3},
-		{name: "0 price", args: map[string]interface{}{"name": "123", "priority": 1, "description": "memoP", "price": 0, "enabled": true}, want: 3},
+		{name: "long name(51)", args: map[string]interface{}{"name": "123456789012345678901234567890123456789012345678901", "priority": 1, "description": "memoP", "price": 123, "enabled": true}, want: 3},
 		{name: "minus price", args: map[string]interface{}{"name": "123", "priority": 1, "description": "memoP", "price": -1, "enabled": true}, want: 3},
 		{name: "minus priority", args: map[string]interface{}{"name": "123", "priority": -1, "description": "memoP", "price": 9, "enabled": true}, want: 3},
 	}
 
 	for _, param := range inputs {
+		fmt.Println(param.name);
 		jBytes, err := json.Marshal(param.args)
 		if err != nil {
 			t.Errorf("failed to marshal json for test.:%s", err)
@@ -170,12 +171,12 @@ func TestOptionItemHandler_POST_BadRequest(t *testing.T) {
 		}
 		jsonStr := string(jBytes)
 		fmt.Println(jsonStr)
-
 		req, _ := http.NewRequest("POST", "/item/option/", bytes.NewBuffer(jBytes))
 		req.Header.Add("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 		if http.StatusBadRequest != w.Code {
+			fmt.Println(w.Body);
 			t.Errorf("Status Code should be BadRequest:%d", w.Code)
 			return
 		}
@@ -202,8 +203,8 @@ func TestOptionItemHandler_POST_BadRequest(t *testing.T) {
 func TestOptionItemHandler_PUT(t *testing.T) {
 	r := SetupOptionItemRouter()
 
-	want := map[string]interface{}{"priority": 2, "name": "itemPP", "description": "memoPP", "price": 1234, "enabled": false}
-	body := map[string]interface{}{"priority": 2, "name": "itemPP", "description": "memoPP", "price": 1234, "enabled": false}
+	want := map[string]interface{}{"priority": 2, "name": "itemPP", "description": "memoPP", "price": 10, "enabled": false}
+	body := map[string]interface{}{"priority": 2, "name": "itemPP", "description": "memoPP", "price": 10, "enabled": false}
 	jBytes, err := json.Marshal(body)
 	if err != nil {
 		t.Errorf("failed to marshal json for test.:%s", err)
@@ -252,8 +253,7 @@ func TestOptionItemHandler_PUT_BadRequest(t *testing.T) {
 		{name: "lack description", args: map[string]interface{}{"name": "1", "priority": 1, "price": 123, "enabled": true}, want: 3},
 		{name: "lack price", args: map[string]interface{}{"name": "1", "priority": 1, "description": "123", "enabled": true}, want: 3},
 		{name: "lack enabled", args: map[string]interface{}{"name": "1", "priority": 1, "description": "123", "price": 123}, want: 3},
-		{name: "long name(26)", args: map[string]interface{}{"name": "12345678901234567890123455", "priority": 1, "description": "memoP", "price": 123, "enabled": true}, want: 3},
-		{name: "0 price", args: map[string]interface{}{"name": "123", "priority": 1, "description": "memoP", "price": 0, "enabled": true}, want: 3},
+		{name: "long name(51)", args: map[string]interface{}{"name": "123456789012345678901234567890123456789012345678901", "priority": 1, "description": "memoP", "price": 123, "enabled": true}, want: 3},
 		{name: "minus price", args: map[string]interface{}{"name": "123", "priority": 1, "description": "memoP", "price": -1, "enabled": true}, want: 3},
 		{name: "minus priority", args: map[string]interface{}{"name": "123", "priority": -1, "description": "memoP", "price": 9, "enabled": true}, want: 3},
 	}

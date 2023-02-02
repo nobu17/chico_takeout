@@ -96,11 +96,20 @@ export default function UserInfoInput(props: UserInfoInputProps) {
         helperText={errors.memo && errors.memo.message}
       />
       <Stack direction="row" spacing={2}>
-        <Button onClick={handleSubmit(onSubmit)} variant="contained">
-          次へ
-        </Button>
-        <Button onClick={handleBack} variant="contained" color="secondary">
+        <Button
+          onClick={handleBack}
+          variant="contained"
+          color="secondary"
+          sx={{ width: 100 }}
+        >
           戻る
+        </Button>
+        <Button
+          onClick={handleSubmit(onSubmit)}
+          variant="contained"
+          sx={{ width: 100 }}
+        >
+          次へ
         </Button>
       </Stack>
     </Stack>

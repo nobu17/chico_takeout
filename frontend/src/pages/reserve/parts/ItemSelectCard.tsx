@@ -125,7 +125,7 @@ function CartBadge(props: CartBadgeProps) {
     <StyledBadge
       badgeContent={props.count}
       color="secondary"
-      sx={{ mr: 1, marginLeft: "auto", zIndex: 0, }}
+      sx={{ mr: 1, marginLeft: "auto", zIndex: 0 }}
     >
       <ShoppingCartIcon sx={{ mr: 0 }} />
     </StyledBadge>
@@ -272,14 +272,19 @@ function ItemSelectDialog(props: ItemSelectDialogProps) {
         <DialogActions>
           <Button
             variant="contained"
+            sx={{ width: 110 }}
+            color="error"
+            onClick={handleCancel}
+          >
+            キャンセル
+          </Button>
+          <Button
+            variant="contained"
             color="primary"
             sx={{ mr: 1, width: 110 }}
             onClick={handleSubmit}
           >
             確定
-          </Button>
-          <Button variant="contained" sx={{ width: 110 }} color="error" onClick={handleCancel}>
-            キャンセル
           </Button>
         </DialogActions>
       </Dialog>

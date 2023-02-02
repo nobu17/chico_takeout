@@ -149,7 +149,11 @@ export default function PickupSelect(props: PickupSelectProps) {
         control={control}
       />
       <Stack direction="row" spacing={2}>
-        <Button onClick={handleSubmit(onSubmit)} variant="contained">
+        <Button
+          onClick={handleSubmit(onSubmit)}
+          variant="contained"
+          sx={{ width: 100 }}
+        >
           次へ
         </Button>
       </Stack>

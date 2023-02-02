@@ -65,11 +65,16 @@ export default function ItemSelect(props: ItemSelectProps) {
         onCartUpdated={props.onCartUpdated}
       ></ItemSelectTabs>
       <Stack direction="row" spacing={2}>
-        <Button onClick={handleSubmit} variant="contained">
-          次へ
-        </Button>
-        <Button onClick={handleBack} variant="contained" color="secondary">
+        <Button
+          onClick={handleBack}
+          variant="contained"
+          color="secondary"
+          sx={{ width: 100 }}
+        >
           戻る
+        </Button>
+        <Button onClick={handleSubmit} variant="contained" sx={{ width: 100 }}>
+          次へ
         </Button>
       </Stack>
       {renderDialog()}

@@ -127,19 +127,19 @@ export default function CartEditDialog(props: CartEditDialogProps) {
           )}
           <Button
             variant="contained"
-            color="primary"
-            sx={{ mr: 1, ml: 1, width: 100 }}
-            onClick={handleSubmit}
-          >
-            確定
-          </Button>
-          <Button
-            variant="contained"
             sx={{ width: 110 }}
             color="error"
             onClick={handleCancel}
           >
             キャンセル
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mr: 1, ml: 1, width: 100 }}
+            onClick={handleSubmit}
+          >
+            確定
           </Button>
         </DialogActions>
       </Dialog>

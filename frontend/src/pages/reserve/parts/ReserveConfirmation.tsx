@@ -35,11 +35,20 @@ export default function ReserveConfirmation(props: ReserveConfirmationProps) {
       <UserInfoConfirmation userInfo={props.userInfo} />
       <ItemConfirmation cart={props.cart} />
       <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={props.onSubmit}>
-          注文する
-        </Button>
-        <Button variant="contained" color="secondary" onClick={props.onBack}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={props.onBack}
+          sx={{ width: 100 }}
+        >
           戻る
+        </Button>
+        <Button
+          variant="contained"
+          onClick={props.onSubmit}
+          sx={{ width: 100 }}
+        >
+          注文する
         </Button>
       </Stack>
     </>

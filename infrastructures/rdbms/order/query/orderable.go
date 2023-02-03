@@ -133,7 +133,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 }
 
 func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableInfo) error {
-	// add offset minutes (180min) and round as 30 minutes (ex:10:10 => 13:30)
+	// add offset minutes (120min) and round as 30 minutes (ex:10:10 => 12:30)
 	now := common.GetRound(*common.GetNowDateWithOffset(common.OffsetMinutesOrderableBefore), 30)
 	today := common.ConvertTimeToDateStr(now)
 	currentTargetTime := common.ConvertTimeToTimeStr(now)
@@ -150,25 +150,14 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 		}
 		// if date is today. check start and end
 		if perDay.Date == today {
-			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.EndTime, currentTargetTime, 0)
+			// only startTime is before current (actual is + 120min) is allowed
+			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.StartTime, currentTargetTime, 0)		
 			if err != nil {
 				return err
 			}
-			// if end is over, not target
+			// if start is over, not target
 			if isOver {
 				continue
-			}
-			// if in range change start time
-			isInRange, err := common.IsInRangeTimeStr(perDay.StartTime, perDay.EndTime, currentTargetTime)
-			if err != nil {
-				return err
-			}
-			if isInRange {
-				perDay.StartTime = currentTargetTime
-				// if start and end is same. skip
-				if perDay.StartTime == perDay.EndTime {
-					continue
-				}
 			}
 		}
 		modifiedOrder = append(modifiedOrder, perDay)

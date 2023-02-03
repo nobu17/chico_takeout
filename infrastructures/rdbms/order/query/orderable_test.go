@@ -182,7 +182,7 @@ func TestModifyTodayInfo_HasToday_AlreadyPassed(t *testing.T) {
 	})
 
 	// have today (10/5) info
-	// but today info is already passed (now * 3 hours is over the end time)
+	// but today info is already passed (now * 2 hours is over the end time)
 	info := order.OrderableInfo{
 		StartDate: "2022/10/03",
 		EndDate:   "2022/10/20",
@@ -237,7 +237,7 @@ func TestModifyTodayInfo_HasToday_NotPassed(t *testing.T) {
 	})
 
 	// have today (10/5) info
-	// but today info is not started yet (now * 3 hours is before start time)
+	// but today info is not started yet (now * 2 hours is before start time)
 	info := order.OrderableInfo{
 		StartDate: "2022/10/03",
 		EndDate:   "2022/10/20",
@@ -482,7 +482,7 @@ func TestModifyTodayInfo_HasToday_NowDateIsChangedToNextDate(t *testing.T) {
 func TestModifyTodayInfo_HasToday_ModifiedStartTime(t *testing.T) {
 	o := OrderableInfoRdbmsQueryService{}
 
-	// mock now (2022/10/5 11:10.30) => +3hours is 14:10
+	// mock now (2022/10/5 11:10.30) => +2hours is 13:10 (rounded:13:30)
 	common.MockNow(func() time.Time {
 		return time.Date(2022, 10, 5, 11, 10, 30, 0, time.Local)
 	})
@@ -505,7 +505,21 @@ func TestModifyTodayInfo_HasToday_ModifiedStartTime(t *testing.T) {
 			{
 				Date:       "2022/10/05",
 				HourTypeId: "2",
-				StartTime:  "13:30", // this time is passed. but not end
+				StartTime:  "13:00", // this time is not allowed. (limit is 13:30)
+				EndTime:    "17:00",
+				Items:      nil,
+			},
+			{
+				Date:       "2022/10/05",
+				HourTypeId: "2",
+				StartTime:  "13:29", // this time is not allowed. (limit is 13:30)
+				EndTime:    "17:00",
+				Items:      nil,
+			},
+			{
+				Date:       "2022/10/05",
+				HourTypeId: "2",
+				StartTime:  "13:30", // this time is just allowed. (13:30)
 				EndTime:    "17:00",
 				Items:      nil,
 			},
@@ -530,9 +544,8 @@ func TestModifyTodayInfo_HasToday_ModifiedStartTime(t *testing.T) {
 	err := o.modifyTodayInfo(&info)
 	assert.NoError(t, err, "no error should be")
 
-	// first item is removed
-	// second item is modified start time. (14:30)
-	// third. fourth items are not modified
+	// 1~3 item is removed
+	// other is remained
 	expected := order.OrderableInfo{
 		StartDate: "2022/10/03",
 		EndDate:   "2022/10/20",
@@ -540,7 +553,7 @@ func TestModifyTodayInfo_HasToday_ModifiedStartTime(t *testing.T) {
 			{
 				Date:       "2022/10/05",
 				HourTypeId: "2",
-				StartTime:  "14:30", // modified
+				StartTime:  "13:30",
 				EndTime:    "17:00",
 				Items:      nil,
 			},
@@ -566,7 +579,7 @@ func TestModifyTodayInfo_HasToday_ModifiedStartTime(t *testing.T) {
 func TestModifyTodayInfo_HasToday_ModifiedStartTime_SameEndTime(t *testing.T) {
 	o := OrderableInfoRdbmsQueryService{}
 
-	// mock now (2022/10/5 11:10.30) => +3hours is 14:10
+	// mock now (2022/10/5 11:10.30) => +2hours is 13:30
 	common.MockNow(func() time.Time {
 		return time.Date(2022, 10, 5, 11, 10, 30, 0, time.Local)
 	})
@@ -582,8 +595,15 @@ func TestModifyTodayInfo_HasToday_ModifiedStartTime_SameEndTime(t *testing.T) {
 			{
 				Date:       "2022/10/05",
 				HourTypeId: "2",
-				StartTime:  "13:30", // this time is passed. but not end
-				EndTime:    "14:30", // start will be 14:30. (same start and end)
+				StartTime:  "12:30", // this time is passed. but not end
+				EndTime:    "13:30",
+				Items:      nil,
+			},
+			{
+				Date:       "2022/10/05",
+				HourTypeId: "2",
+				StartTime:  "12:30", // this time is passed. but not end
+				EndTime:    "13:31",
 				Items:      nil,
 			},
 			{

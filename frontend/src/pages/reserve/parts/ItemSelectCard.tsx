@@ -186,6 +186,10 @@ function ItemSelectDialog(props: ItemSelectDialogProps) {
   };
 
   const handleCancel = () => {
+    // reset
+    setQuantity(props.quantity);
+    setOptions(props.selectedOptions);
+    
     props.onCancel();
   };
 

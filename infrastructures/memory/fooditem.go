@@ -35,12 +35,16 @@ func resetFoodItemMemory() {
 
 	foodMemory = map[string]*domains.FoodItem{}
 	scheduleIds1 := []string{schedules[0].GetId(), schedules[1].GetId()}
-	item1, _ := domains.NewFoodItem("food1", "item1", 1, 4, 10, 100, allKinds[0].GetId(), scheduleIds1, true, "https://food1.jpg")
+	item1, _ := domains.NewFoodItem("food1", "item1", 1, 4, 10, 100, allKinds[0].GetId(), scheduleIds1, true, "https://food1.jpg", []string{})
 	foodMemory[item1.GetId()] = item1
 
 	scheduleIds2 := []string{schedules[1].GetId(), schedules[2].GetId()}
-	item2, _ := domains.NewFoodItem("food2", "item2", 2, 5, 18, 200, allKinds[1].GetId(), scheduleIds2, true, "")
+	item2, _ := domains.NewFoodItem("food2", "item2", 2, 5, 18, 200, allKinds[1].GetId(), scheduleIds2, true, "", []string{})
 	foodMemory[item2.GetId()] = item2
+
+	scheduleIds3 := []string{schedules[1].GetId(), schedules[2].GetId()}
+	item3, _ := domains.NewFoodItem("food3", "item3", 3, 6, 20, 110, allKinds[1].GetId(), scheduleIds3, true, "", []string{ "2023/12/10", "2023/12/13" })
+	foodMemory[item3.GetId()] = item3
 }
 
 func (s *FoodItemMemoryRepository) GetMemory() map[string]*domains.FoodItem {

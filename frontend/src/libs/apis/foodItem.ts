@@ -33,6 +33,7 @@ type FoodItemUpdateRequest = {
     imageUrl: string;
     kindId: string;
     scheduleIds: string[];
+    allowDates: string[];
   };
   
   const convertRequest = (item: FoodItem): FoodItemUpdateRequest => {
@@ -49,6 +50,7 @@ type FoodItemUpdateRequest = {
       imageUrl: item.imageUrl,
       kindId: kindId,
       scheduleIds: item.scheduleIds,
+      allowDates: item.allowDates,
     };
   };
   

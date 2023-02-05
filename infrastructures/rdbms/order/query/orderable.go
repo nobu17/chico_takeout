@@ -87,7 +87,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 		for _, specialHour := range specialHours {
 			// special hour
 			if common.DateEqual(date, *specialHour.Date) {
-				foodItems := o.getFoodItems(specialHour.BusinessHourModelID, foods)
+				foodItems := o.getFoodItems(specialHour.BusinessHourModelID, date, foods)
 				o.reduceFoodRemain(foodItems, foodConsumption, date)
 				allItems := append(foodItems, stocks...)
 				info := order.PerDayOrderableInfo{
@@ -106,7 +106,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 			weekday := date.Weekday()
 			for _, hour := range hours {
 				if hour.HasWeekDay(int(weekday)) {
-					foodItems := o.getFoodItems(hour.ID, foods)
+					foodItems := o.getFoodItems(hour.ID, date, foods)
 					o.reduceFoodRemain(foodItems, foodConsumption, date)
 					allItems := append(foodItems, stocks...)
 					info := order.PerDayOrderableInfo{
@@ -151,7 +151,7 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 		// if date is today. check start and end
 		if perDay.Date == today {
 			// only startTime is before current (actual is + 120min) is allowed
-			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.StartTime, currentTargetTime, 0)		
+			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.StartTime, currentTargetTime, 0)
 			if err != nil {
 				return err
 			}
@@ -191,7 +191,7 @@ func (o *OrderableInfoRdbmsQueryService) getStockItems() ([]order.OrderableItemI
 	return infoList, nil
 }
 
-func (o *OrderableInfoRdbmsQueryService) getFoodItems(hourTypeId string, foods []items.FoodItemModel) []order.OrderableItemInfo {
+func (o *OrderableInfoRdbmsQueryService) getFoodItems(hourTypeId string, targetDate time.Time, foods []items.FoodItemModel) []order.OrderableItemInfo {
 	infoList := []order.OrderableItemInfo{}
 
 	for _, item := range foods {
@@ -208,6 +208,20 @@ func (o *OrderableInfoRdbmsQueryService) getFoodItems(hourTypeId string, foods [
 		if !belongs {
 			continue
 		}
+		// has allow date, need check date
+		if len(item.AllowDates.Dates) > 0 {
+			hasDate := false
+			for _, date := range item.AllowDates.Dates {
+				if common.DateEqual(targetDate, date) {
+					hasDate = true
+					break
+				}
+			}
+			if !hasDate {
+				continue
+			}
+		}
+
 		info := order.OrderableItemInfo{}
 		info.Id = item.ID
 		info.ItemType = "food"

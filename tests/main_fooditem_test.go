@@ -42,18 +42,19 @@ func SetupFoodItemRouter() *gin.Engine {
 	return r
 }
 
-func TestFoodItemHandler_GETALL(t *testing.T) {
+func TestFoodItemHandler_GET_ALL(t *testing.T) {
 
 	kinds := []map[string]interface{}{
 		{"priority": 1, "name": "item1"},
 		{"priority": 2, "name": "item2"},
 	}
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "imageUrl": "https://food1.jpg"},
-		{"priority": 2, "name": "food2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 18, "imageUrl": ""},
+		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "imageUrl": "https://food1.jpg", "allowDates": []string{}},
+		{"priority": 2, "name": "food2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 18, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 3, "name": "food3", "description": "item3", "maxOrder": 6, "price": 110, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 20, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/13"}},
 	}
 	wantsScheduleIdLength := []int{
-		2, 2,
+		2, 2, 2,
 	}
 
 	r := SetupFoodItemRouter()
@@ -72,7 +73,7 @@ func TestFoodItemHandler_GETALL(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, 2, len(response), "response length is incorrect")
+	assert.Equal(t, 3, len(response), "response length is incorrect")
 
 	for index, item := range response {
 		scheduleIds, ok := item["scheduleIds"].([]interface{})
@@ -93,11 +94,12 @@ func TestFoodItemHandler_GET(t *testing.T) {
 		{"priority": 2, "name": "item2"},
 	}
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "imageUrl": "https://food1.jpg"},
-		{"priority": 2, "name": "food2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 18, "imageUrl": ""},
+		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "imageUrl": "https://food1.jpg", "allowDates": []string{}},
+		{"priority": 2, "name": "food2", "description": "item2", "maxOrder": 5, "price": 200, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 18, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 3, "name": "food3", "description": "item3", "maxOrder": 6, "price": 110, "enabled": true, "kind": kinds[1], "maxOrderPerDay": 20, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/13"}},
 	}
 	wantsScheduleIdLength := []int{
-		2, 2,
+		2, 2, 2,
 	}
 
 	index := 0
@@ -156,12 +158,14 @@ func TestFoodItemHandler_POST_CREATE(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png"},
-		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": ""},
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 6, "name": "create_food3", "description": "desc3", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/20"}},
 	}
 	bodies := []map[string]interface{}{
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png"},
-		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": ""},
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 6, "name": "create_food3", "description": "desc3", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/20"}},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -207,119 +211,156 @@ func GetFoodItemErrorData(kindIds, scheduleIds []string) []foodItemErrorData {
 		{name: "lack priority", args: map[string]interface{}{
 			"name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 5, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error priority(0)", args: map[string]interface{}{
 			"priority": 0, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 5, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error priority(-1)", args: map[string]interface{}{
 			"priority": -1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 5, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack name", args: map[string]interface{}{
 			"priority": 1, "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 5, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error name(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 5, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
-		{name: "error name(over limit(16))", args: map[string]interface{}{
-			"priority": 1, "name": MakeRandomStr(16), "description": "item1",
+			"allowDates": []string{},
+		}, want: 3},
+		{name: "error name(over limit(26))", args: map[string]interface{}{
+			"priority": 1, "name": MakeRandomStr(26), "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack description", args: map[string]interface{}{
 			"priority": 1, "name": "stock1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error description(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error description(over limit(151))", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": MakeRandomStr(151),
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack maxOrder", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error maxOrder(0)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
 			"maxOrder": 0, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error maxOrder(31)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
 			"maxOrder": 31, "price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack price", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+		}, want: 3},
 		{name: "error price(0)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
 			"maxOrder": 1, "price": 0, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error price(20001)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
 			"maxOrder": 1, "price": 20001, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack enabled", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack kindId", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error kindId(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": "", "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "not exist kindId", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "price": 100, "enabled": true, "kindId": "abc", "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack maxOrderPerDay", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error maxOrderPerDay(101)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 101, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error maxOrderPerDay(0)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": -1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "lack scheduleIds", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 101, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error scheduleIds(empty)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 99, "scheduleIds": []string{}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error not exists scheduleIds", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 2,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 10, "scheduleIds": []string{"1234"}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error not exists scheduleIds and exist id", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 2,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 10, "scheduleIds": []string{scheduleIds[1], "1234"}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+		}, want: 3},
 		{name: "error maxOrder > maxOrderPerDay", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 2,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[1]}, "imageUrl": "https://hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error lack of imageUrl", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 2, "scheduleIds": []string{scheduleIds[0]},
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
 		{name: "error incorrect imageUrl format", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
 			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 2, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "hoge.png",
-		}, want: 2},
+			"allowDates": []string{},
+		}, want: 3},
+		{name: "error incorrect date format", args: map[string]interface{}{
+			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
+			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 2, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "",
+			"allowDates": []string{"2023"},
+		}, want: 3},
+		{name: "error incorrect date format mixed", args: map[string]interface{}{
+			"priority": 1, "name": "stock1", "description": "item1", "maxOrder": 1,
+			"price": 100, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 2, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "",
+			"allowDates": []string{"2023/12/10", "abcd"},
+		}, want: 3},
 	}
 	return foodItemErrorInputs
 }
@@ -350,6 +391,7 @@ func TestFoodItemHandler_POST_CREATE_BadRequest(t *testing.T) {
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 
+		fmt.Println(w.Body)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 
 		// confirm stock is not added
@@ -389,19 +431,21 @@ func TestFoodItemHandler_PUT(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png"},
-		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": ""},
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food3", "description": "desc3", "maxOrder": 3, "price": 2200, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2020/12/10", "2023/12/10"}},
 	}
 	bodies := []map[string]interface{}{
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png",},
-		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "",},
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
+		{"priority": 5, "name": "create_food3", "description": "desc3", "maxOrder": 3, "price": 2200, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2020/12/10", "2023/12/10"}},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
 		assert.NoError(t, err, "init json is failed")
 
-		jsonStr := string(jBytes)
-		fmt.Println("req", jsonStr)
+		//jsonStr := string(jBytes)
+		//fmt.Println("req", jsonStr)
 
 		req, _ := http.NewRequest("PUT", "/item/food/"+foodIds[0], bytes.NewBuffer(jBytes))
 		req.Header.Add("Content-Type", "application/json")
@@ -420,7 +464,7 @@ func TestFoodItemHandler_PUT(t *testing.T) {
 		r.ServeHTTP(w, getReq)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		fmt.Println("response", w.Body)
+		// fmt.Println("response", w.Body)
 
 		var response map[string]interface{}
 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
@@ -443,8 +487,8 @@ func TestFoodItemHandler_PUT_NotFound(t *testing.T) {
 	}
 
 	bodies := []map[string]interface{}{
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://food1.jpg"},
-		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "" },
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://food1.jpg", "allowDates": []string{}},
+		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "", "allowDates": []string{}},
 	}
 
 	jBytes, err := json.Marshal(bodies[0])
@@ -482,7 +526,7 @@ func TestFoodItemHandler_PUT_CREATE_BadRequest(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}},
+		{"priority": 1, "name": "food1", "description": "item1", "maxOrder": 4, "price": 100, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 10, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "https://food1.jpg", "allowDates": []string{}},
 	}
 
 	inputs := GetFoodItemErrorData(kindIds, scheduleIds)

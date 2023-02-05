@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"chico/takeout/common"
+	"chico/takeout/domains/shared"
 
 	"github.com/google/uuid"
 )
@@ -21,7 +22,7 @@ type SpecialBusinessHourRepository interface {
 type SpecialBusinessHour struct {
 	id             string
 	name           string
-	date           Date
+	date           shared.Date
 	shift          TimeRange
 	businessHourId string
 }
@@ -55,7 +56,7 @@ func (s *SpecialBusinessHour) Set(name, date, start, end, businessHourId string)
 		return err
 	}
 
-	dateVal, err := NewDate(date)
+	dateVal, err := shared.NewDate(date)
 	if err != nil {
 		return err
 	}

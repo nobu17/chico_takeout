@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
+
 import { ItemKind } from "../../../../libs/ItemKind";
 import { FoodItem } from "../../../../libs/FoodItem";
 import { BusinessHour } from "../../../../libs/BusinessHour";
@@ -21,6 +22,8 @@ import {
   MaxErrorMessage,
   MinErrorMessage,
 } from "../../../../libs/ErrorMessages";
+
+import MultiSelectDatePicker from "../../../../components/parts/MultiSelectDatePicker";
 
 const baseUrl = "/foods";
 
@@ -50,6 +53,7 @@ export type FoodItemInput = {
   imageUrl: string;
   kindId: string; // for select only using kindId
   scheduleIds: string[];
+  allowDates: string[];
 };
 
 type HourSelects = {
@@ -71,6 +75,7 @@ const convertInput = (item: FoodItem): FoodItemInput => {
     imageUrl: item.imageUrl,
     kindId: kindId,
     scheduleIds: item.scheduleIds,
+    allowDates: item.allowDates,
   };
 };
 
@@ -88,6 +93,7 @@ const reverseInput = (item: FoodItemInput, kinds: ItemKind[]): FoodItem => {
     imageUrl: item.imageUrl,
     kind: kind!,
     scheduleIds: item.scheduleIds,
+    allowDates: item.allowDates,
   };
 };
 
@@ -225,6 +231,17 @@ export default function FoodItemForm(props: FoodItemFormProps) {
             multiple={true}
             itemList={hoursList}
             control={control}
+          />
+          <Controller
+            name="allowDates"
+            control={control}
+            render={({ field: { onChange, value, ref } }) => (
+              <MultiSelectDatePicker
+                selectedDates={value}
+                onCancel={() => {}}
+                onSubmit={(val) => { setValue("allowDates", val) }}
+              />
+            )}
           />
           <Controller
             name="imageUrl"

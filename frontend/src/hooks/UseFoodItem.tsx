@@ -17,6 +17,7 @@ const defaultFoodItem: FoodItem = {
   kind: null,
   scheduleIds: [],
   imageUrl: "",
+  allowDates: [],
 };
 
 const foodApi = new FoodItemApi();

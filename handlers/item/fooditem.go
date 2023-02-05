@@ -11,6 +11,7 @@ type FoodItemResponse struct {
 	CommonItemResponse
 	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
+	AllowDates     []string `json:"allowDates" binding:"required"`
 }
 
 func newFoodItemData(item *usecase.FoodItemModel) *FoodItemResponse {
@@ -33,6 +34,7 @@ func newFoodItemData(item *usecase.FoodItemModel) *FoodItemResponse {
 		},
 		ScheduleIds:    item.ScheduleIds,
 		MaxOrderPerDay: item.MaxOrderPerDay,
+		AllowDates:     item.AllowDates,
 	}
 }
 
@@ -40,6 +42,7 @@ type FoodItemCreateRequest struct {
 	CommonItemCreateRequest
 	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
+	AllowDates     []string `json:"allowDates" binding:"required"`
 }
 
 type FoodItemCreateResponse struct {
@@ -54,7 +57,7 @@ func (s *FoodItemCreateRequest) toModel() *usecase.FoodItemCreateModel {
 				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
-		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay,
+		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay, AllowDates: s.AllowDates,
 	}
 }
 
@@ -62,6 +65,7 @@ type FoodItemUpdateRequest struct {
 	CommonItemUpdateRequest
 	ScheduleIds    []string `json:"scheduleIds" binding:"required"`
 	MaxOrderPerDay int      `json:"maxOrderPerDay" binding:"required"`
+	AllowDates     []string `json:"allowDates" binding:"required"`
 }
 
 func (s *FoodItemUpdateRequest) toModel(id string) *usecase.FoodItemUpdateModel {
@@ -73,7 +77,7 @@ func (s *FoodItemUpdateRequest) toModel(id string) *usecase.FoodItemUpdateModel 
 				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
-		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay,
+		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay, AllowDates: s.AllowDates,
 	}
 }
 

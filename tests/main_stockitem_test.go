@@ -200,8 +200,8 @@ func GetStockItemErrorData(kindIds []string) []stockItemErrorData {
 			"priority": 1, "name": "", "description": "item1",
 			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
-		{name: "error name(over limit(16))", args: map[string]interface{}{
-			"priority": 1, "name": MakeRandomStr(16), "description": "item1",
+		{name: "error name(over limit(26))", args: map[string]interface{}{
+			"priority": 1, "name": MakeRandomStr(26), "description": "item1",
 			"maxOrder": 4, "price": 100, "enabled": true, "kindId": kindIds[0], "imageUrl": "https://image.png",
 		}, want: 2},
 		{name: "lack description", args: map[string]interface{}{

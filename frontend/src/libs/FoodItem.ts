@@ -12,4 +12,5 @@ export type FoodItem = {
   imageUrl: string;
   kind: ItemKind | null;
   scheduleIds: string[];
+  allowDates: string[];
 };

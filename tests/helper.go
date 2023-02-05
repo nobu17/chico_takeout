@@ -48,7 +48,6 @@ func AssertMap(t *testing.T, maps map[string]interface{}, key string, want inter
 				got = append(got, int(elem))
 			}
 		}
-		// fmt.Println("comp", want, got)
 		if len(got) == 0 {
 			assert.ElementsMatch(t, want, a)
 		} else {
@@ -67,7 +66,7 @@ func AssertMap(t *testing.T, maps map[string]interface{}, key string, want inter
 		got = value
 	}
 	if got != want {
-		t.Errorf("got value is not same from want. key=%s got=%s, want=%s", key, value, want)
+		t.Errorf("got value is not same from want. key=%s got=%s, want=%s", key, got, want)
 	}
 }
 

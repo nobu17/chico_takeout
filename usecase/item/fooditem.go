@@ -12,6 +12,7 @@ type FoodItemModel struct {
 	CommonItemModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
+	AllowDates     []string
 }
 
 func newFoodItemModel(item *domains.FoodItem, kind *domains.ItemKind) *FoodItemModel {
@@ -31,6 +32,7 @@ func newFoodItemModel(item *domains.FoodItem, kind *domains.ItemKind) *FoodItemM
 		},
 		ScheduleIds:    item.GetScheduleIds(),
 		MaxOrderPerDay: item.GetMaxOrderPerDay(),
+		AllowDates:     item.GetAllowDates(),
 	}
 }
 
@@ -38,12 +40,14 @@ type FoodItemCreateModel struct {
 	CommonItemCreateModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
+	AllowDates     []string
 }
 
 type FoodItemUpdateModel struct {
 	CommonItemUpdateModel
 	ScheduleIds    []string
 	MaxOrderPerDay int
+	AllowDates     []string
 }
 
 type FoodItemUseCase interface {
@@ -113,7 +117,7 @@ func (f *foodItemUseCase) FindAll() ([]FoodItemModel, error) {
 }
 
 func (f *foodItemUseCase) Create(model *FoodItemCreateModel) (string, error) {
-	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl)
+	item, err := domains.NewFoodItem(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl, model.AllowDates)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +149,7 @@ func (i *foodItemUseCase) Update(model *FoodItemUpdateModel) error {
 		return common.NewUpdateTargetNotFoundError(model.Id)
 	}
 
-	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl)
+	err = item.Set(model.Name, model.Description, model.Priority, model.MaxOrder, model.MaxOrderPerDay, model.Price, model.KindId, model.ScheduleIds, model.Enabled, model.ImageUrl, model.AllowDates)
 	if err != nil {
 		return err
 	}

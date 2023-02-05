@@ -17,6 +17,7 @@ import (
 	sdomains "chico/takeout/domains/store"
 	orderHandler "chico/takeout/handlers/order"
 	"chico/takeout/infrastructures/memory"
+	"chico/takeout/middleware"
 	orderUseCase "chico/takeout/usecase/order"
 
 	"github.com/gin-gonic/gin"
@@ -69,7 +70,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 	foodMemoryMaps = foodRepo.GetMemory()
 	// add new food item
 	scheduleIds1 := []string{schedule.GetSchedules()[0].GetId(), schedule.GetSchedules()[1].GetId()}
-	food1, _ := idomains.NewFoodItem("food3", "item3", 4, 10, 11, 222, kindIds[0], scheduleIds1, true, "https://food1.jpg")
+	food1, _ := idomains.NewFoodItem("food4", "item4", 4, 10, 11, 222, kindIds[0], scheduleIds1, true, "https://food1.jpg", []string{})
 	foodRepo.Create(food1)
 
 	optRepos := memory.NewOptionItemMemoryRepository()
@@ -83,6 +84,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 		mailer := memory.NewMemorySendOrderMail()
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepos, stockRepo, foodRepo, kindRepo, optRepos, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
+		order.Use(middleware.SetContext(handler.InitContext))
 		order.GET("/:id", handler.Get)
 		order.POST("/", handler.PostCreate)
 		order.PUT("/:id", handler.PutCancel)
@@ -93,6 +95,28 @@ func SetupOrderInfoRouter() *gin.Engine {
 		order.GET("/active/*date", handler.GetActiveByDate)
 	}
 	return r
+}
+
+func assertResponse(t *testing.T, want, got map[string]interface{}) {
+	assert.Equal(t, want["userId"], got["userId"])
+	assert.Equal(t, want["userName"], got["userName"])
+	assert.Equal(t, want["memo"], got["memo"])
+	assert.Equal(t, want["pickupDateTime"], got["pickupDateTime"])
+	assert.Equal(t, want["canceled"], got["canceled"])
+	wantFoods := want["foodItems"].([]map[string]interface{})
+	gotFoods := got["foodItems"].([]interface{})
+	assert.Equal(t, len(wantFoods), len(gotFoods))
+	for i, wanFood := range wantFoods {
+		gotFood := gotFoods[i].(map[string]interface{})
+		AssertMaps(t, gotFood, wanFood)
+	}
+	wantStocks := want["stockItems"].([]map[string]interface{})
+	gotStocks := got["stockItems"].([]interface{})
+	assert.Equal(t, len(wantStocks), len(gotStocks))
+	for i, wanStock := range wantStocks {
+		gotStock := gotStocks[i].(map[string]interface{})
+		AssertMaps(t, gotStock, wanStock)
+	}
 }
 
 func TestOrderInfoHandler_GET(t *testing.T) {
@@ -108,19 +132,19 @@ func TestOrderInfoHandler_GET(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"userId": "user1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00", "canceled": true,
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 3.0},
-				{"itemId": foodIds[1], "name": "food2", "price": 200.0, "quantity": 1.0},
+				{"name": "food1", "price": 100, "quantity": 3, "options": []string{}},
+				{"name": "food2", "price": 200, "quantity": 1, "options": []string{}},
 			},
 		},
-		{"userId": "user2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
+		{"userId": "user2", "userName": "ユーザー2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00", "canceled": true,
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds[0], "name": "stock1", "price": 100.0, "quantity": 2.0},
+				{"name": "stock1", "price": 100, "quantity": 2, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[0], "name": "food1", "price": 100.0, "quantity": 1.0},
+				{"name": "food1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 		},
 	}
@@ -140,8 +164,8 @@ func TestOrderInfoHandler_GET(t *testing.T) {
 		var response map[string]interface{}
 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
-		// todo: currently cant assert nest data
-		AssertMapsWithIgnoreKeys(t, response, wants[index], []string{"stockItems", "foodItems"})
+		want := wants[index]
+		assertResponse(t, want, response)
 		index++
 	}
 }
@@ -158,19 +182,19 @@ func TestOrderInfoHandler_GET_ALL(t *testing.T) {
 		foodIds[value.GetName()] = id
 	}
 	wants := []map[string]interface{}{
-		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
-			"stockItems": []map[string]interface{}{},
+		{"userId": "user2", "userName": "ユーザー2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00", "canceled": true,
+			"stockItems": []map[string]interface{}{
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 2, "options": []string{}},
+			},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
-				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 		},
-		{"userId": "user2", "userName": "ユーザー2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
-			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 2.0},
-			},
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00", "canceled": true,
+			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 3, "options": []string{}},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200, "quantity": 1, "options": []string{}},
 			},
 		},
 	}
@@ -185,10 +209,13 @@ func TestOrderInfoHandler_GET_ALL(t *testing.T) {
 	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
 	fmt.Println("response", response)
-	for index, _ := range response {
+	for index := range response {
 		// todo: currently cant assert nest data
-		AssertMapsWithIgnoreKeys(t, response[index], wants[index], []string{"stockItems", "foodItems"})
+		// AssertMapsWithIgnoreKeys(t, response[index], wants[index], []string{"stockItems", "foodItems"})
 		// AssertMaps(t, response[index], wants[index])
+		got := response[index]
+		want := wants[index]
+		assertResponse(t, want, got)
 	}
 }
 
@@ -209,11 +236,11 @@ func TestOrderInfoHandler_GetByDateNow(t *testing.T) {
 		foodIds[value.GetName()] = id
 	}
 	wants := []map[string]interface{}{
-		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00", "canceled": true,
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
-				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 3, "options": []string{}},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200, "quantity": 1, "options": []string{}},
 			},
 		},
 	}
@@ -228,8 +255,11 @@ func TestOrderInfoHandler_GetByDateNow(t *testing.T) {
 	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
 	// fmt.Println("response", response)
-	for index, _ := range response {
-		AssertMaps(t, response[index], wants[index])
+	for index := range response {
+		// AssertMaps(t, response[index], wants[index])
+		got := response[index]
+		want := wants[index]
+		assertResponse(t, want, got)
 	}
 
 	common.ResetNow()
@@ -247,11 +277,11 @@ func TestOrderInfoHandler_GetByDate(t *testing.T) {
 		foodIds[value.GetName()] = id
 	}
 	wants := []map[string]interface{}{
-		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
+		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00", "canceled": true,
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
-				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 3, "options": []string{}},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200, "quantity": 1, "options": []string{}},
 			},
 		},
 	}
@@ -266,8 +296,10 @@ func TestOrderInfoHandler_GetByDate(t *testing.T) {
 	_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
 	// fmt.Println("response", response)
-	for index, _ := range response {
-		AssertMaps(t, response[index], wants[index])
+	for index := range response {
+		got := response[index]
+		want := wants[index]
+		assertResponse(t, want, got)
 	}
 }
 
@@ -288,16 +320,16 @@ func TestOrderInfoHandler_GETByUser(t *testing.T) {
 		{"userId": "user1", "userName": "ユーザー1", "memo": "memo1", "pickupDateTime": "2050/12/10 12:00",
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 3.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 3.0},
 				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 1.0},
 			},
 		},
 		{"userId": "user2", "userName": "ユーザー2", "memo": "memo2", "pickupDateTime": "2050/12/14 12:00",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 2.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 2.0},
 			},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 1.0},
 			},
 		},
 	}
@@ -398,65 +430,65 @@ func TestOrderInfoHandler_POST_CREATE(t *testing.T) {
 	}
 	wants := []map[string]interface{}{
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
-			"userName":  "ユーザー123",
+			"userName": "ユーザー123", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "1234", "memo": "めも2", "pickupDateTime": "2052/12/10 11:30",
-			"userName":  "ユーザー1234",
+			"userName": "ユーザー1234", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "12345", "memo": "", "pickupDateTime": "2052/12/11 21:00",
-			"userName":  "ユーザー12345",
+			"userName": "ユーザー12345", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123456", "memo": "特別日程", "pickupDateTime": "2055/05/08 11:00",
-			"userName":  "ユーザー123456",
+			"userName": "ユーザー123456", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
-			"userName":  "ユーザー123",
+			"userName": "ユーザー123", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
-			"userName":  "ユーザー123",
+			"userName": "ユーザー123", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 1, "options": []string{}},
 			},
 		},
 		{"userId": "123", "memo": "めも", "pickupDateTime": "2052/12/10 09:00",
-			"userName":  "ユーザー123",
+			"userName": "ユーザー123", "canceled": false,
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"stockItems": []map[string]interface{}{
-				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100.0, "quantity": 1.0},
-				{"itemId": stockIds["stock3"], "name": "stock3", "price": 300.0, "quantity": 3.0},
+				{"itemId": stockIds["stock1"], "name": "stock1", "price": 100, "quantity": 1, "options": []string{}},
+				{"itemId": stockIds["stock3"], "name": "stock3", "price": 300, "quantity": 3, "options": []string{}},
 			},
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds["food1"], "name": "food1", "price": 100.0, "quantity": 1.0},
-				{"itemId": foodIds["food2"], "name": "food2", "price": 200.0, "quantity": 2.0},
+				{"itemId": foodIds["food1"], "name": "food1", "price": 100, "quantity": 1, "options": []string{}},
+				{"itemId": foodIds["food2"], "name": "food2", "price": 200, "quantity": 2, "options": []string{}},
 			},
 		},
 	}
@@ -492,7 +524,8 @@ func TestOrderInfoHandler_POST_CREATE(t *testing.T) {
 		var response map[string]interface{}
 		_ = json.Unmarshal([]byte(w.Body.Bytes()), &response)
 
-		AssertMaps(t, response, wants[index])
+		assertResponse(t, wants[index], response)
+		// AssertMaps(t, response, wants[index])
 	}
 }
 
@@ -652,7 +685,7 @@ func getOrderInfoErrorData(stockIds, foodIds []string) []orderInfoErrorData {
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[0], "quantity": 5.0},
+				{"itemId": foodIds[0], "quantity": 9.0},
 			},
 			"stockItems": []map[string]interface{}{},
 		}},
@@ -813,10 +846,19 @@ func TestOrderInfoHandler_POST_BadRequest_PickupDateIsPast(t *testing.T) {
 func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {
 	r := SetupOrderInfoRouter()
 
-	foodIds := []string{}
+	targetFoodId := ""
 	for id := range foodMemoryMaps {
-		foodIds = append(foodIds, id)
+		if foodMemoryMaps[id].GetName() == "food4" {
+			targetFoodId = id
+			break
+		}
 	}
+	
+	if (targetFoodId == "") {
+		assert.Fail(t, "not found target food4")
+	}
+
+	fmt.Println("target food", targetFoodId)
 
 	prepare := orderInfoErrorData{
 		name: "consuming all food stock",
@@ -825,7 +867,7 @@ func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {
 			"userName":  "ユーザー123",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[2], "quantity": 10.0},
+				{"itemId": targetFoodId, "quantity": 10.0},
 			},
 			"stockItems": []map[string]interface{}{},
 		},
@@ -838,7 +880,7 @@ func TestOrderInfoHandler_POST_BadRequest_FoodOrderLimits(t *testing.T) {
 			"userName":  "ユーザー1234",
 			"userEmail": "userx@hoge.com", "userTelNo": "123456789",
 			"foodItems": []map[string]interface{}{
-				{"itemId": foodIds[2], "quantity": 2.0},
+				{"itemId": targetFoodId, "quantity": 5.0},
 			},
 			"stockItems": []map[string]interface{}{},
 		},

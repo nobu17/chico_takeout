@@ -19,13 +19,12 @@ export default function FoodItemTable() {
     loading: foodLoading,
     error: foodError,
   } = useFoodItem();
-  
-const {
-  loading: hourLoading,
-  error: hourError,
-  businessHours,
 
-} = useBusinessHour();
+  const {
+    loading: hourLoading,
+    error: hourError,
+    businessHours,
+  } = useBusinessHour();
 
   const [open, setOpen] = React.useState(false);
   const [item, setItem] = React.useState(defaultFoodItem);
@@ -80,7 +79,18 @@ const {
       width: 190,
       valueGetter: (params) => {
         if (params.row.scheduleIds) {
-          return getSchedulesName(params.row.scheduleIds)
+          return getSchedulesName(params.row.scheduleIds);
+        }
+        return "";
+      },
+    },
+    {
+      field: "allowDates",
+      headerName: "販売期間指定",
+      width: 190,
+      valueGetter: (params) => {
+        if (params.row.allowDates) {
+          return getAllowDateNames(params.row.allowDates);
         }
         return "";
       },
@@ -97,7 +107,18 @@ const {
       }
     }
     return names.join(",");
-  }
+  };
+
+  const getAllowDateNames = (allowDates: string[]): string => {
+    if (allowDates.length === 0) {
+      return "指定なし";
+    }
+    const names: string[] = [];
+    for (const allowDate of allowDates) {
+      names.push(allowDate);
+    }
+    return names.join(",");
+  };
 
   const handleRemove = (item: FoodItem) => {
     const result = window.confirm("削除してもよろしいですか？");
@@ -172,7 +193,10 @@ const {
           onClose={onClose}
         />
       </div>
-      <LoadingSpinner message="Loading..." isLoading={foodLoading || hourLoading} />
+      <LoadingSpinner
+        message="Loading..."
+        isLoading={foodLoading || hourLoading}
+      />
     </>
   );
 }

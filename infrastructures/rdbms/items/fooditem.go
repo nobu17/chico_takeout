@@ -1,8 +1,14 @@
 package items
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"sort"
+	"time"
 
+	"chico/takeout/common"
 	domains "chico/takeout/domains/item"
 	"chico/takeout/infrastructures/rdbms"
 	"chico/takeout/infrastructures/rdbms/store"
@@ -35,6 +41,29 @@ type FoodItemModel struct {
 	ItemKindModel   ItemKindModel
 	BusinessHours   []store.BusinessHourModel `gorm:"many2many:foodItem_businessHours;"`
 	ImageUrl        string
+	AllowDates      ItemSchedule `gorm:"serializer:json"`
+}
+
+type ItemSchedule struct {
+	Dates []time.Time
+}
+
+func (i *ItemSchedule) Scan(value interface{}) error {
+	val, ok := value.([]byte)
+	if !ok {
+		return errors.New(fmt.Sprint("Failed to unmarshal string value:", value))
+	}
+
+	return json.Unmarshal([]byte(val), i)
+}
+
+func (i ItemSchedule) Value() (driver.Value, error) {
+	val, err := json.Marshal(&i)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
 }
 
 func newFoodItemModel(s *domains.FoodItem) *FoodItemModel {
@@ -56,8 +85,9 @@ func newFoodItemModel(s *domains.FoodItem) *FoodItemModel {
 		hour.ID = hourId
 		hours = append(hours, hour)
 	}
-
 	model.BusinessHours = hours
+
+	model.AllowDates = ItemSchedule{Dates: s.GetAllowDatesAsTime()}
 
 	return &model
 }
@@ -67,7 +97,11 @@ func (s *FoodItemModel) toDomain() (*domains.FoodItem, error) {
 	for _, hour := range s.BusinessHours {
 		ids = append(ids, hour.ID)
 	}
-	model, err := domains.NewFoodItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.MaxOrderPerDay, s.Price, s.ItemKindModelID, ids, s.Enabled, s.ImageUrl)
+	dates := []string{}
+	for _, date := range s.AllowDates.Dates {
+		dates = append(dates, common.ConvertTimeToDateStr(date))
+	}
+	model, err := domains.NewFoodItemForOrm(s.ID, s.Name, s.Description, s.Priority, s.MaxOrder, s.MaxOrderPerDay, s.Price, s.ItemKindModelID, ids, s.Enabled, s.ImageUrl, dates)
 	if err != nil {
 		return nil, err
 	}

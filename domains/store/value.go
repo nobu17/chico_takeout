@@ -119,23 +119,6 @@ func (d *DateRange) InRangeDate(datetime time.Time) bool {
     return common.IsInRange(*tStart, *tEnd, datetime)	
 }
 
-type Date struct {
-	shared.StringValue
-}
-
-func NewDate(value string) (*Date, error) {
-	_, err := common.ConvertStrToDate(value)
-	if err != nil {
-		return nil, common.NewValidationError("date", fmt.Sprintf("can not convert date:%s", value))
-	}
-	return &Date{StringValue: shared.NewStringValue(value)}, nil
-}
-
-func (d *Date) IsSameDate(datetime time.Time) bool {
-    dateStr := common.ConvertTimeToDateStr(datetime)
-	return d.StringValue.GetValue() == dateStr
-}
-
 type Name struct {
 	shared.StringValue
 }

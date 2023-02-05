@@ -2,7 +2,9 @@ package item
 
 import (
 	"chico/takeout/common"
+	"chico/takeout/domains/shared"
 	"fmt"
+	"time"
 )
 
 type FoodItemRepository interface {
@@ -17,24 +19,58 @@ type FoodItem struct {
 	commonItem
 	scheduleIds    []string
 	maxOrderPerDay MaxOrderPerDay
+	allowDates     AllowDates
 }
 
-func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) (*FoodItem, error) {
+type AllowDates struct {
+	values []shared.Date
+}
+
+func (a *AllowDates) GetDates() []string {
+	values := []string{}
+	for _, val := range a.values {
+		values = append(values, val.GetValue())
+	}
+	return values
+}
+
+func (a *AllowDates) GetDatesAsTime() []time.Time {
+	values := []time.Time{}
+	for _, val := range a.values {
+		values = append(values, val.GetAsDate())
+	}
+	return values
+}
+
+func NewAllowDates(dates []string) (*AllowDates, error) {
+	// allow empty
+	dateV := []shared.Date{}
+	for _, date := range dates {
+		val, err := shared.NewDate(date)
+		if err != nil {
+			return nil, err
+		}
+		dateV = append(dateV, *val)
+	}
+	return &AllowDates{values: dateV}, nil
+}
+
+func NewFoodItem(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string, allowDates []string) (*FoodItem, error) {
 	common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	if err != nil {
 		return nil, err
 	}
 
 	item := FoodItem{commonItem: *common}
-	err = item.set(maxOrderPerDay, scheduleIds)
+	err = item.set(maxOrderPerDay, scheduleIds, allowDates)
 	if err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) (*FoodItem, error) {
-	item, err := NewFoodItem(name, description, priority, maxOrder, maxOrderPerDay, price, kindId, scheduleIds, enabled, imageUrl)
+func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string, allowDates []string) (*FoodItem, error) {
+	item, err := NewFoodItem(name, description, priority, maxOrder, maxOrderPerDay, price, kindId, scheduleIds, enabled, imageUrl, allowDates)
 	if err != nil {
 		return nil, err
 	}
@@ -42,20 +78,20 @@ func NewFoodItemForOrm(id, name, description string, priority, maxOrder, maxOrde
 	return item, nil
 }
 
-func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string) error {
+func (f *FoodItem) Set(name, description string, priority, maxOrder, maxOrderPerDay, price int, kindId string, scheduleIds []string, enabled bool, imageUrl string, allowDates []string) error {
 	err := f.commonItem.Set(name, description, priority, maxOrder, price, kindId, enabled, imageUrl)
 	// common, err := newCommonItem(name, description, priority, maxOrder, price, kindId, enabled)
 	if err != nil {
 		return err
 	}
-	err = f.set(maxOrderPerDay, scheduleIds)
+	err = f.set(maxOrderPerDay, scheduleIds, allowDates)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *FoodItem) set(maxOrderPerDay int, scheduleIds []string) error {
+func (f *FoodItem) set(maxOrderPerDay int, scheduleIds, allowDates []string) error {
 	maxOrderPValue, err := NewMaxOrderPerDay(maxOrderPerDay, f.maxOrder)
 	if err != nil {
 		return err
@@ -64,8 +100,13 @@ func (f *FoodItem) set(maxOrderPerDay int, scheduleIds []string) error {
 	if err != nil {
 		return err
 	}
+	dates, err := NewAllowDates(allowDates)
+	if err != nil {
+		return err
+	}
 	f.maxOrderPerDay = *maxOrderPValue
 	f.scheduleIds = scheduleIds
+	f.allowDates = *dates
 	return nil
 }
 
@@ -98,6 +139,14 @@ func (s *FoodItem) GetMaxOrderPerDay() int {
 
 func (s *FoodItem) GetScheduleIds() []string {
 	return s.scheduleIds
+}
+
+func (s *FoodItem) GetAllowDates() []string {
+	return s.allowDates.GetDates()
+}
+
+func (s *FoodItem) GetAllowDatesAsTime() []time.Time {
+	return s.allowDates.GetDatesAsTime()
 }
 
 func (s *FoodItem) HasSameId(id string) bool {

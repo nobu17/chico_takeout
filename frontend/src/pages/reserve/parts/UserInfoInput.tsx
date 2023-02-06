@@ -69,7 +69,7 @@ export default function UserInfoInput(props: UserInfoInputProps) {
         label="E-mail"
         {...register("email", {
           required: { value: true, message: RequiredErrorMessage },
-          maxLength: { value: 30, message: MaxLengthErrorMessage(30) },
+          maxLength: { value: 50, message: MaxLengthErrorMessage(50) },
           validate: handleEmailValidation,
         })}
         error={Boolean(errors.email)}

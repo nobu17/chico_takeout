@@ -86,7 +86,13 @@ export default function ItemSelectCard(props: ItemSelectCardProps) {
           <CardActions disableSpacing>
             <Typography sx={{ ml: 1, mb: 0, mt: 0 }} variant="subtitle1">
               {" "}
-              ¥ {props.item.price.toLocaleString()}
+              {props.item.max > 0 ? (
+                <>¥ {props.item.price.toLocaleString()}</>
+              ) : (
+                <Typography variant="body2" color="error">
+                  在庫なし
+                </Typography>
+              )}
             </Typography>
             <CartBadge count={props.quantity}></CartBadge>
           </CardActions>
@@ -189,7 +195,7 @@ function ItemSelectDialog(props: ItemSelectDialogProps) {
     // reset
     setQuantity(props.quantity);
     setOptions(props.selectedOptions);
-    
+
     props.onCancel();
   };
 

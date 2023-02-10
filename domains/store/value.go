@@ -115,7 +115,6 @@ func (d *DateRange) IsOverlap(other DateRange) bool {
 func (d *DateRange) InRangeDate(datetime time.Time) bool {
 	tStart, _ := common.ConvertStrToDate(d.start)
 	tEnd, _ := common.ConvertStrToDate(d.end)
-
     return common.IsInRange(*tStart, *tEnd, datetime)	
 }
 

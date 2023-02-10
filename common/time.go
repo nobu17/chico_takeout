@@ -169,9 +169,10 @@ func IsOverlap(start1, end1, start2, end2 time.Time) bool {
 }
 
 func IsInRange(startDate, endDate, targetDateTime time.Time) bool {
-	// start -1 to include start
-	actualStart := startDate.AddDate(0, 0, -1)
-	// end +1 to include end
+	// ex:st:2022-12-01 end:2022-12-03 => allow 2022-12-01 00:00 ~ 2022-12-03 23:59
+	// start -1 msec to include start
+	actualStart := startDate.Add(time.Millisecond * time.Duration(-1))
+	// end +1day - 1msec to include end
 	actualEnd := endDate.AddDate(0, 0, 1)
 
 	isAfterStart := targetDateTime.After(actualStart)

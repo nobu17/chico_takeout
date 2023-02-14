@@ -1,7 +1,6 @@
 package query
 
 import (
-	"fmt"
 	"time"
 
 	"chico/takeout/common"
@@ -28,12 +27,10 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	holidays := []store.SpecialHolidayModel{}
 	// end is need escape
 	// get period in range record
-	fmt.Println("endDate,startDate", endDate, startDate)
 	err := o.db.Where("start <= ? and \"end\" >= ?", endDate, startDate).Find(&holidays).Error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("holidays", holidays)
 	// get special business hour
 	specialHours := []store.SpecialBusinessHourModel{}
 	err = o.db.Debug().Preload("BusinessHourModel").Where("date <= ? and date >= ?", endDate, startDate).Find(&specialHours).Error

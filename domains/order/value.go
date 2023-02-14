@@ -22,8 +22,8 @@ func NewPrice(value int) (*Price, error) {
 }
 
 func validatePrice(price int) error {
-	if price < 1 {
-		return common.NewValidationError("price", "Need to be greater than 1")
+	if price < 0 {
+		return common.NewValidationError("price", "Need to be greater than equal 0")
 	}
 	return nil
 }

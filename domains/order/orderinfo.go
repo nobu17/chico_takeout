@@ -281,7 +281,7 @@ func NewOptionItemInfo(itemId, name string, price int) (*OptionItemInfo, error) 
 		return nil, common.NewValidationError("itemId", "required")
 	}
 
-	nameV, err := item.NewName(name, item.CommonItemNameMaxLength)
+	nameV, err := item.NewName(name, item.OptionItemNameMaxLength)
 	if err != nil {
 		return nil, err
 	}

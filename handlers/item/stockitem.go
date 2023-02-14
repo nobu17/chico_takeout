@@ -47,7 +47,7 @@ func (s *StockItemCreateRequest) toModel() *usecase.StockItemCreateModel {
 		CommonItemCreateModel: usecase.CommonItemCreateModel{
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: *s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
 	}
@@ -63,7 +63,7 @@ func (s *StockItemUpdateRequest) toModel(id string) *usecase.StockItemUpdateMode
 			Id:     id,
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: *s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
 	}

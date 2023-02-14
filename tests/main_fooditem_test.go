@@ -161,11 +161,13 @@ func TestFoodItemHandler_POST_CREATE(t *testing.T) {
 		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 		{"priority": 6, "name": "create_food3", "description": "desc3", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/20"}},
+		{"priority": 7, "name": "free_food", "description": "free", "maxOrder": 2, "price": 0, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 12, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 	}
 	bodies := []map[string]interface{}{
 		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 		{"priority": 6, "name": "create_food3", "description": "desc3", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2023/12/10", "2023/12/20"}},
+		{"priority": 7, "name": "free_food", "description": "free", "maxOrder": 2, "price": 0, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 12, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -272,9 +274,9 @@ func GetFoodItemErrorData(kindIds, scheduleIds []string) []foodItemErrorData {
 			"priority": 1, "name": "stock1", "description": "item1",
 			"maxOrder": 1, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
 		}, want: 3},
-		{name: "error price(0)", args: map[string]interface{}{
+		{name: "error price(-1)", args: map[string]interface{}{
 			"priority": 1, "name": "stock1", "description": "desc",
-			"maxOrder": 1, "price": 0, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
+			"maxOrder": 1, "price": -1, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 1, "scheduleIds": []string{scheduleIds[0]}, "imageUrl": "https://hoge.png",
 			"allowDates": []string{},
 		}, want: 3},
 		{name: "error price(20001)", args: map[string]interface{}{
@@ -434,11 +436,13 @@ func TestFoodItemHandler_PUT(t *testing.T) {
 		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kind": kinds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food3", "description": "desc3", "maxOrder": 3, "price": 2200, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2020/12/10", "2023/12/10"}},
+		{"priority": 5, "name": "free_food", "description": "free", "maxOrder": 2, "price": 0, "enabled": true, "kind": kinds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 	}
 	bodies := []map[string]interface{}{
 		{"priority": 3, "name": "create_food1", "description": "desc1", "maxOrder": 1, "price": 1000, "enabled": false, "kindId": kindIds[1], "maxOrderPerDay": 11, "scheduleIds": []string{scheduleIds[2]}, "imageUrl": "https://hoge.png", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food2", "description": "desc2", "maxOrder": 2, "price": 2000, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 		{"priority": 5, "name": "create_food3", "description": "desc3", "maxOrder": 3, "price": 2200, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{"2020/12/10", "2023/12/10"}},
+		{"priority": 5, "name": "free_food", "description": "free", "maxOrder": 2, "price": 0, "enabled": true, "kindId": kindIds[0], "maxOrderPerDay": 14, "scheduleIds": []string{scheduleIds[0], scheduleIds[1]}, "imageUrl": "", "allowDates": []string{}},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)

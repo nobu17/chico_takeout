@@ -54,7 +54,7 @@ func (s *FoodItemCreateRequest) toModel() *usecase.FoodItemCreateModel {
 		CommonItemCreateModel: usecase.CommonItemCreateModel{
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: *s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
 		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay, AllowDates: s.AllowDates,
@@ -74,7 +74,7 @@ func (s *FoodItemUpdateRequest) toModel(id string) *usecase.FoodItemUpdateModel 
 			Id:     id,
 			KindId: s.KindId,
 			CommonItemBaseModel: usecase.CommonItemBaseModel{
-				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
+				Name: s.Name, Priority: s.Priority, MaxOrder: s.MaxOrder, Price: *s.Price, Description: s.Description, Enabled: *s.Enabled, ImageUrl: *s.ImageUrl,
 			},
 		},
 		ScheduleIds: s.ScheduleIds, MaxOrderPerDay: s.MaxOrderPerDay, AllowDates: s.AllowDates,

@@ -170,7 +170,7 @@ export default function StockItemForm(props: StockItemFormProps) {
             {...register("price", {
               valueAsNumber: true,
               required: { value: true, message: RequiredErrorMessage },
-              min: { value: 1, message: MinErrorMessage(1) },
+              min: { value: 0, message: MinErrorMessage(0) },
               max: { value: 20000, message: MaxErrorMessage(20000) },
             })}
             error={Boolean(errors.price)}

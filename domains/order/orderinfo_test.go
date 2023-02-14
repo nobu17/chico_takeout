@@ -107,6 +107,12 @@ func TestNewOptionItemInfo(t *testing.T) {
 			hasValidationErr: false,
 		},
 		{
+			name:             "edge zero price",
+			args:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 0},
+			want:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 0},
+			hasValidationErr: false,
+		},
+		{
 			name:             "empty item id",
 			args:             optionItemInfo{itemId: "", name: "opt1", price: 10},
 			want:             optionItemInfo{},
@@ -115,12 +121,6 @@ func TestNewOptionItemInfo(t *testing.T) {
 		{
 			name:             "empty name",
 			args:             optionItemInfo{itemId: "1", name: "", price: 10},
-			want:             optionItemInfo{},
-			hasValidationErr: true,
-		},
-		{
-			name:             "zero price",
-			args:             optionItemInfo{itemId: "1", name: "opt1", price: 0},
 			want:             optionItemInfo{},
 			hasValidationErr: true,
 		},
@@ -160,6 +160,16 @@ func TestNewCommonItemInfo(t *testing.T) {
 			},
 			want: commonItemInfoArgs{
 				name: "test", itemId: "12", price: 100, quantity: 10, options: []optionItemInfo{},
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "normal check(has 0 price",
+			args: commonItemInfoArgs{
+				name: "test", itemId: "12", price: 0, quantity: 10, options: []optionItemInfo{},
+			},
+			want: commonItemInfoArgs{
+				name: "test", itemId: "12", price: 0, quantity: 10, options: []optionItemInfo{},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -214,9 +224,9 @@ func TestNewCommonItemInfo(t *testing.T) {
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
 		},
-		{name: "error price(0)",
+		{name: "error price(minus)",
 			args: commonItemInfoArgs{
-				name: "123456789", itemId: "12", price: 0, quantity: 10, options: []optionItemInfo{},
+				name: "123456789", itemId: "12", price: -1, quantity: 10, options: []optionItemInfo{},
 			},
 			want:             commonItemInfoArgs{},
 			hasValidationErr: true,

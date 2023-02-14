@@ -58,7 +58,7 @@ func (s *commonItem) Set(name, description string, priority, maxOrder, price int
 		return err
 	}
 
-	priceV, err := NewPrice(price, CommonItemMaxPrice)
+	priceV, err := NewPriceAllowZero(price, CommonItemMaxPrice)
 	if err != nil {
 		return err
 	}

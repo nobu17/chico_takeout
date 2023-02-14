@@ -267,7 +267,7 @@ func setUpDb(cfg common.DbConfig) *gorm.DB {
 	if err != nil {
 		panic(err.Error())
 	}
-	sqlDb.SetConnMaxLifetime(time.Hour)
+	sqlDb.SetConnMaxLifetime(time.Minute)
 
 	migrateDb(db)
 

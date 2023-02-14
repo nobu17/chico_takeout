@@ -24,9 +24,16 @@ func ResetNow() {
 	now = time.Now
 }
 
+// get until from minutes (ex:2023-02-12 12:15)
 func GetNowDate() *time.Time {
 	now := now().In(jst)
 	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
+	return &t
+}
+
+func GetNowDateUntilDay() *time.Time {
+	now := now().In(jst)
+	t := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, jst)
 	return &t
 }
 

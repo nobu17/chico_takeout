@@ -42,7 +42,7 @@ type OrderableItemInfo struct {
 
 func (o *OrderQueryUseCase) FetchOrderableInfo() (*OrderableInfo, error) {
 	// start is now
-	start := common.GetNowDate()
+	start := common.GetNowDateUntilDay()
 	// 30 days
 	end := start.AddDate(0, 0, 30)
 	return o.service.FetchByDate(*start, end)

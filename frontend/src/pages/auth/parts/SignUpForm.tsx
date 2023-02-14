@@ -51,7 +51,7 @@ export default function SignUpForm(props: SignUpFormProps) {
   // const passwordReget = /^(?=.*?[a-z])(?=.*?\d)(?=.*?[!-\/:-@[-`{-~])[!-~]{8,100}$/i;
   const handlePasswordValidation = (password: string) => {
     if (!reg.test(password)) {
-      return "英数字の大小文字と記号を含む,8文字以上24文字以下の値を入力してください。";
+      return "英数字の大小文字と記号(.?/-)を含む,8文字以上24文字以下の値を入力してください。";
     }
     return;
   };
@@ -72,6 +72,7 @@ export default function SignUpForm(props: SignUpFormProps) {
           />
           <TextField
             label="Password"
+            placeholder="英数字の大小文字と記号(.?/-)を含む,8文字以上24文字以下"
             fullWidth
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"

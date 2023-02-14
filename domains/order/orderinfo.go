@@ -321,7 +321,11 @@ func (c *commonItemInfo) GetPrice() int {
 }
 
 func (c *commonItemInfo) GetTotalCost() int {
-	return c.price.value * c.quantity.value
+	unitPrice := c.price.value
+	for _, opt := range c.GetOptionItems() {
+		unitPrice += opt.GetPrice()
+	}
+	return unitPrice * c.quantity.value
 }
 
 func newCommonItemInfo(itemId, name string, price, quantity int, options []OptionItemInfo) (*commonItemInfo, error) {

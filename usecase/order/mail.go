@@ -126,9 +126,29 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo 
 		for _, food := range order.GetFoodItems() {
 			b.WriteString(fmt.Sprintf("%s, %d円, %d個", food.GetName(), food.GetPrice(), food.GetQuantity()))
 			b.WriteString("\n")
+			options := food.GetOptionItems()
+			if len(options) > 0 {
+				b.WriteString("-オプション-\n")
+				for _, opt := range options {
+					b.WriteString(fmt.Sprintf("(%s, %d円)", opt.GetName(), opt.GetPrice()))
+					b.WriteString("\n")
+				}
+				b.WriteString("----\n")
+			}
+			b.WriteString("\n")
 		}
 		for _, stock := range order.GetStockItems() {
 			b.WriteString(fmt.Sprintf("%s, %d円, %d個", stock.GetName(), stock.GetPrice(), stock.GetQuantity()))
+			b.WriteString("\n")
+			options := stock.GetOptionItems()
+			if len(options) > 0 {
+				b.WriteString("-オプション-\n")
+				for _, opt := range options {
+					b.WriteString(fmt.Sprintf("(%s, %d円)", opt.GetName(), opt.GetPrice()))
+					b.WriteString("\n")
+				}
+				b.WriteString("----\n")
+			}
 			b.WriteString("\n")
 		}
 		b.WriteString("\n")

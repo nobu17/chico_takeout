@@ -25,10 +25,10 @@ export default function Home() {
           <Typography variant="h5" align="center" gutterBottom>
             テイクアウト予約サイト
           </Typography>
-          <Typography variant="body1" align="center" paragraph>
-            特性のスパイスカレーなどをテイクアウト予約注文できます。
+          <Typography variant="body1" sx={{ mx: 2 }} align="center" paragraph>
+            特製のスパイスカレーなどをテイクアウト予約注文できます。
             <br />
-            特性のオリジナルグッズも。
+            特製のオリジナルグッズも。
             <br />
           </Typography>
           <Grid item xs={12}>

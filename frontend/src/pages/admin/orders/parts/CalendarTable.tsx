@@ -4,7 +4,7 @@ import { UserOrderInfo } from "../../../../libs/apis/order";
 import { useAdminOrder } from "../../../../hooks/UseAdminOrder";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 import { useEffect, useState } from "react";
-import { Alert } from "@mui/material";
+import { Alert, Switch, FormGroup, FormControlLabel } from "@mui/material";
 import OrderDetailDialog from "../../../mypage/parts/OrderDetailDialog";
 
 export default function CalendarTable() {
@@ -12,6 +12,7 @@ export default function CalendarTable() {
     useAdminOrder();
   const [selectedOrders, setSelectedOrders] = useState<UserOrderInfo[]>([]);
   const [open, setOpen] = useState(false);
+  const [displayCancel, setDisplayCancel] = useState(false);
   const [selectedItem, setSelectedItem] = useState<UserOrderInfo>();
 
   useEffect(() => {
@@ -20,6 +21,10 @@ export default function CalendarTable() {
     };
     init();
   }, []);
+
+  useEffect(() => {
+    handleCalendarSelected(selectedOrders);
+  }, [displayCancel]);
 
   const errorMessage = (error: Error | undefined) => {
     if (error) {
@@ -34,7 +39,15 @@ export default function CalendarTable() {
   };
 
   const handleCalendarSelected = (items: UserOrderInfo[]) => {
-    setSelectedOrders(items);
+    if (!displayCancel) {
+      setSelectedOrders(items.filter((i) => !i.canceled));
+    } else {
+      setSelectedOrders(items);
+    }
+  };
+
+  const handleDisplayCancel = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayCancel(event.target.checked);
   };
 
   const handleDetailSelect = (item: UserOrderInfo) => {
@@ -55,7 +68,16 @@ export default function CalendarTable() {
   return (
     <>
       {errorMessage(error)}
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch checked={displayCancel} onChange={handleDisplayCancel} />
+          }
+          label="キャンセルも表示"
+        />
+      </FormGroup>
       <OrderCalendar
+        displayCancel={displayCancel}
         orders={orderHistory}
         onSelected={handleCalendarSelected}
       ></OrderCalendar>

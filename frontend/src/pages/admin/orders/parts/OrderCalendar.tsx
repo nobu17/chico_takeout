@@ -6,6 +6,7 @@ import { toDateString, getNowDate } from "../../../../libs/util/DateUtil";
 import { UserOrderInfo } from "../../../../libs/apis/order";
 
 type OrderCalendarProps = {
+  displayCancel: boolean;
   orders?: UserOrderInfo[];
   onSelected?: callbackOnSelected;
 };
@@ -54,9 +55,17 @@ export default function OrderCalendar(props: OrderCalendarProps) {
 
     const dateStr = toDateString(date);
     let hasOrder = false;
-    const foundIndex = props.orders!.findIndex((x) =>
-      x.pickupDateTime.startsWith(dateStr)
-    );
+    let foundIndex = -1;
+    if (props.displayCancel) {
+      foundIndex = props.orders!.findIndex((x) =>
+        x.pickupDateTime.startsWith(dateStr)
+      );
+    } else {
+      foundIndex = props.orders!.findIndex((x) =>
+        x.pickupDateTime.startsWith(dateStr) && !x.canceled
+      );
+    }
+
     if (foundIndex >= 0) {
       hasOrder = true;
     }

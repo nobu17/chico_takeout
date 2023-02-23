@@ -13,13 +13,13 @@ func NewSmtpSendOrderMail() *SmtpSendOrderMail {
 }
 
 func (s *SmtpSendOrderMail) SendComplete(data order.OrderCompleteMailData) error {
-	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Bcc, data.SendTo)
+	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Cc, data.SendTo)
 }
 
 func (s *SmtpSendOrderMail) SendCancel(data order.OrderCancelMailData) error {
-	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Bcc, data.SendTo)
+	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Cc, data.SendTo)
 }
 
 func (s *SmtpSendOrderMail) SendDailySummary(data order.ReservationSummaryMailData) error {
-	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Bcc, data.SendTo)
+	return s.mailer.sendMail(data.Title, data.Message, data.SendFrom, data.Cc, data.SendTo)
 }

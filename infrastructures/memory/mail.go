@@ -33,7 +33,7 @@ func (m *MemorySendOrderMail) SendComplete(data order.OrderCompleteMailData) err
 	}
 	b.WriteString(fmt.Sprintf("to:%s\n", toStr))
 
-	b.WriteString(fmt.Sprintf("bcc:%s\n", data.Bcc))
+	b.WriteString(fmt.Sprintf("cc:%s\n", data.Cc))
 	b.WriteString(fmt.Sprintf("title:%s\n", data.Title))
 	b.WriteString(fmt.Sprintf("message:%s\n", data.Message))
 
@@ -42,7 +42,7 @@ func (m *MemorySendOrderMail) SendComplete(data order.OrderCompleteMailData) err
 	mData := &DummyMailData{
 		Title:    data.Title,
 		Message:  data.Message,
-		Bcc:      data.Bcc,
+		Bcc:      data.Cc,
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}
@@ -61,7 +61,7 @@ func (m *MemorySendOrderMail) SendCancel(data order.OrderCancelMailData) error {
 	}
 	b.WriteString(fmt.Sprintf("to:%s\n", toStr))
 
-	b.WriteString(fmt.Sprintf("bcc:%s\n", data.Bcc))
+	b.WriteString(fmt.Sprintf("cc:%s\n", data.Cc))
 	b.WriteString(fmt.Sprintf("title:%s\n", data.Title))
 	b.WriteString(fmt.Sprintf("message:%s\n", data.Message))
 
@@ -70,7 +70,7 @@ func (m *MemorySendOrderMail) SendCancel(data order.OrderCancelMailData) error {
 	mData := &DummyMailData{
 		Title:    data.Title,
 		Message:  data.Message,
-		Bcc:      data.Bcc,
+		Bcc:      data.Cc,
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}
@@ -89,7 +89,7 @@ func (m *MemorySendOrderMail) SendDailySummary(data order.ReservationSummaryMail
 	}
 	b.WriteString(fmt.Sprintf("to:%s\n", toStr))
 
-	b.WriteString(fmt.Sprintf("bcc:%s\n", data.Bcc))
+	b.WriteString(fmt.Sprintf("cc:%s\n", data.Cc))
 	b.WriteString(fmt.Sprintf("title:%s\n", data.Title))
 	b.WriteString(fmt.Sprintf("message:%s\n", data.Message))
 
@@ -98,7 +98,7 @@ func (m *MemorySendOrderMail) SendDailySummary(data order.ReservationSummaryMail
 	mData := &DummyMailData{
 		Title:    data.Title,
 		Message:  data.Message,
-		Bcc:      data.Bcc,
+		Bcc:      data.Cc,
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}

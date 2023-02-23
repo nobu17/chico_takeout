@@ -9,7 +9,7 @@ import (
 type smtpMail struct {
 }
 
-func (s *smtpMail) sendMail(subject, message, from, bcc string, to []string) error {
+func (s *smtpMail) sendMail(subject, message, from, cc string, to []string) error {
 	cfg := common.GetConfig().Mail
 	auth := smtp.PlainAuth(
 		"",
@@ -24,7 +24,7 @@ func (s *smtpMail) sendMail(subject, message, from, bcc string, to []string) err
 		from,
 		to,
 		[]byte(
-			"Bcc:"+bcc+"\n"+
+			"Cc:"+cc+"\n"+
 				"To:"+to[0]+"\n"+
 				"Subject:"+subject+"\r\n"+
 				"\r\n"+

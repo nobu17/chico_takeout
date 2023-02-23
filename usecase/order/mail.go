@@ -50,9 +50,9 @@ func NewOrderCompleteMailData(order *domains.OrderInfo, sendFrom, adminMail stri
 
 	message := b.String()
 	sendTo := []string{order.GetUserEmail()}
-	bcc := adminMail
+	cc := adminMail
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendTo)
 	if err != nil {
 		return nil, err
 	}
@@ -80,9 +80,9 @@ func NewOrderCancelMailData(order *domains.OrderInfo, sendFrom, adminMail string
 
 	message := b.String()
 	sendTo := []string{order.GetUserEmail()}
-	bcc := adminMail
+	cc := adminMail
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendTo)
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendTo)
 	if err != nil {
 		return nil, err
 	}
@@ -157,10 +157,10 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo 
 	}
 
 	message := b.String()
-	bcc := ""
+	cc := ""
 	sendToAr := []string{sendTo}
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendToAr)
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendToAr)
 	if err != nil {
 		return nil, err
 	}
@@ -177,10 +177,10 @@ func NewNoReservationSummaryMailData(sendFrom, sendTo string, startDateTime time
 	b.WriteString("\n\n")
 
 	message := b.String()
-	bcc := ""
+	cc := ""
 	sendToAr := []string{sendTo}
 
-	comm, err := newCommonMailData(title, message, sendFrom, bcc, sendToAr)
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendToAr)
 	if err != nil {
 		return nil, err
 	}
@@ -193,11 +193,11 @@ type commonMailData struct {
 	Title    string
 	SendTo   []string
 	SendFrom string
-	Bcc      string
+	Cc      string
 	Message  string
 }
 
-func newCommonMailData(title, message, sendFrom, bcc string, sendTo []string) (*commonMailData, error) {
+func newCommonMailData(title, message, sendFrom, cc string, sendTo []string) (*commonMailData, error) {
 	if strings.TrimSpace(title) == "" {
 		return nil, common.NewValidationError("title", "empty is not allowed.")
 	}
@@ -209,10 +209,10 @@ func newCommonMailData(title, message, sendFrom, bcc string, sendTo []string) (*
 		return nil, err
 	}
 
-	// bcc is optional
-	if bcc != "" {
-		check = validator.NewEmailValidator("Bcc")
-		if err := check.Validate(bcc); err != nil {
+	// cc is optional, only not empty case, checked
+	if cc != "" {
+		check = validator.NewEmailValidator("CC")
+		if err := check.Validate(cc); err != nil {
 			return nil, err
 		}
 	}
@@ -230,7 +230,7 @@ func newCommonMailData(title, message, sendFrom, bcc string, sendTo []string) (*
 	return &commonMailData{
 		Title:    title,
 		SendTo:   sendTo,
-		Bcc:      bcc,
+		Cc:      cc,
 		SendFrom: sendFrom,
 		Message:  message,
 	}, nil

@@ -101,9 +101,9 @@ func TestNewOptionItemInfo(t *testing.T) {
 			hasValidationErr: false,
 		},
 		{
-			name:             "edge limit name(25)",
-			args:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 10},
-			want:             optionItemInfo{itemId: "1", name: "1234567890123456789012345", price: 10},
+			name:             "edge limit name(50)",
+			args:             optionItemInfo{itemId: "1", name: "12345678901234567890123451234567890123456789012345", price: 10},
+			want:             optionItemInfo{itemId: "1", name: "12345678901234567890123451234567890123456789012345", price: 10},
 			hasValidationErr: false,
 		},
 		{
@@ -131,8 +131,8 @@ func TestNewOptionItemInfo(t *testing.T) {
 			hasValidationErr: true,
 		},
 		{
-			name:             "over limit name(26)",
-			args:             optionItemInfo{itemId: "1", name: "12345678901234567890123456", price: 10},
+			name:             "over limit name(51)",
+			args:             optionItemInfo{itemId: "1", name: "123456789012345678901234512345678901234567890123456", price: 10},
 			want:             optionItemInfo{},
 			hasValidationErr: true,
 		},

@@ -68,6 +68,7 @@ func NewOrderInfo(userId, userName, userEmail, userTelNo, memo, pickupDateTime s
 	if err != nil {
 		return nil, err
 	}
+	// pick up time is checked before specific time
 	pickupDate, err := NewPickupDateTime(pickupDateTime)
 	if err != nil {
 		return nil, err

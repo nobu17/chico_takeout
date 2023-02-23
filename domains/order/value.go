@@ -104,7 +104,7 @@ func NewPickupDateTime(value string) (*PickupDateTime, error) {
 	date, _ := common.ConvertStrToDateTime(value)
 	// pick up time should be future from now + offset
 	now := now()
-	if !common.StartIsBeforeEnd(now, *date, common.OffsetMinutesOrderableBefore) {
+	if !common.StartIsBeforeEnd(now, *date, common.OffsetMinutesOrderableCheckBefore) {
 		return nil, common.NewValidationError("PickupDateTime", fmt.Sprintf("not allowed time(%s). limit: now(%s) + minutes:(%v)", value, now, common.OffsetMinutesOrderableBefore))
 	}
 	return &PickupDateTime{DateTime: *item}, nil

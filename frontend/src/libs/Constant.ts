@@ -1,5 +1,8 @@
 export const OffsetMinutesUserCanCancel = 180;
-export const OffsetMinutesUserCanOrder = 180;
+// offset minutes user can order.
+// this value is used for client side select time.
+// server side check is within 60 min
+export const OffsetMinutesUserCanOrder = 65;
 
 export const StoreTimeList = [
   "06:00",

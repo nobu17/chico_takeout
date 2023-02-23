@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Stack, TextField, Button } from "@mui/material";
+import { Stack, TextField, Button, Typography } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { RhfGroupSelects } from "../../../components/parts/Rhf/RhfGroupSelects";
@@ -11,7 +11,7 @@ import {
   isBeforeFromNow,
   GetDateTimeFromStr,
 } from "../../../libs/util/DateUtil";
-import { OffsetMinutesUserCanOrder } from "../../../libs/Constant";
+import { OffsetMinutesUserCanOrder, OffsetMinutesUserCanCancel } from "../../../libs/Constant";
 
 type PickupSelectProps = {
   selectedInfo: PickupDate;
@@ -47,7 +47,7 @@ export default function PickupSelect(props: PickupSelectProps) {
   const onSubmit: SubmitHandler<PickupDate> = (data) => {
     setValue("time", data.time);
     const inputDateTime = GetDateTimeFromStr(data.date, data.time);
-    // check pick up time is over 3 hours from now
+    // check pick up time is over 1 hour from now
     if (isBeforeFromNow(inputDateTime, OffsetMinutesUserCanOrder)) {
       setError("time", {
         message:
@@ -148,6 +148,9 @@ export default function PickupSelect(props: PickupSelectProps) {
         itemList={categoryTimes}
         control={control}
       />
+      <Typography variant="subtitle1" color="error" textAlign="center">
+        ※注文後のキャンセルは、受け取り時間の{OffsetMinutesUserCanCancel / 60}時間前まで可能です。ご注意ください。
+      </Typography>
       <Stack direction="row" spacing={2}>
         <Button
           onClick={handleSubmit(onSubmit)}

@@ -49,14 +49,14 @@ export function useMyOrder() {
       setError(new Error("有効なオーダーがありません。"));
       return;
     }
-    // not admin can not cancel before 3 hours
+    // not admin can not cancel before 1 hours
     if (
       !state.isAdmin &&
       isBeforeFromNowStr(target.pickupDateTime, OffsetMinutesUserCanCancel)
     ) {
       await showMessageDialog(
         "",
-        "直前のキャンセルはできません。お手数ですが店舗にご連絡お願いいたします。"
+        "直前のキャンセルはできません。お手数ですが電話にてご連絡をお願いいたします。"
       );
       return;
     }

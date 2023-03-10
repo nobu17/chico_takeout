@@ -7,15 +7,20 @@ import (
 
 	"chico/takeout/common"
 	itemHandler "chico/takeout/handlers/item"
+	messageHandler "chico/takeout/handlers/message"
 	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
+
 	itemRDBMS "chico/takeout/infrastructures/rdbms/items"
+	messageRDBMS "chico/takeout/infrastructures/rdbms/message"
 	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
 	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
 	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
+
 	"chico/takeout/infrastructures/smtp"
 	"chico/takeout/middleware"
 	itemUseCase "chico/takeout/usecase/item"
+	messageUseCase "chico/takeout/usecase/message"
 	orderUseCase "chico/takeout/usecase/order"
 	orderQueryUseCase "chico/takeout/usecase/order/query"
 	storeUseCase "chico/takeout/usecase/store"
@@ -246,6 +251,20 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 		orderable.GET("/", handler.Get)
 	}
 
+	message := r.Group("/message/store")
+	{
+		messageRepo := messageRDBMS.NewStoreMessageRepository(db)
+		useCase := messageUseCase.NewStoreMessageUseCase(messageRepo)
+		err := useCase.CreateInitialMessage()
+		if err != nil {
+			panic("failed init error")
+		}
+		handler := messageHandler.NewStoreMessageHandler(useCase)
+		message.GET("/:id", handler.Get)
+		message.POST("/", middleware.CheckAuthInfo(auth), middleware.CheckAdmin(), handler.Post)
+		message.PUT("/:id", middleware.CheckAuthInfo(auth), middleware.CheckAdmin(), handler.Put)
+	}
+
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
@@ -325,6 +344,10 @@ func migrateDb(db *gorm.DB) {
 		panic(err.Error())
 	}
 	err = db.AutoMigrate(&orderRDBMS.OrderInfoModel{})
+	if err != nil {
+		panic(err.Error())
+	}
+	err = db.AutoMigrate(&messageRDBMS.StoreMessageModel{})
 	if err != nil {
 		panic(err.Error())
 	}

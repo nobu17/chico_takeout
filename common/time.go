@@ -56,6 +56,11 @@ func GetNowTimeStr(offsetMinutes int) string {
 	return ConvertTimeToTimeStr(afterNow)
 }
 
+func GetNowTime() *time.Time {
+	now := now().In(jst)
+	return &now
+}
+
 func GetRound(t time.Time, roundMinutes int) time.Time {
 	r := t.Round(time.Duration(roundMinutes) * time.Minute)
 

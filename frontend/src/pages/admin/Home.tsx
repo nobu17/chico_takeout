@@ -35,9 +35,12 @@ const orderMenu: PageMenuProps = {
 };
 
 const statisticsMenu: PageMenuProps = {
-  title: "集計",
+  title: "その他",
   icon: "science",
-  pageInfos: [{ title: "集計(月別)", url: "/admin/statistics/monthly" }],
+  pageInfos: [
+    { title: "メッセージ 編集", url: "/admin/messages" },
+    { title: "集計(月別)", url: "/admin/statistics/monthly" }
+  ],
 };
 
 export default function AdminHome() {

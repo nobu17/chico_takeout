@@ -45,6 +45,7 @@ import SpecialHoliday from "./pages/admin/stores/SpecialHoliday";
 import Calendar from "./pages/admin/orders/Calendar";
 import AllOrderTable from "./pages/admin/orders/AllOrderTable";
 import Monthly from "./pages/admin/statistics/Monthly";
+import Messages from "./pages/admin/messages/Messages";
 
 import "./App.css";
 
@@ -117,6 +118,10 @@ function App() {
                   <Route
                     path="/admin/statistics/monthly"
                     element={<Monthly />}
+                  />
+                  <Route
+                    path="/admin/messages"
+                    element={<Messages />}
                   />
                 </Route>
                 <Route path="/inquiry" element={<Inquiry />} />

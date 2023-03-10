@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { Alert, CircularProgress } from "@mui/material";
-import Grid from "@mui/material/Grid";
-
+import { Alert, CircularProgress, Grid } from "@mui/material";
 import PageTitle from "../../components/parts/PageTitle";
 import { useMyOrder } from "../../hooks/UseMyOrder";
 import PageMenu, { PageMenuProps } from "../../components/parts/PageMenu";
 import ReserveInfoCardList from "./parts/ReserveInfoCardList";
 import { useConfirmDialog } from "../../hooks/UseConfirmDialog";
 import { useReloadTimer } from "../../hooks/UseTimer";
+import { useMessages } from "../../hooks/UseMessages";
+import StoreMessage from "./parts/StoreMessage";
 
 const myMenu: PageMenuProps = {
   title: "マイメニュー",
@@ -20,6 +20,12 @@ const myMenu: PageMenuProps = {
 
 export default function MyHome() {
   useReloadTimer(30);
+  const {
+    current,
+    load,
+    error: messageError,
+    loading: messageLoading,
+  } = useMessages();
   const { showConfirmDialog, renderConfirmDialog } = useConfirmDialog();
   const {
     activeOrders,
@@ -33,6 +39,7 @@ export default function MyHome() {
   useEffect(() => {
     const init = async () => {
       await loadActive();
+      await load("2");
     };
     init();
   }, []);
@@ -63,6 +70,15 @@ export default function MyHome() {
               orders={activeOrders}
               cancelRequest={handleCancel}
             ></ReserveInfoCardList>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {messageLoading ? (
+            <CircularProgress color="success" />
+          ) : messageError ? (
+            <></>
+          ) : (
+            <StoreMessage message={current}></StoreMessage>
           )}
         </Grid>
       </Grid>

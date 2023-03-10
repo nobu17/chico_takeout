@@ -16,13 +16,12 @@ import { useAuth } from "../contexts/AuthContext";
 
 const title = "CHICO★SPICE";
 const pages: NavItem[] = [
-  { label: "テイクアウト予約", link: "/reserve" },
+  { label: "予約", link: "/reserve" },
   { label: "マイページ", link: "/my_page", isUser: true },
   { label: "管理ページ", link: "/admin", isAdmin: true },
   { label: "ログイン", link: "/auth/sign_in", isNotAuth: true },
   { label: "ログアウト", link: "/auth/sign_out", isUser: true },
   { label: "店舗公式", link: "https://chico-sp-website.web.app" },
-  { label: "イートイン予約", link: "https://nobu17.pythonanywhere.com" },
   { label: "お問い合わせ", link: "/inquiry" },
 ];
 

@@ -104,7 +104,7 @@ export default function PickupSelect(props: PickupSelectProps) {
           return (
             <MobileDatePicker
               {...field}
-              label="受取日時"
+              label="来店日時"
               mask="____/__/__"
               inputFormat="yyyy/MM/dd"
               closeOnSelect={true}
@@ -142,7 +142,7 @@ export default function PickupSelect(props: PickupSelectProps) {
         }}
       />
       <RhfGroupSelects
-        label="受取時間帯"
+        label="来店時間帯"
         name="time"
         multiple={false}
         itemList={categoryTimes}

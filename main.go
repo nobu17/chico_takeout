@@ -11,6 +11,7 @@ import (
 	orderHandler "chico/takeout/handlers/order"
 	storeHandler "chico/takeout/handlers/store"
 
+	"chico/takeout/infrastructures/mail"
 	itemRDBMS "chico/takeout/infrastructures/rdbms/items"
 	messageRDBMS "chico/takeout/infrastructures/rdbms/message"
 	orderRDBMS "chico/takeout/infrastructures/rdbms/order"
@@ -217,7 +218,7 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	}
 	order := r.Group("/order")
 	{
-		mailer := smtp.NewSmtpSendOrderMail()
+		mailer := mail.NewSendGridSendOrderMail()
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, kindRepo, optionItemRepos, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 

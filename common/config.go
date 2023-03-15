@@ -24,12 +24,13 @@ type DbConfig struct {
 }
 
 type MailConfig struct {
-	User  string
-	Pass  string
-	Host  string
-	Port  string
-	From  string
-	Admin string
+	User        string
+	Pass        string
+	Host        string
+	Port        string
+	From        string
+	Admin       string
+	SendGridKey string
 }
 
 var config = Config{}
@@ -80,12 +81,13 @@ func newDbConfig() DbConfig {
 
 func newMailConfig() MailConfig {
 	config := MailConfig{
-		User:  os.Getenv("MAIL_USER"),
-		Pass:  os.Getenv("MAIL_PASS"),
-		Host:  os.Getenv("MAIL_HOST"),
-		Port:  os.Getenv("MAIL_PORT"),
-		From:  os.Getenv("MAIL_FROM"),
-		Admin: os.Getenv("MAIL_ADMIN"),
+		User:        os.Getenv("MAIL_USER"),
+		Pass:        os.Getenv("MAIL_PASS"),
+		Host:        os.Getenv("MAIL_HOST"),
+		Port:        os.Getenv("MAIL_PORT"),
+		From:        os.Getenv("MAIL_FROM"),
+		Admin:       os.Getenv("MAIL_ADMIN"),
+		SendGridKey: os.Getenv("SEND_GRID_API_KEY"),
 	}
 	return config
 }

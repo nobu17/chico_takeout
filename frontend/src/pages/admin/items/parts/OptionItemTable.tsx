@@ -113,6 +113,9 @@ export default function OptionItemTable() {
           disableDensitySelector={true}
           editMode="row"
           hideFooter
+          getRowClassName={(params) =>
+            `table-row-enabled--${params.row.enabled}`
+          }
         />
       </div>
       <OptionItemFormDialog open={open} editItem={item} onClose={onClose} />
@@ -133,6 +136,14 @@ const styles = {
     ".MuiDataGrid-columnHeaders": {
       backgroundColor: "#65b2c6",
       color: "#fff",
+    },
+    "& .table-row-enabled--false": {
+      backgroundColor: "#696969",
+      color: "#fff",
+      "&:hover": {
+        backgroundColor: "#696969",
+        color: "#fff",
+      },
     },
   },
 };

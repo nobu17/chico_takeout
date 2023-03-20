@@ -24,7 +24,7 @@ func NewOrderCompleteMailData(order *domains.OrderInfo, sendFrom, adminMail stri
 	title := "予約完了のお知らせ.(CHICO SPICE)"
 
 	b := &strings.Builder{}
-	b.WriteString("テイクアウトの予約が完了いたしました。")
+	b.WriteString("予約が完了いたしました。")
 	b.WriteString("\n\n")
 	b.WriteString("※ご注文内容に関してはマイページからご確認下さい。")
 	b.WriteString("\n")
@@ -69,7 +69,7 @@ func NewOrderCancelMailData(order *domains.OrderInfo, sendFrom, adminMail string
 	title := "キャンセル完了のお知らせ.(CHICO SPICE)"
 
 	b := &strings.Builder{}
-	b.WriteString("テイクアウトの予約をキャンセルいたしました。")
+	b.WriteString("予約をキャンセルいたしました。")
 	b.WriteString("\n")
 	b.WriteString("またのご利用をお待ちしております。")
 	b.WriteString("\n\n")
@@ -96,7 +96,7 @@ type ReservationSummaryMailData struct {
 }
 
 func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
-	title := fmt.Sprintf("(テイクアウト)本日のオーダー情報(%s)", common.ConvertTimeToDateStr(startDateTime))
+	title := fmt.Sprintf("本日のオーダー情報(%s)", common.ConvertTimeToDateStr(startDateTime))
 
 	b := &strings.Builder{}
 	b.WriteString(fmt.Sprintf("本日のオーダー情報は下記になります。(%s 以降)", common.ConvertTimeToTimeStr(startDateTime)))
@@ -170,7 +170,7 @@ func NewReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo 
 }
 
 func NewNoReservationSummaryMailData(sendFrom, sendTo string, startDateTime time.Time) (*ReservationSummaryMailData, error) {
-	title := fmt.Sprintf("(テイクアウト)本日のオーダーはありません(%s)", common.ConvertTimeToDateStr(startDateTime))
+	title := fmt.Sprintf("本日のオーダーはありません(%s)", common.ConvertTimeToDateStr(startDateTime))
 
 	b := &strings.Builder{}
 	b.WriteString(fmt.Sprintf("本日のオーダーはありません。(%s 以降)", common.ConvertTimeToTimeStr(startDateTime)))

@@ -39,7 +39,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	}
 	// get business hour
 	hours := []store.BusinessHourModel{}
-	err = o.db.Preload("Weekdays").Find(&hours).Error
+	err = o.db.Preload("Weekdays").Where("enabled = true").Find(&hours).Error
 	if err != nil {
 		return nil, err
 	}

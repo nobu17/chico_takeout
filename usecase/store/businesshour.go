@@ -26,12 +26,18 @@ type BusinessHoursUpdateModel struct {
 	Weekdays []Weekday
 }
 
+type BusinessHoursEnabledUpdateModel struct {
+	Id       string
+	Enabled  bool
+}
+
 type BusinessHourModel struct {
 	Id       string
 	Name     string
 	Start    string
 	End      string
 	Weekdays []Weekday
+	Enabled  bool
 }
 
 func newBusinessHourModel(item domains.BusinessHour) *BusinessHourModel {
@@ -46,6 +52,7 @@ func newBusinessHourModel(item domains.BusinessHour) *BusinessHourModel {
 		Start:    item.GetStart(),
 		End:      item.GetEnd(),
 		Weekdays: weekdays,
+		Enabled:  item.GetEnabled(),
 	}
 }
 
@@ -110,6 +117,7 @@ func toDomainWeekday(weekdays []Weekday) []domains.Weekday {
 type BusinessHoursUseCase interface {
 	GetAll() (*BusinessHoursModel, error)
 	Update(model *BusinessHoursUpdateModel) error
+	UpdateEnabled(model *BusinessHoursEnabledUpdateModel) error
 	InitIfNotExists() error
 }
 
@@ -150,6 +158,25 @@ func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {
 	}
 
 	new, err := businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays))
+	if err != nil {
+		return err
+	}
+
+	err = b.businessHoursRepository.Update(new)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *businessHoursUseCase) UpdateEnabled(model *BusinessHoursEnabledUpdateModel) error {
+	businessHours, err := b.businessHoursService.FetchBusinessHours()
+	if err != nil {
+		return err
+	}
+
+	new, err := businessHours.UpdateEnabled(model.Id, model.Enabled)
 	if err != nil {
 		return err
 	}

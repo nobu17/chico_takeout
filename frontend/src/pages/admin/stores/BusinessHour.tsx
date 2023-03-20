@@ -1,6 +1,6 @@
-import Grid from "@mui/material/Grid";
+import { Grid } from "@mui/material";
 import AdminPage from "../../../components/parts/AdminPage";
-import BusinessHourTable from "./parts/BusinessHourTable"
+import BusinessHourTable from "./parts/BusinessHourTable";
 
 export default function BusinessHour() {
   return (

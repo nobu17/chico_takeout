@@ -31,7 +31,7 @@ func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) e
 		return err
 	}
 	if overLapped {
-		return common.NewValidationError("Date", fmt.Sprintf("time is overwrapped:date=%s, start=%s, end=%s", item.GetDate(), item.GetStart(), item.GetEnd()))
+		return common.NewValidationError("Date", fmt.Sprintf("time is duplicated:date=%s, start=%s, end=%s", item.GetDate(), item.GetStart(), item.GetEnd()))
 	}
 
 	return nil

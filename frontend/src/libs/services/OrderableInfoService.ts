@@ -32,7 +32,7 @@ export default class OrderableInfoService {
     const foods = await this.foodApi.getAll();
     const stocks = await this.stockApi.getAll();
     const kinds = await this.itemKindService.getAggregatedItemKinds();
-    const businessHours = await this.businessHourApi.getAll();
+    const businessHours = await this.businessHourApi.getAll(); // special hour setting case need disabled, so get all items
 
     const lists: PerDayOrderableInfo[] = [];
     for (const perDay of orderable.data.perDayInfo) {

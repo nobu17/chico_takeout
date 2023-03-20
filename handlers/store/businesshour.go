@@ -44,6 +44,7 @@ type BusinessHourData struct {
 	Start    string             `json:"start" binding:"required"`
 	End      string             `json:"end" binding:"required"`
 	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
+	Enabled  *bool              `json:"enabled" binding:"required"`
 }
 
 func newBusinessHourData(model usecases.BusinessHourModel) *BusinessHourData {
@@ -53,6 +54,18 @@ func newBusinessHourData(model usecases.BusinessHourModel) *BusinessHourData {
 		Start:    model.Start,
 		End:      model.End,
 		Weekdays: model.Weekdays,
+		Enabled:  &model.Enabled,
+	}
+}
+
+type BusinessHoursEnabledUpdateData struct {
+	Enabled *bool  `json:"enabled" binding:"required"`
+}
+
+func (b *BusinessHoursEnabledUpdateData) toModel(id string) *usecases.BusinessHoursEnabledUpdateModel {
+	return &usecases.BusinessHoursEnabledUpdateModel{
+		Id:       id,
+		Enabled:  *b.Enabled,
 	}
 }
 
@@ -83,6 +96,20 @@ func (b *businessHoursHandler) Put(c *gin.Context) {
 		return
 	}
 	err := b.usecase.Update(req.toModel(id))
+	if err != nil {
+		b.HandleError(c, err)
+		return
+	}
+	b.HandleOK(c, nil)
+}
+
+func (b *businessHoursHandler) PutEnabled(c *gin.Context) {
+	id := c.Param("id")
+	var req BusinessHoursEnabledUpdateData
+	if !b.ShouldBind(c, &req) {
+		return
+	}
+	err := b.usecase.UpdateEnabled(req.toModel(id))
 	if err != nil {
 		b.HandleError(c, err)
 		return

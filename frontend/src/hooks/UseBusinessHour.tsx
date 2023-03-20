@@ -9,6 +9,12 @@ const defaultBusinessHour: BusinessHour = {
   start: "08:00",
   end: "10:00",
   weekdays: [],
+  enabled: true,
+};
+
+type UpdateEnabledInfo = {
+  id: string;
+  enabled: boolean;
 };
 
 const busApi = new businessHourApi();
@@ -25,29 +31,52 @@ export default function useFoodItem() {
     init();
   }, []);
 
-  const updateBusinessHour = (item: BusinessHour) : Promise<ApiError | null> => {
+  const updateBusinessHour = (item: BusinessHour): Promise<ApiError | null> => {
     return update(item);
   };
 
   const update = async (item: BusinessHour): Promise<ApiError | null> => {
     try {
-        setError(undefined);
-        setLoading(true);
-        await busApi.update(item);
-        // reload
-        await getForReload();
-        return null;
-      } catch (e: any) {
-        // bad request not set error
-        if (e instanceof ApiError) {
-          if (!e.isBadRequest()){
-            setError(e);
-          }
-        } 
-        return e;
-      } finally {
-        setLoading(false);
+      setError(undefined);
+      setLoading(true);
+      await busApi.update(item);
+      // reload
+      await getForReload();
+      return null;
+    } catch (e: any) {
+      // bad request not set error
+      if (e instanceof ApiError) {
+        if (!e.isBadRequest()) {
+          setError(e);
+        }
       }
+      return e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateBusinessHourEnabled = async (
+    data: UpdateEnabledInfo
+  ): Promise<ApiError | null> => {
+    try {
+      setError(undefined);
+      setLoading(true);
+      await busApi.updateEnabled(data);
+      // reload
+      await getForReload();
+      return null;
+    } catch (e: any) {
+      // bad request not set error
+      if (e instanceof ApiError) {
+        if (!e.isBadRequest()) {
+          setError(e);
+        }
+      }
+      return e;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getForReload = async () => {
@@ -72,6 +101,7 @@ export default function useFoodItem() {
     businessHours,
     defaultBusinessHour,
     updateBusinessHour,
+    updateBusinessHourEnabled,
     error,
     loading,
   };

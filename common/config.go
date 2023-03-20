@@ -31,6 +31,7 @@ type MailConfig struct {
 	From        string
 	Admin       string
 	SendGridKey string
+	Mailer      string
 }
 
 var config = Config{}
@@ -88,6 +89,7 @@ func newMailConfig() MailConfig {
 		From:        os.Getenv("MAIL_FROM"),
 		Admin:       os.Getenv("MAIL_ADMIN"),
 		SendGridKey: os.Getenv("SEND_GRID_API_KEY"),
+		Mailer:      os.Getenv("MAILER"),
 	}
 	return config
 }

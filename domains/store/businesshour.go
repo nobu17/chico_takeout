@@ -73,6 +73,9 @@ func (b *BusinessHours) FindById(id string) *BusinessHour {
 func (b *BusinessHours) IsInBusiness(targetDateTime time.Time) bool {
 	// check each schedule
 	for _, bs := range b.schedules {
+		if !bs.enabled {
+			continue
+		}
 		isIn := bs.IsInSchedule(targetDateTime)
 		if isIn {
 			return true
@@ -121,6 +124,20 @@ func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) 
 	return selfCopy, nil
 }
 
+func (b *BusinessHours) UpdateEnabled(id string, enabled bool) (*BusinessHours, error) {
+	selfCopy, err := b.Copy()
+	if err != nil {
+		return nil, fmt.Errorf("unexpected error at copy:%s", err)
+	}
+
+	_, target := selfCopy.findSchedule(id)
+	if target == nil {
+		return nil, common.NewNotFoundError("id")
+	}
+	target.SetEnabled(enabled)
+	return selfCopy, nil
+}
+
 func (b *BusinessHours) findSchedule(id string) (int, *BusinessHour) {
 	// return pointer, so it is not immutable
 	for i := 0; i < len(b.schedules); i++ {
@@ -145,6 +162,8 @@ func (b *BusinessHours) validateSchedules() error {
 
 func (b *BusinessHours) validateDuplicate() error {
 	// check duplicate business hour
+	// this case not check enabled or disabled
+	// even if disabled, duplication is not allowed
 	for i, schedule := range b.schedules {
 		for j := i + 1; j < len(b.schedules); j++ {
 			target := b.schedules[j]
@@ -173,6 +192,7 @@ type BusinessHour struct {
 	name     Name
 	shift    TimeRange
 	weekdays []Weekday
+	enabled     bool
 }
 
 func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
@@ -182,16 +202,19 @@ func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour
 	if err != nil {
 		return nil, err
 	}
+	// default enabled
+	businessHour.SetEnabled(true)
 	return businessHour, nil
 }
 
-func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
+func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday, enabled bool) (*BusinessHour, error) {
 	businessHour := &BusinessHour{id: id}
 
 	err := businessHour.Set(name, start, end, weekdays)
 	if err != nil {
 		return nil, err
 	}
+	businessHour.SetEnabled(enabled)
 	return businessHour, nil
 }
 
@@ -229,6 +252,10 @@ func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
 	b.weekdays = weekdays
 
 	return nil
+}
+
+func (b *BusinessHour) SetEnabled(enabled bool) {
+	b.enabled = enabled
 }
 
 func validateBusinessHourName(name string) error {
@@ -302,4 +329,8 @@ func (b *BusinessHour) GetEnd() string {
 
 func (b *BusinessHour) GetWeekdays() []Weekday {
 	return b.weekdays
+}
+
+func (b *BusinessHour) GetEnabled() bool {
+	return b.enabled
 }

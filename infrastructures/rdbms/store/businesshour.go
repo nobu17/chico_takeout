@@ -27,6 +27,7 @@ type BusinessHourModel struct {
 	Start    *time.Time
 	End      *time.Time
 	Weekdays []WeekDaysModel
+	Enabled  bool  `gorm:"not null;default:true"`
 }
 
 func (b *BusinessHourModel) HasWeekDay(weekday int) bool {
@@ -61,6 +62,8 @@ func newBusinessHourModel(b *domains.BusinessHour) (*BusinessHourModel, error) {
 	}
 	model.Weekdays = weekdays
 
+	model.Enabled = b.GetEnabled()
+
 	return &model, nil
 }
 
@@ -72,7 +75,7 @@ func (b *BusinessHourModel) toDomain() (*domains.BusinessHour, error) {
 		val := domains.Weekday(weekday.Value)
 		weekdays = append(weekdays, val)
 	}
-	model, err := domains.NewBusinessHourForOrm(b.ID, b.Name, startStr, endStr, weekdays)
+	model, err := domains.NewBusinessHourForOrm(b.ID, b.Name, startStr, endStr, weekdays, b.Enabled)
 
 	if err != nil {
 		return nil, err

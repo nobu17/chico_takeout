@@ -10,4 +10,5 @@ export type BusinessHour = {
   start: string;
   end: string;
   weekdays: DayOfWeek[];
+  enabled: boolean;
 };

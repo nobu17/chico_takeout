@@ -34,6 +34,7 @@ func SetupHourRouter() *gin.Engine {
 		handler := storeHandler.BusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/:id", handler.Put)
+		hour.PUT("/:id/enabled", handler.PutEnabled)
 	}
 	return r
 }
@@ -66,9 +67,9 @@ func getAllBusinessHour(t *testing.T, r *gin.Engine) []map[string]interface{} {
 
 func TestBusinessHoursHandler_GET(t *testing.T) {
 	wants := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
 	}
 
 	r := SetupHourRouter()
@@ -85,6 +86,7 @@ func TestBusinessHoursHandler_GET(t *testing.T) {
 	if !ok {
 		assert.Fail(t, "failed to cast result")
 	}
+	fmt.Println("response:", res)
 	for index, ind := range res {
 		hours, ok := ind.(map[string]interface{})
 		if !ok {
@@ -108,30 +110,30 @@ func TestBusinessHoursHandler_PUT(t *testing.T) {
 		{name: "put morning", id: businessHoursMemory.GetSchedules()[0].GetId(),
 			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
-				{"name": "lunch", "start": "11:30", "end": "15:00", "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "weekdays": []int{3, 6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
 			}},
 		{name: "put lunch", id: businessHoursMemory.GetSchedules()[1].GetId(),
 			args: map[string]interface{}{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "weekdays": []int{3, 6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
 			}},
 		{name: "put dinner", id: businessHoursMemory.GetSchedules()[2].GetId(),
 			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{6}},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}},
-				{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
+				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{6}},
 			}},
 		{name: "empty weekend", id: businessHoursMemory.GetSchedules()[2].GetId(),
 			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{}},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}},
-				{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
+				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{}},
 			}},
 	}
 
@@ -168,9 +170,9 @@ func TestBusinessHoursHandler_PUT_BadRequest(t *testing.T) {
 	}
 
 	want := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
 	}
 
 	inputs := []input{
@@ -250,9 +252,9 @@ func TestBusinessHoursHandler_PUT_NotFound(t *testing.T) {
 	}
 
 	want := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
 	}
 
 	inputs := []input{
@@ -276,6 +278,61 @@ func TestBusinessHoursHandler_PUT_NotFound(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+
+		// GET to confirm result
+		results := getAllBusinessHour(t, r)
+		for index, result := range results {
+			AssertMaps(t, result, input.want[index])
+		}
+	}
+}
+
+func TestBusinessHoursHandler_PUT_ENABLED(t *testing.T) {
+	r := SetupHourRouter()
+
+	type input struct {
+		name string
+		id   string
+		args map[string]interface{}
+		want []map[string]interface{}
+	}
+	inputs := []input{
+		{name: "put morning disabled", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"enabled": false},
+			want: []map[string]interface{}{
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+			}},
+		{name: "put morning enabled", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"enabled": true},
+			want: []map[string]interface{}{
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+			}},
+		{name: "put lunch disabled", id: businessHoursMemory.GetSchedules()[1].GetId(),
+			args: map[string]interface{}{"enabled": false},
+			want: []map[string]interface{}{
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+			}},
+	}
+
+	for _, input := range inputs {
+		jBytes, err := json.Marshal(input.args)
+		if err != nil {
+			assert.Fail(t, "failed to create json", err)
+			continue
+		}
+
+		req, _ := http.NewRequest("PUT", "/store/hour/"+input.id+"/enabled", bytes.NewBuffer(jBytes))
+		req.Header.Add("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
 
 		// GET to confirm result
 		results := getAllBusinessHour(t, r)

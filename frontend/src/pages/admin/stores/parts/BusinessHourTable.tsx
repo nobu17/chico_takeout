@@ -18,6 +18,7 @@ export default function BusinessHourTable() {
     businessHours,
     defaultBusinessHour,
     updateBusinessHour,
+    updateBusinessHourEnabled,
     loading,
     error,
   } = useBusinessHour();
@@ -47,9 +48,30 @@ export default function BusinessHourTable() {
         );
       },
     },
+    {
+      field: "",
+      width: 90,
+      headerName: "",
+      sortable: false,
+      renderCell: (params: GridRenderCellParams<string>) => {
+        return (
+          <>
+            <Button
+              sx={{ mr: 2 }}
+              color="error"
+              variant="contained"
+              onClick={(e) => handleEnableEdit(params.row, !params.row.enabled)}
+            >
+              {params.row.enabled ? "無効化" : "有効化"}
+            </Button>
+          </>
+        );
+      },
+    },
     { field: "name", headerName: "名称", width: 120 },
     { field: "start", headerName: "開始時刻", width: 120 },
     { field: "end", headerName: "終了時刻", width: 120 },
+    { field: "enabled", headerName: "有効", width: 120 },
     {
       field: "Monday",
       headerName: toShortString(DAY_OF_WEEK.Monday),
@@ -126,6 +148,29 @@ export default function BusinessHourTable() {
     setOpen(true);
   };
 
+  const handleEnableEdit = async (item: BusinessHour, enabled: boolean) => {
+    const msg = enabled
+      ? "実行しますか？"
+      : "予約等がある状態で無効化をした場合、全ての予定を無効化した場合など、想定外のエラー等が発生します。\n納得の上、自己責任で実行しますか？サポートは一切しません。";
+    const yesNo = window.confirm(msg);
+    if (!yesNo) {
+      return;
+    }
+    setSnackMessage("");
+    setOpenSnack(false);
+    const result = await updateBusinessHourEnabled({
+      id: item.id,
+      enabled: enabled,
+    });
+    if (result !== null) {
+      if (result.isBadRequest()) {
+        setSnackMessage(result.message);
+        setOpenSnack(true);
+        return;
+      }
+    }
+  };
+
   const onClose = async (data: BusinessHour | null) => {
     if (data) {
       const result = await updateBusinessHour(data);
@@ -133,7 +178,7 @@ export default function BusinessHourTable() {
         if (result.isBadRequest()) {
           setSnackMessage(result.message);
           setOpenSnack(true);
-          return
+          return;
         }
       }
     }
@@ -154,7 +199,6 @@ export default function BusinessHourTable() {
     return <></>;
   };
 
-
   return (
     <>
       {errorMessage(error)}
@@ -169,6 +213,9 @@ export default function BusinessHourTable() {
           disableDensitySelector={true}
           editMode="row"
           hideFooter
+          getRowClassName={(params) =>
+            `table-row-enabled--${params.row.enabled}`
+          }
         />
         <BusinessHourFormDialog open={open} editItem={item} onClose={onClose} />
       </div>
@@ -199,6 +246,15 @@ const styles = {
     ".MuiDataGrid-columnHeaders": {
       backgroundColor: "#65b2c6",
       color: "#fff",
+    },
+    // disabled row
+    "& .table-row-enabled--false": {
+      backgroundColor: "#696969",
+      color: "#fff",
+      "&:hover": {
+        backgroundColor: "#696969",
+        color: "#fff",
+      },
     },
   },
 };

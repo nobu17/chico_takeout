@@ -18,7 +18,6 @@ import (
 	orderQueryRDBMS "chico/takeout/infrastructures/rdbms/order/query"
 	storeRDBMS "chico/takeout/infrastructures/rdbms/store"
 
-	"chico/takeout/infrastructures/smtp"
 	"chico/takeout/middleware"
 	itemUseCase "chico/takeout/usecase/item"
 	messageUseCase "chico/takeout/usecase/message"
@@ -46,9 +45,9 @@ func main() {
 	defer sqlDb.Close()
 
 	auth := initAuthService()
-	r := setupRouter(db, auth)
+	r := setupRouter(db, auth, cfg)
 
-	go scheduleTask(db)
+	go scheduleTask(db, cfg)
 
 	r.Run(":" + cfg.AppPort)
 }
@@ -70,7 +69,7 @@ func initAuthService() middleware.AuthService {
 	return service
 }
 
-func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
+func setupRouter(db *gorm.DB, auth middleware.AuthService, cfg *common.Config) *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
@@ -116,6 +115,8 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	r.NoRoute(func(ctx *gin.Context) {
 		ctx.HTML(http.StatusOK, "index.html", gin.H{})
 	})
+
+	mailer := mail.NewSendOrderMailService(cfg.Mail)
 
 	optionItemRepos := itemRDBMS.NewOptionItemRepository(db)
 	optionItem := r.Group("/item/option")
@@ -185,6 +186,7 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 		handler := storeHandler.BusinessHoursHandler(useCase)
 		hour.GET("/", handler.Get)
 		hour.PUT("/:id", middleware.CheckAdmin(), handler.Put)
+		hour.PUT("/:id/enabled", middleware.CheckAdmin(), handler.PutEnabled)
 	}
 
 	specialHour := r.Group("/store/special_hour")
@@ -218,7 +220,6 @@ func setupRouter(db *gorm.DB, auth middleware.AuthService) *gin.Engine {
 	}
 	order := r.Group("/order")
 	{
-		mailer := mail.NewSendGridSendOrderMail()
 		useCase := orderUseCase.NewOrderInfoUseCase(orderRepo, stockRepo, foodRepo, kindRepo, optionItemRepos, businessHoursRepo, spBusinessHourRepo, holidayRepo, mailer)
 		handler := orderHandler.NewOrderInfoHandler(useCase)
 
@@ -354,8 +355,8 @@ func migrateDb(db *gorm.DB) {
 	}
 }
 
-func scheduleTask(db *gorm.DB) {
-	mailer := smtp.NewSmtpSendOrderMail()
+func scheduleTask(db *gorm.DB, cfg *common.Config) {
+	mailer := mail.NewSendOrderMailService(cfg.Mail)
 	orderRepo, err := orderRDBMS.NewOrderInfoRepository(db)
 	if err != nil {
 		panic(err)

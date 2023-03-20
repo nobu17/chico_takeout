@@ -33,12 +33,15 @@ type OptionItemInput = {
   checked: boolean;
 };
 
-const convertInput = (items: OptionItemInfo[], selected: OptionItemInfo[]): OptionItemInput[] => {
+const convertInput = (
+  items: OptionItemInfo[],
+  selected: OptionItemInfo[]
+): OptionItemInput[] => {
   const converted: OptionItemInput[] = [];
   for (const item of items) {
     converted.push({
       item: item,
-      checked: selected.some(s => s.id === item.id),
+      checked: selected.some((s) => s.id === item.id),
     });
   }
   return converted;
@@ -47,7 +50,9 @@ const convertInput = (items: OptionItemInfo[], selected: OptionItemInfo[]): Opti
 export default function OptionItemSelectDialog(
   props: OptionItemSelectDialogProps
 ) {
-  const [inputs, setInputs] = React.useState(convertInput(props.items, props.selected));
+  const [inputs, setInputs] = React.useState(
+    convertInput(props.items, props.selected)
+  );
 
   const handleToggle = (item: OptionItemInfo) => () => {
     let targetItem = inputs.find((x) => x.item.id === item.id);
@@ -84,6 +89,9 @@ export default function OptionItemSelectDialog(
               オプション選択
             </Typography>
           </Toolbar>
+          <Typography sx={{ ml: 2, flex: 1 }} variant="caption" component="div">
+            同一商品で異なる設定希望の場合は、要望に記載下さい。
+          </Typography>
         </AppBar>
         <List
           sx={{ width: "100%", maxWidth: 960, bgcolor: "background.paper" }}
@@ -112,7 +120,9 @@ export default function OptionItemSelectDialog(
                     id={labelId}
                     primary={`${item.name} : ¥ ${item.price.toLocaleString()}`}
                     secondary={
-                      <React.Fragment><LineBreak msg={item.description} /></React.Fragment>
+                      <React.Fragment>
+                        <LineBreak msg={item.description} />
+                      </React.Fragment>
                     }
                   />
                 </ListItemButton>

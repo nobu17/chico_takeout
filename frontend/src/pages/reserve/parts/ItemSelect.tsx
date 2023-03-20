@@ -48,7 +48,7 @@ export default function ItemSelect(props: ItemSelectProps) {
     <>
       <Typography
         component="h6"
-        variant="h6"
+        variant="subtitle2"
         align="center"
         color="error"
         gutterBottom
@@ -56,7 +56,8 @@ export default function ItemSelect(props: ItemSelectProps) {
           mt: 3,
         }}
       >
-        ※価格は全て税込みです。
+        ※価格は全て税込みです。<br/>
+        上部メニューは→にスライドできます。
       </Typography>
       <ItemSelectTabs
         cart={props.cart}

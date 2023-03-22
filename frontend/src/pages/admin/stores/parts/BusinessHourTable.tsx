@@ -151,7 +151,7 @@ export default function BusinessHourTable() {
   const handleEnableEdit = async (item: BusinessHour, enabled: boolean) => {
     const msg = enabled
       ? "実行しますか？"
-      : "予約等がある状態で無効化をした場合、全ての予定を無効化した場合など、想定外のエラー等が発生します。\n納得の上、自己責任で実行しますか？サポートは一切しません。";
+      : "予約等がある状態で無効化をした場合、全ての予定を無効化した場合など、想定外のエラー等が発生します。\n納得の上、自己責任で実行しますか？";
     const yesNo = window.confirm(msg);
     if (!yesNo) {
       return;

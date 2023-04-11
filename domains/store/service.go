@@ -1,5 +1,10 @@
 package store
 
+import (
+	"chico/takeout/common"
+	"time"
+)
+
 type BusinessHoursService struct {
 	businessHoursRepository BusinessHoursRepository
 }
@@ -90,3 +95,41 @@ func (h *HolidayService) CheckOverWrap(item *SpecialHoliday) (bool, error) {
 	}
 	return false, nil
 }
+
+type BusinessHourManagementService struct {
+	businessHoursRepository BusinessHoursRepository
+	specialHolidayRepository SpecialHolidayRepository
+	specialBusinessHourRepository SpecialBusinessHourRepository
+}
+
+func NewBusinessHourManagementService(
+	businessHoursRepository BusinessHoursRepository,
+	specialHolidayRepository SpecialHolidayRepository,
+	specialBusinessHourRepository SpecialBusinessHourRepository) *BusinessHourManagementService {
+	return &BusinessHourManagementService{
+		businessHoursRepository: businessHoursRepository,
+		specialHolidayRepository: specialHolidayRepository,
+		specialBusinessHourRepository: specialBusinessHourRepository,
+	}
+}
+
+func (b *BusinessHourManagementService) GetSpecificDateHour(date time.Time) (*BusinessHourInfo, error) {
+	// get holidays
+	holidays, err := b.specialHolidayRepository.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	spHours, err := b.specialBusinessHourRepository.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	bs, err := b.businessHoursRepository.Fetch()
+	if err != nil {
+		return nil, err
+	}
+
+	spec := NewBusinessHoursManagementSpecification(*bs, spHours, holidays)
+	dateStr := common.ConvertTimeToDateStr(date)
+	return spec.GetStoreBusinessHours(dateStr)
+}
+

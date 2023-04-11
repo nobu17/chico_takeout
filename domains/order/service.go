@@ -129,6 +129,26 @@ func (o *OrderFilter) GetActiveOrderOfSpecifiedDay(startDateTime time.Time) ([]O
 	return target, nil
 }
 
+func (o *OrderFilter) GetActiveOrderOfSpecifiedDayAndTime(startDate, startTime, endTime time.Time) ([]OrderInfo, error) {
+	// fetch orders of specified date
+	orders, err := o.orderRepo.FindByPickupDate(common.ConvertTimeToDateStr(startDate))
+	if err != nil {
+		return nil, err
+	}
+	// check active and in range time
+	target := []OrderInfo{}
+	for _, order := range orders {
+		if order.canceled {
+			continue
+		}
+		pickUpTime := order.pickupDateTime.GetDateTime()	
+		if common.IsInRangeTime(startTime, endTime, pickUpTime) {
+			target = append(target, order)
+		}
+	}
+	return target, nil
+}
+
 type OrderDuplicateChecker struct {
 	orderRepo OrderInfoRepository
 }

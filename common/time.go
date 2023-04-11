@@ -30,6 +30,12 @@ func GetNowDate() *time.Time {
 	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
 	return &t
 }
+// currently same GetNowDate
+func GetNowDateUntilMinutes() *time.Time {
+	now := now().In(jst)
+	t := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, jst)
+	return &t
+}
 
 func GetNowDateUntilDay() *time.Time {
 	now := now().In(jst)

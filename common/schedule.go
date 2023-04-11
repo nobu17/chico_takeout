@@ -37,3 +37,33 @@ func (d *DailySchedularTask) CheckAndExecTask() {
 		}
 	}
 }
+
+type TimerScheduleTask struct {
+	intervalMinutes int
+	task func(time.Time)
+}
+
+func NewTimerScheduleTask(intervalMinutes int, task func(time.Time)) (*TimerScheduleTask, error) {
+	if task == nil {
+		return nil, NewValidationError("task", "should not nil")
+	}
+	if intervalMinutes < 1 {
+		return nil, NewValidationError("intervalMinutes", "should be greater than 0")
+	}
+	return &TimerScheduleTask{
+		intervalMinutes: intervalMinutes,
+		task:  task,
+	}, nil
+}
+
+func (t *TimerScheduleTask) Start() {
+	timer := time.NewTicker(time.Minute * time.Duration(t.intervalMinutes))
+	defer timer.Stop()
+
+	for {
+		select {
+		case <-timer.C:
+			t.task(*GetNowDateUntilMinutes())
+		}
+	}
+}

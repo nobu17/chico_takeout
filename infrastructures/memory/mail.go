@@ -8,7 +8,7 @@ import (
 )
 
 type MemorySendOrderMail struct {
-	DummyData *DummyMailData
+	Sent []DummyMailData
 }
 
 type DummyMailData struct {
@@ -46,7 +46,7 @@ func (m *MemorySendOrderMail) SendComplete(data order.OrderCompleteMailData) err
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}
-	m.DummyData = mData
+	m.Sent = append(m.Sent, *mData)
 
 	return nil
 }
@@ -74,7 +74,7 @@ func (m *MemorySendOrderMail) SendCancel(data order.OrderCancelMailData) error {
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}
-	m.DummyData = mData
+	m.Sent = append(m.Sent, *mData)
 
 	return nil
 }
@@ -102,7 +102,7 @@ func (m *MemorySendOrderMail) SendDailySummary(data order.ReservationSummaryMail
 		SendTo:   data.SendTo,
 		SendFrom: data.SendFrom,
 	}
-	m.DummyData = mData
+	m.Sent = append(m.Sent, *mData)
 
 	return nil
 }

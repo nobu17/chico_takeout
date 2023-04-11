@@ -361,24 +361,25 @@ func scheduleTask(db *gorm.DB, cfg *common.Config) {
 	if err != nil {
 		panic(err)
 	}
-	useCase := orderUseCase.NewOrderTaskUseCase(orderRepo, mailer)
-	task, err := common.NewDailySchedularTask("08:00", func() {
-		mErr := useCase.NotifyDailyOrder(*common.GetNowDate())
-		if mErr != nil {
-			fmt.Println("mail send fail", mErr)
-			return
-		}
+	businessHoursRepo := storeRDBMS.NewBusinessHoursRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	spBusinessHourRepo := storeRDBMS.NewSpecialBusinessHoursRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	holidayRepo := storeRDBMS.NewSpecialHolidayRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	useCase := orderUseCase.NewOrderTaskUseCase(orderRepo, mailer, businessHoursRepo, holidayRepo, spBusinessHourRepo)
+	// 30 minutes interval
+	timer, err := common.NewTimerScheduleTask(30, func(now time.Time){
+		useCase.NotifyOrderByHour(now)
 	})
 	if err != nil {
 		panic("failed to init schedular")
 	}
-	timer := time.NewTicker(time.Minute * 10)
-	defer timer.Stop()
-
-	for {
-		select {
-		case <-timer.C:
-			task.CheckAndExecTask()
-		}
-	}
+	timer.Start()
 }

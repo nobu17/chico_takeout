@@ -84,6 +84,21 @@ func (b *BusinessHours) IsInBusiness(targetDateTime time.Time) bool {
 	return false
 }
 
+func (b *BusinessHours) FindByWeekday(weekday int) []BusinessHour {
+	result := []BusinessHour{}
+	for _, bs := range b.schedules {
+		if !bs.enabled {
+			continue
+		}
+		if bs.HasWeekday(Weekday(weekday)) {
+			// return copy for immutable
+			newItem := bs
+			result = append(result, newItem)
+		}
+	}
+	return result
+}
+
 // currently add is not needed.
 // func (b *BusinessHours) Add(name, start, end string, weekdays []Weekday) error {
 // 	hour, err := NewBusinessHour(name, start, end, weekdays)
@@ -192,7 +207,7 @@ type BusinessHour struct {
 	name     Name
 	shift    TimeRange
 	weekdays []Weekday
-	enabled     bool
+	enabled  bool
 }
 
 func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
@@ -333,4 +348,13 @@ func (b *BusinessHour) GetWeekdays() []Weekday {
 
 func (b *BusinessHour) GetEnabled() bool {
 	return b.enabled
+}
+
+func (b *BusinessHour) HasWeekday(weekday Weekday) bool {
+	for _, wk := range b.weekdays {
+		if wk == weekday {
+			return true
+		}
+	}
+	return false
 }

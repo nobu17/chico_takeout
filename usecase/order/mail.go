@@ -189,6 +189,100 @@ func NewNoReservationSummaryMailData(sendFrom, sendTo string, startDateTime time
 	}, nil
 }
 
+func NewHourReservationSummaryMailData(orders []domains.OrderInfo, sendFrom, sendTo, date, startTime, endTime string) (*ReservationSummaryMailData, error) {
+	title := fmt.Sprintf("本日のオーダー情報(%s %s ~ %s)", date, startTime, endTime)
+
+	b := &strings.Builder{}
+	b.WriteString(fmt.Sprintf("本日のオーダー情報は下記になります。(%s :: %s ~ %s)", date, startTime, endTime))
+	b.WriteString("\n\n")
+
+	b.WriteString(fmt.Sprintf("注文数:%d", len(orders)))
+	b.WriteString("\n")
+
+	for _, order := range orders {
+		b.WriteString("-------------")
+		b.WriteString("\n")
+		b.WriteString("**注文者 情報**")
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("受取日時:%s", order.GetPickupDateTime()))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("氏名:%s", order.GetUserName()))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("E-mail:%s", order.GetUserEmail()))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("TEL:%s", order.GetUserTelNo()))
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("要望やメッセージ:%s", order.GetMemo()))
+		b.WriteString("\n")
+		b.WriteString("\n")
+		b.WriteString("**注文 情報**")
+		b.WriteString("\n")
+		for _, food := range order.GetFoodItems() {
+			b.WriteString(fmt.Sprintf("%s, %d円, %d個", food.GetName(), food.GetPrice(), food.GetQuantity()))
+			b.WriteString("\n")
+			options := food.GetOptionItems()
+			if len(options) > 0 {
+				b.WriteString("-オプション-\n")
+				for _, opt := range options {
+					b.WriteString(fmt.Sprintf("(%s, %d円)", opt.GetName(), opt.GetPrice()))
+					b.WriteString("\n")
+				}
+				b.WriteString("----\n")
+			}
+			b.WriteString("\n")
+		}
+		for _, stock := range order.GetStockItems() {
+			b.WriteString(fmt.Sprintf("%s, %d円, %d個", stock.GetName(), stock.GetPrice(), stock.GetQuantity()))
+			b.WriteString("\n")
+			options := stock.GetOptionItems()
+			if len(options) > 0 {
+				b.WriteString("-オプション-\n")
+				for _, opt := range options {
+					b.WriteString(fmt.Sprintf("(%s, %d円)", opt.GetName(), opt.GetPrice()))
+					b.WriteString("\n")
+				}
+				b.WriteString("----\n")
+			}
+			b.WriteString("\n")
+		}
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("合計:: %d円", order.GetTotalCost()))
+		b.WriteString("\n\n")
+	}
+
+	message := b.String()
+	cc := ""
+	sendToAr := []string{sendTo}
+
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendToAr)
+	if err != nil {
+		return nil, err
+	}
+	return &ReservationSummaryMailData{
+		commonMailData: *comm,
+	}, nil
+}
+
+func NewNoHourReservationSummaryMailData(sendFrom, sendTo, date, startTime, endTime string) (*ReservationSummaryMailData, error) {
+	title := fmt.Sprintf("オーダーはありません(%s %s ~ %s)", date, startTime, endTime)
+
+	b := &strings.Builder{}
+	b.WriteString(fmt.Sprintf("オーダーはありません(%s :: %s ~ %s)", date, startTime, endTime))
+	b.WriteString("\n\n")
+
+	message := b.String()
+	cc := ""
+	sendToAr := []string{sendTo}
+
+	comm, err := newCommonMailData(title, message, sendFrom, cc, sendToAr)
+	if err != nil {
+		return nil, err
+	}
+	return &ReservationSummaryMailData{
+		commonMailData: *comm,
+	}, nil
+}
+
 type commonMailData struct {
 	Title    string
 	SendTo   []string

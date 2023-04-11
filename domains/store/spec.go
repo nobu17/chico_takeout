@@ -16,7 +16,7 @@ func NewSpecialBusinessHourSpecification(specialHours []SpecialBusinessHour) *Sp
 }
 
 func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) error {
-	// check same hour id is assigned at samedate
+	// check same hour id is assigned at same date
 	exists, err := s.businessHourIdIsAssigned(item)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (s *SpecialBusinessHourSpecification) Validate(item *SpecialBusinessHour) e
 		return common.NewValidationError("businessHourId", fmt.Sprintf("business hour id at same date is already assigned. only 1 assign is allowed. id:%s, date=%s", item.GetBusinessHourId(), item.GetDate()))
 	}
 
-	// check time is overlapped at samedate
+	// check time is overlapped at same date
 	overLapped, err := s.dateAndTimeIsOverLapped(item)
 	if err != nil {
 		return err
@@ -125,34 +125,72 @@ type BusinessHoursManagementSpecification struct {
 }
 
 type BusinessHourInfo struct {
-	date   string
-	hours  []HourInfo
+	Date  string
+	Hours []HourInfo
 }
 type HourInfo struct {
-	hourId string
-	name   string
-	start  string
-	end    string
+	HourTypeId string
+	Name       string
+	StartTime  string
+	EndTime    string
 }
 
-// func (b *BusinessHoursManagementSpecification) GetStoreBusinessHours(date string) (*BusinessHourInfo, error) {
-// 	dateTime, err := common.ConvertStrToDateTime(date)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// at first check special holiday
-// 	// check special holiday (most high priority)
-// 	for _, sh := range b.specialHolidays {
-// 		if sh.shift.InRangeDate(*dateTime) {
-// 			// store is holiday. can not reserve
-// 			return nil, nil
-// 		}
-// 	}
+func NewBusinessHoursManagementSpecification(normalSchedules BusinessHours,
+	specialSchedules []SpecialBusinessHour,
+	specialHolidays []SpecialHoliday) *BusinessHoursManagementSpecification {
+	return &BusinessHoursManagementSpecification{
+		normalSchedules,
+		specialSchedules,
+		specialHolidays,
+	}
+}
 
-// 	// check special schedule
+func (b *BusinessHoursManagementSpecification) GetStoreBusinessHours(dateStr string) (*BusinessHourInfo, error) {
+	date, err := common.ConvertStrToDate(dateStr)
+	if err != nil {
+		return nil, err
+	}
+	result := BusinessHourInfo{Date: dateStr, Hours: []HourInfo{}}
+	// at first check special holiday
+	// check special holiday (most high priority)
+	for _, sh := range b.specialHolidays {
+		if sh.shift.InRangeDate(*date) {
+			// store is holiday. no information
+			return &result, nil
+		}
+	}
 
+	// check special schedule
+	hasSpecialSchedules := false
+	for _, sc := range b.specialSchedules {
+		if sc.IsSameDate(*date) {
+			hour := HourInfo{
+				HourTypeId: sc.GetBusinessHourId(),
+				Name:       sc.GetName(),
+				StartTime:  sc.GetStart(),
+				EndTime:    sc.GetEnd(),
+			}
+			result.Hours = append(result.Hours, hour)
 
-// 	// get week of day
-// 	// weekDay := dateTime.Weekday()
-// 	// get match day
-// }
+			hasSpecialSchedules = true
+		}
+	}
+
+	// if already has, skip
+	if hasSpecialSchedules {
+		return &result, nil
+	}
+
+	// get normal schedule
+	weekday := date.Weekday()
+	for _, sc := range b.normalSchedules.FindByWeekday(int(weekday)) {
+		hour := HourInfo{
+			HourTypeId: sc.GetId(),
+			Name:       sc.GetName(),
+			StartTime:  sc.GetStart(),
+			EndTime:    sc.GetEnd(),
+		}
+		result.Hours = append(result.Hours, hour)
+	}
+	return &result, nil
+}

@@ -25,13 +25,14 @@ export default function UserLogin() {
     const result = await signIn(input.email, input.password);
     if (result.isSuccessful) {
       navigate("/my_page");
-    } else if (!result.emailVerified) {
+    }
+    else if (!result.errorMessage && !result.emailVerified) {
       await showMessageDialog(
         "エラー",
-        "メール認証が完了していません。先にメール認証を進めてください。"
+        "メール認証が完了していません。アカウント登録時に送信されたメールから認証を行なってください。うまくいかない場合、お手数ですが「パスワードを忘れた場合はこちら」からパスワードの再設定お願いいたします。"
       );
     } else {
-      await showMessageDialog("エラー", "ログインに失敗しました。");
+      await showMessageDialog("エラー", "ログインに失敗しました。IDとパスワードのご確認お願いいたします。");
     }
   };
 

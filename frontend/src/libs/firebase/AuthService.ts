@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import { User } from "firebase/auth";
 import {
   auth,
@@ -46,7 +47,10 @@ export class AuthService {
       );
     } catch (e: unknown) {
       let msg = "";
-      if (e instanceof Error) {
+      if (e instanceof FirebaseError) {
+        msg = e.message;
+      }
+      else if (e instanceof Error) {
         msg = e.message;
       }
       return new AuthResult(false, false, "", "", msg, false);

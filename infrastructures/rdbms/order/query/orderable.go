@@ -88,7 +88,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 			// special hour
 			if common.DateEqual(date, *specialHour.Date) {
 				foodItems := o.getFoodItems(specialHour.BusinessHourModelID, date, foods)
-				o.reduceFoodRemain(foodItems, foodConsumption, date)
+				foodItems = o.reduceFoodRemain(foodItems, foodConsumption, date)
 				allItems := append(foodItems, stocks...)
 				info := order.PerDayOrderableInfo{
 					Date:       common.ConvertTimeToDateStr(date),
@@ -107,7 +107,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 			for _, hour := range hours {
 				if hour.HasWeekDay(int(weekday)) {
 					foodItems := o.getFoodItems(hour.ID, date, foods)
-					o.reduceFoodRemain(foodItems, foodConsumption, date)
+					foodItems = o.reduceFoodRemain(foodItems, foodConsumption, date)
 					allItems := append(foodItems, stocks...)
 					info := order.PerDayOrderableInfo{
 						Date:       common.ConvertTimeToDateStr(date),
@@ -233,23 +233,26 @@ func (o *OrderableInfoRdbmsQueryService) getFoodItems(hourTypeId string, targetD
 	return infoList
 }
 
-func (o *OrderableInfoRdbmsQueryService) reduceFoodRemain(items []order.OrderableItemInfo, perDayOrder []foodOrderPerDayOrderedData, date time.Time) {
+func (o *OrderableInfoRdbmsQueryService) reduceFoodRemain(items []order.OrderableItemInfo, perDayOrder []foodOrderPerDayOrderedData, date time.Time) []order.OrderableItemInfo {
 	for _, order := range perDayOrder {
-		if order.PickUpDate == date {
-			for _, item := range items {
+		//fmt.Println("perDayOrder:", order, date, common.DateEqual(order.PickUpDate, date));
+		if common.DateEqual(order.PickUpDate, date) {
+			// fmt.Println("same date:", date);
+			for i, item := range items {
 				// reduce the remain
 				if item.Id == order.Id {
-					item.Remain = item.Remain - order.Quantity
+					items[i].Remain = item.Remain - order.Quantity
 				}
 			}
 		}
 	}
+	return items
 }
 
 func (o *OrderableInfoRdbmsQueryService) getPerDateFoodOrder(startDate, endDate time.Time) ([]foodOrderPerDayOrderedData, error) {
 	models := []foodOrderPerDayOrderedData{}
 	o.db.Raw(`select pick_up_date, food_item_model_id as id, food_order_quantity.quantity as quantity 
-	from (select order_info.pick_up_date, food_order.food_item_model_id , SUM(food_order.quantity) as quantity from (select *, CAST(pickup_date_time AS DATE) as pick_up_date  from order_info_models where pickup_date_time >= ? and pickup_date_time  <= ?) as order_info
+	from (select order_info.pick_up_date, food_order.food_item_model_id , SUM(food_order.quantity) as quantity from (select *, CAST(pickup_date_time AS DATE) as pick_up_date  from order_info_models where pickup_date_time >= ? and pickup_date_time  <= ? and canceled = FALSE) as order_info
 	 inner join ordered_food_item_models as food_order on order_info.id = food_order.order_info_model_id
 	 group by food_order.food_item_model_id, order_info.pick_up_date) as food_order_quantity
 	 left join food_item_models as food_models on food_order_quantity.food_item_model_id = food_models.id

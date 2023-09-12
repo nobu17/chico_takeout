@@ -1,20 +1,32 @@
 import * as React from "react";
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { Button, Alert } from "@mui/material";
+import {
+  Button,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Box,
+} from "@mui/material";
 
 import FoodItemFormDialog from "./FoodItemFormDialog";
 import { FoodItem } from "../../../../libs/FoodItem";
-import useFoodItem from "../../../../hooks/UseFoodItem";
+import useFoodItem, { CountDisplay } from "../../../../hooks/UseFoodItem";
 import useBusinessHour from "../../../../hooks/UseBusinessHour";
 import LoadingSpinner from "../../../../components/parts/LoadingSpinner";
 
 export default function FoodItemTable() {
   const {
-    foodItems,
+    kindNames,
+    selectedKindFilter,
     defaultFoodItem,
     addFoodItem,
     updateFoodItem,
     deleteFoodItem,
+    updateSelectedKindFilter,
+    filteredFoods,
     itemKinds,
     loading: foodLoading,
     error: foodError,
@@ -139,6 +151,11 @@ export default function FoodItemTable() {
     setOpen(true);
   };
 
+  const handleFilterSelect = (event: SelectChangeEvent) => {
+    const select = JSON.parse(event.target.value) as CountDisplay;
+    updateSelectedKindFilter(select.name);
+  };
+
   const onClose = (data: FoodItem | null) => {
     setOpen(false);
     if (data) {
@@ -169,10 +186,26 @@ export default function FoodItemTable() {
       <Button sx={{ my: 2 }} fullWidth variant="contained" onClick={handleNew}>
         新規作成
       </Button>
+      <Box>
+        <FormControl sx={{ m: 1, width: 400 }}>
+          <InputLabel id="kind-filter-label">種別フィルタ</InputLabel>
+          <Select
+            labelId="kind-filter-label"
+            value={JSON.stringify(selectedKindFilter)}
+            onChange={handleFilterSelect}
+          >
+            {kindNames.map((filter) => (
+              <MenuItem key={filter.display()} value={JSON.stringify(filter)}>
+                {filter.display()}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
       <div style={{ height: 600 }}>
         <DataGrid
           sx={styles.grid}
-          rows={foodItems}
+          rows={filteredFoods}
           columns={columns}
           disableColumnFilter={true}
           disableColumnMenu={true}

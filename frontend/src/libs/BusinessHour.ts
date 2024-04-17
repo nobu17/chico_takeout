@@ -11,4 +11,5 @@ export type BusinessHour = {
   end: string;
   weekdays: DayOfWeek[];
   enabled: boolean;
+  offsetHour: number;
 };

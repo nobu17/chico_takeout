@@ -10,6 +10,7 @@ const defaultBusinessHour: BusinessHour = {
   end: "10:00",
   weekdays: [],
   enabled: true,
+  offsetHour: 3,
 };
 
 type UpdateEnabledInfo = {

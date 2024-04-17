@@ -25,29 +25,30 @@ type SpecialBusinessHour struct {
 	date           shared.Date
 	shift          TimeRange
 	businessHourId string
+	hourOffset     HourOffset
 }
 
 const (
 	SpecialBusinessHourMaxName = 30
 )
 
-func NewSpecialBusinessHour(name, date, start, end, businessHourId string) (*SpecialBusinessHour, error) {
+func NewSpecialBusinessHour(name, date, start, end, businessHourId string, hourOffset uint) (*SpecialBusinessHour, error) {
 	hour := &SpecialBusinessHour{id: uuid.NewString()}
-	if err := hour.Set(name, date, start, end, businessHourId); err != nil {
+	if err := hour.Set(name, date, start, end, businessHourId, hourOffset); err != nil {
 		return nil, err
 	}
 	return hour, nil
 }
 
-func NewSpecialBusinessHourForOrm(id, name, date, start, end, businessHourId string) (*SpecialBusinessHour, error) {
+func NewSpecialBusinessHourForOrm(id, name, date, start, end, businessHourId string, hourOffset uint) (*SpecialBusinessHour, error) {
 	hour := &SpecialBusinessHour{id: id}
-	if err := hour.Set(name, date, start, end, businessHourId); err != nil {
+	if err := hour.Set(name, date, start, end, businessHourId, hourOffset); err != nil {
 		return nil, err
 	}
 	return hour, nil
 }
 
-func (s *SpecialBusinessHour) Set(name, date, start, end, businessHourId string) error {
+func (s *SpecialBusinessHour) Set(name, date, start, end, businessHourId string, hourOffset uint) error {
 	if err := s.validateName(name); err != nil {
 		return err
 	}
@@ -66,10 +67,16 @@ func (s *SpecialBusinessHour) Set(name, date, start, end, businessHourId string)
 		return err
 	}
 
+	hOffSet, err := NewHourOffset(hourOffset)
+	if err != nil {
+		return err
+	}
+
 	s.name = name
 	s.date = *dateVal
 	s.shift = *shift
 	s.businessHourId = businessHourId
+	s.hourOffset = *hOffSet
 
 	return nil
 }
@@ -129,6 +136,10 @@ func (s *SpecialBusinessHour) GetBusinessHourId() string {
 	return s.businessHourId
 }
 
+func (s *SpecialBusinessHour) GetHourOffset() uint {
+	return s.hourOffset.GetValue()
+}
+
 func (s *SpecialBusinessHour) HaveSameBusinessHourId(other SpecialBusinessHour) bool {
 	return s.businessHourId == other.businessHourId
 }
@@ -152,5 +163,3 @@ func (s *SpecialBusinessHour) IsInRange(datetime time.Time) bool {
 	}
 	return false
 }
-
-

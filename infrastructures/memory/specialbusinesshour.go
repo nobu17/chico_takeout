@@ -25,13 +25,13 @@ func resetSpecialBusinessHour() {
 	businessHour, _ := NewBusinessHoursMemoryRepository().Fetch()
 	schedules := businessHour.GetSchedules()
 	specialBusinessHourMemory = map[string]*domains.SpecialBusinessHour{}
-	item1, err := domains.NewSpecialBusinessHour("特別日程1", "2022/05/06", "08:00", "12:00", schedules[0].GetId())
+	item1, err := domains.NewSpecialBusinessHour("特別日程1", "2022/05/06", "08:00", "12:00", schedules[0].GetId(), 1)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")
 	}
 	specialBusinessHourMemory[item1.GetId()] = item1
-	item2, err := domains.NewSpecialBusinessHour("特別日程2", "2022/05/08", "11:00", "14:00", schedules[1].GetId())
+	item2, err := domains.NewSpecialBusinessHour("特別日程2", "2022/05/08", "11:00", "14:00", schedules[1].GetId(), 12)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")

@@ -29,13 +29,14 @@ type SpecialBusinessHourModel struct {
 	End                 *time.Time
 	BusinessHourModelID string
 	BusinessHourModel   BusinessHourModel
+	OffsetHour          uint `gorm:"not null;default:3"`
 }
 
 func (s *SpecialBusinessHourModel) toDomain() (*domains.SpecialBusinessHour, error) {
 	startStr := common.ConvertTimeToTimeStr(*s.Start)
 	endStr := common.ConvertTimeToTimeStr(*s.End)
 	dateStr := common.ConvertTimeToDateStr(*s.Date)
-	model, err := domains.NewSpecialBusinessHourForOrm(s.ID, s.Name, dateStr, startStr, endStr, s.BusinessHourModelID)
+	model, err := domains.NewSpecialBusinessHourForOrm(s.ID, s.Name, dateStr, startStr, endStr, s.BusinessHourModelID, s.OffsetHour)
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +67,7 @@ func newSpecialBusinessHourModel(s *domains.SpecialBusinessHour) (*SpecialBusine
 	model.End = end
 
 	model.BusinessHourModelID = s.GetBusinessHourId()
+	model.OffsetHour = s.GetHourOffset()
 	return &model, nil
 }
 

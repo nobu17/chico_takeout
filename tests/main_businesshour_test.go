@@ -67,9 +67,9 @@ func getAllBusinessHour(t *testing.T, r *gin.Engine) []map[string]interface{} {
 
 func TestBusinessHoursHandler_GET(t *testing.T) {
 	wants := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 	}
 
 	r := SetupHourRouter()
@@ -108,36 +108,37 @@ func TestBusinessHoursHandler_PUT(t *testing.T) {
 	}
 	inputs := []input{
 		{name: "put morning", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 4},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
-				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}, "offsetHour": 4},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 			}},
 		{name: "put lunch", id: businessHoursMemory.GetSchedules()[1].GetId(),
-			args: map[string]interface{}{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}},
+			args: map[string]interface{}{"name": "lunch2", "start": "11:00", "end": "14:30", "weekdays": []int{4}, "offsetHour": 1},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}, "offsetHour": 4},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}, "offsetHour": 1},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 			}},
 		{name: "put dinner", id: businessHoursMemory.GetSchedules()[2].GetId(),
-			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{6}},
+			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{6}, "offsetHour": 12},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
-				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{6}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}, "offsetHour": 4},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}, "offsetHour": 1},
+				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{6}, "offsetHour": 12},
 			}},
 		{name: "empty weekend", id: businessHoursMemory.GetSchedules()[2].GetId(),
-			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{}},
+			args: map[string]interface{}{"name": "dinner2", "start": "17:00", "end": "20:00", "weekdays": []int{}, "offsetHour": 11},
 			want: []map[string]interface{}{
-				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}},
-				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}},
-				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{}},
+				{"name": "morning2", "start": "08:00", "end": "09:00", "enabled": true, "weekdays": []int{2, 3, 4}, "offsetHour": 4},
+				{"name": "lunch2", "start": "11:00", "end": "14:30", "enabled": true, "weekdays": []int{4}, "offsetHour": 1},
+				{"name": "dinner2", "start": "17:00", "end": "20:00", "enabled": true, "weekdays": []int{}, "offsetHour": 11},
 			}},
 	}
 
 	for _, input := range inputs {
+		fmt.Println("name:", input.name)
 		jBytes, err := json.Marshal(input.args)
 		if err != nil {
 			assert.Fail(t, "failed to create json", err)
@@ -170,50 +171,66 @@ func TestBusinessHoursHandler_PUT_BadRequest(t *testing.T) {
 	}
 
 	want := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 	}
 
 	inputs := []input{
 		{name: "error: empty name", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: start time format", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "0800", "end": "09:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "0800", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: end time format", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "0900", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "0900", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: start is greater than end time", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "07:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "07:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: duplicated weekends", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4, 2}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4, 2}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: overlap time", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "12:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "12:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: lack name", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"start": "08:00", "end": "10:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"start": "08:00", "end": "10:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: lack start", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "end": "10:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "end": "10:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: lack end", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "weekdays": []int{2, 3, 4}, "offsetHour": 3},
 			want: want,
 		},
 		{name: "error: lack weekends", id: businessHoursMemory.GetSchedules()[0].GetId(),
-			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00"},
+			args: map[string]interface{}{"name": "morning2", "start": "08:00", "end": "09:00", "offsetHour": 3},
+			want: want,
+		},
+		{name: "error: 0 offset hour", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 0},
+			want: want,
+		},
+		{name: "error: 13 offset hour", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 13},
+			want: want,
+		},
+		{name: "error: minus offset hour", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": -1},
+			want: want,
+		},
+		{name: "error: lack offset hour", id: businessHoursMemory.GetSchedules()[0].GetId(),
+			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
 			want: want,
 		},
 	}
@@ -232,6 +249,7 @@ func TestBusinessHoursHandler_PUT_BadRequest(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		fmt.Println("body:", w.Body)
 
 		// GET to confirm result
 		results := getAllBusinessHour(t, r)
@@ -252,14 +270,14 @@ func TestBusinessHoursHandler_PUT_NotFound(t *testing.T) {
 	}
 
 	want := []map[string]interface{}{
-		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+		{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+		{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 	}
 
 	inputs := []input{
 		{name: "not exists id", id: "12345",
-			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}},
+			args: map[string]interface{}{"name": "test", "start": "08:00", "end": "09:00", "weekdays": []int{2, 3, 4}, "offsetHour": 4},
 			want: want,
 		},
 	}
@@ -300,23 +318,23 @@ func TestBusinessHoursHandler_PUT_ENABLED(t *testing.T) {
 		{name: "put morning disabled", id: businessHoursMemory.GetSchedules()[0].GetId(),
 			args: map[string]interface{}{"enabled": false},
 			want: []map[string]interface{}{
-				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 			}},
 		{name: "put morning enabled", id: businessHoursMemory.GetSchedules()[0].GetId(),
 			args: map[string]interface{}{"enabled": true},
 			want: []map[string]interface{}{
-				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 			}},
 		{name: "put lunch disabled", id: businessHoursMemory.GetSchedules()[1].GetId(),
 			args: map[string]interface{}{"enabled": false},
 			want: []map[string]interface{}{
-				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}},
-				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}},
+				{"name": "morning", "start": "07:00", "end": "09:30", "enabled": true, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "lunch", "start": "11:30", "end": "15:00", "enabled": false, "weekdays": []int{2, 3, 5, 6, 0}, "offsetHour": 3},
+				{"name": "dinner", "start": "18:00", "end": "21:00", "enabled": true, "weekdays": []int{3, 6}, "offsetHour": 3},
 			}},
 	}
 

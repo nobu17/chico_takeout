@@ -11,6 +11,7 @@ const defaultSpecialBusinessHour: SpecialBusinessHour = {
   end: "10:00",
   date: toDateString(getNowDate(0)),
   businessHourId: "",
+  offsetHour: 3,
 };
 
 const busApi = new SpecialBusinessHourApi();

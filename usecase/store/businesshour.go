@@ -19,25 +19,27 @@ func newBusinessHoursModel(item *domains.BusinessHours) *BusinessHoursModel {
 }
 
 type BusinessHoursUpdateModel struct {
-	Id       string
-	Name     string
-	Start    string
-	End      string
-	Weekdays []Weekday
+	Id         string
+	Name       string
+	Start      string
+	End        string
+	Weekdays   []Weekday
+	OffsetHour uint
 }
 
 type BusinessHoursEnabledUpdateModel struct {
-	Id       string
-	Enabled  bool
+	Id      string
+	Enabled bool
 }
 
 type BusinessHourModel struct {
-	Id       string
-	Name     string
-	Start    string
-	End      string
-	Weekdays []Weekday
-	Enabled  bool
+	Id         string
+	Name       string
+	Start      string
+	End        string
+	Weekdays   []Weekday
+	Enabled    bool
+	OffsetHour uint
 }
 
 func newBusinessHourModel(item domains.BusinessHour) *BusinessHourModel {
@@ -47,12 +49,13 @@ func newBusinessHourModel(item domains.BusinessHour) *BusinessHourModel {
 	}
 
 	return &BusinessHourModel{
-		Id:       item.GetId(),
-		Name:     item.GetName(),
-		Start:    item.GetStart(),
-		End:      item.GetEnd(),
-		Weekdays: weekdays,
-		Enabled:  item.GetEnabled(),
+		Id:         item.GetId(),
+		Name:       item.GetName(),
+		Start:      item.GetStart(),
+		End:        item.GetEnd(),
+		Weekdays:   weekdays,
+		Enabled:    item.GetEnabled(),
+		OffsetHour: item.GetHourOffset(),
 	}
 }
 
@@ -157,7 +160,7 @@ func (b *businessHoursUseCase) Update(model *BusinessHoursUpdateModel) error {
 		return err
 	}
 
-	new, err := businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays))
+	new, err := businessHours.Update(model.Id, model.Name, model.Start, model.End, toDomainWeekday(model.Weekdays), model.OffsetHour)
 	if err != nil {
 		return err
 	}

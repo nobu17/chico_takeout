@@ -522,21 +522,21 @@ func setUpUseCase() (order.OrderTaskUseCase, *memory.MemorySendOrderMail) {
 	holidayRepo.Create(holiday1)
 
 	schedules := businessHourRepo.GetMemory().GetSchedules()
-	spHour1, err := stDomains.NewSpecialBusinessHour("特別モーニング", "2050/12/17", "08:00", "12:00", schedules[0].GetId())
+	spHour1, err := stDomains.NewSpecialBusinessHour("特別モーニング", "2050/12/17", "08:00", "12:00", schedules[0].GetId(), 3)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")
 	}
 	spBusinessHourRepo.Create(spHour1)
 
-	spHour2, err := stDomains.NewSpecialBusinessHour("特別モーニング2", "2050/12/18", "08:00", "12:00", schedules[0].GetId())
+	spHour2, err := stDomains.NewSpecialBusinessHour("特別モーニング2", "2050/12/18", "08:00", "12:00", schedules[0].GetId(), 4)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")
 	}
 	spBusinessHourRepo.Create(spHour2)
 
-	spHour3, err := stDomains.NewSpecialBusinessHour("特別ディナー2", "2050/12/18", "16:00", "19:00", schedules[2].GetId())
+	spHour3, err := stDomains.NewSpecialBusinessHour("特別ディナー2", "2050/12/18", "16:00", "19:00", schedules[2].GetId(), 1)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")
@@ -544,7 +544,7 @@ func setUpUseCase() (order.OrderTaskUseCase, *memory.MemorySendOrderMail) {
 	spBusinessHourRepo.Create(spHour3)
 
 	// sp morning with order
-	spHour4, err := stDomains.NewSpecialBusinessHour("特別モーニング3", "2050/12/19", "08:00", "12:00", schedules[0].GetId())
+	spHour4, err := stDomains.NewSpecialBusinessHour("特別モーニング3", "2050/12/19", "08:00", "12:00", schedules[0].GetId(), 12)
 	if err != nil {
 		fmt.Println(err)
 		panic("failed to create special holiday")

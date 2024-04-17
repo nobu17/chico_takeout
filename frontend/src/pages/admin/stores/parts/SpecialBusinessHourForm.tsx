@@ -16,6 +16,7 @@ import {
 
 import { startIsLessThanEnd } from "../../../../libs/util/TimeCompare";
 import { toDate, toDateString } from "../../../../libs/util/DateUtil";
+import { RhfHourOffsetSelect } from "../../../../components/parts/Rhf/RhfHourOffsetSelect";
 
 type SpecialBusinessHourFormProps = {
   editItem: SpecialBusinessHour;
@@ -37,6 +38,7 @@ type SpecialBusinessHourInput = {
   start: string;
   end: string;
   businessHourId: string;
+  offsetHour: number;
 };
 
 const convertInput = (item: SpecialBusinessHour): SpecialBusinessHourInput => {
@@ -47,6 +49,7 @@ const convertInput = (item: SpecialBusinessHour): SpecialBusinessHourInput => {
     start: item.start,
     end: item.end,
     businessHourId: item.businessHourId,
+    offsetHour: item.offsetHour,
   };
 };
 
@@ -58,6 +61,7 @@ const reverseInput = (item: SpecialBusinessHourInput): SpecialBusinessHour => {
     start: item.start,
     end: item.end,
     businessHourId: item.businessHourId,
+    offsetHour: item.offsetHour,
   };
 };
 
@@ -148,6 +152,11 @@ export default function SpecialBusinessHourForm(
             label="終了時間"
             timeList={timeList}
             name="end"
+            control={control}
+          />
+          <RhfHourOffsetSelect
+            label="予約最終受付時間(X時間前+(1~30分)"
+            name="offsetHour"
             control={control}
           />
           <SubmitButtons

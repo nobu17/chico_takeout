@@ -23,11 +23,12 @@ func NewBusinessHoursRepository(db *gorm.DB) *BusinessHoursRepository {
 // BusinessHourModel has many WeekDaysModel, BusinessHourModelID is the foreign key
 type BusinessHourModel struct {
 	rdbms.BaseModel
-	Name     string
-	Start    *time.Time
-	End      *time.Time
-	Weekdays []WeekDaysModel
-	Enabled  bool  `gorm:"not null;default:true"`
+	Name       string
+	Start      *time.Time
+	End        *time.Time
+	Weekdays   []WeekDaysModel
+	Enabled    bool `gorm:"not null;default:true"`
+	OffsetHour uint `gorm:"not null;default:3"`
 }
 
 func (b *BusinessHourModel) HasWeekDay(weekday int) bool {
@@ -63,6 +64,7 @@ func newBusinessHourModel(b *domains.BusinessHour) (*BusinessHourModel, error) {
 	model.Weekdays = weekdays
 
 	model.Enabled = b.GetEnabled()
+	model.OffsetHour = b.GetHourOffset()
 
 	return &model, nil
 }
@@ -75,7 +77,7 @@ func (b *BusinessHourModel) toDomain() (*domains.BusinessHour, error) {
 		val := domains.Weekday(weekday.Value)
 		weekdays = append(weekdays, val)
 	}
-	model, err := domains.NewBusinessHourForOrm(b.ID, b.Name, startStr, endStr, weekdays, b.Enabled)
+	model, err := domains.NewBusinessHourForOrm(b.ID, b.Name, startStr, endStr, weekdays, b.Enabled, b.OffsetHour)
 
 	if err != nil {
 		return nil, err

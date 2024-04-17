@@ -11,6 +11,7 @@ import (
 
 const (
 	BusinessHoursMaxSchedules = 3
+	DefaultHourOffset         = 3
 )
 
 type BusinessHoursRepository interface {
@@ -25,9 +26,9 @@ type BusinessHours struct {
 
 func NewDefaultBusinessHours() (*BusinessHours, error) {
 	// create default
-	morning, _ := NewBusinessHour("morning", "07:00", "09:30", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday})
-	lunch, _ := NewBusinessHour("lunch", "11:30", "15:00", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday})
-	dinner, _ := NewBusinessHour("dinner", "18:00", "21:00", []Weekday{Wednesday, Saturday})
+	morning, _ := NewBusinessHour("morning", "07:00", "09:30", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday}, DefaultHourOffset)
+	lunch, _ := NewBusinessHour("lunch", "11:30", "15:00", []Weekday{Tuesday, Wednesday, Friday, Saturday, Sunday}, DefaultHourOffset)
+	dinner, _ := NewBusinessHour("dinner", "18:00", "21:00", []Weekday{Wednesday, Saturday}, DefaultHourOffset)
 
 	schedules := []BusinessHour{}
 	schedules = append(schedules, *morning)
@@ -117,7 +118,7 @@ func (b *BusinessHours) FindByWeekday(weekday int) []BusinessHour {
 // 	return nil
 // }
 
-func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) (*BusinessHours, error) {
+func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday, hourOffset uint) (*BusinessHours, error) {
 	selfCopy, err := b.Copy()
 	if err != nil {
 		return nil, fmt.Errorf("unexpected error at copy:%s", err)
@@ -127,7 +128,7 @@ func (b *BusinessHours) Update(id, name, start, end string, weekdays []Weekday) 
 	if target == nil {
 		return nil, common.NewNotFoundError("id")
 	}
-	err = target.Set(name, start, end, weekdays)
+	err = target.Set(name, start, end, weekdays, hourOffset)
 	if err != nil {
 		return nil, err
 	}
@@ -203,17 +204,18 @@ const (
 )
 
 type BusinessHour struct {
-	id       string
-	name     Name
-	shift    TimeRange
-	weekdays []Weekday
-	enabled  bool
+	id         string
+	name       Name
+	shift      TimeRange
+	weekdays   []Weekday
+	enabled    bool
+	hourOffset HourOffset
 }
 
-func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour, error) {
+func NewBusinessHour(name, start, end string, weekdays []Weekday, hourOffset uint) (*BusinessHour, error) {
 	businessHour := &BusinessHour{id: uuid.NewString()}
 
-	err := businessHour.Set(name, start, end, weekdays)
+	err := businessHour.Set(name, start, end, weekdays, hourOffset)
 	if err != nil {
 		return nil, err
 	}
@@ -222,10 +224,10 @@ func NewBusinessHour(name, start, end string, weekdays []Weekday) (*BusinessHour
 	return businessHour, nil
 }
 
-func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday, enabled bool) (*BusinessHour, error) {
+func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday, enabled bool, hourOffset uint) (*BusinessHour, error) {
 	businessHour := &BusinessHour{id: id}
 
-	err := businessHour.Set(name, start, end, weekdays)
+	err := businessHour.Set(name, start, end, weekdays, hourOffset)
 	if err != nil {
 		return nil, err
 	}
@@ -234,8 +236,9 @@ func NewBusinessHourForOrm(id, name, start, end string, weekdays []Weekday, enab
 }
 
 func (b *BusinessHour) Copy() *BusinessHour {
-	businessHour, _ := NewBusinessHour(b.name.GetValue(), b.shift.start, b.shift.end, b.weekdays)
+	businessHour, _ := NewBusinessHour(b.name.GetValue(), b.shift.start, b.shift.end, b.weekdays, b.hourOffset.GetValue())
 	businessHour.id = b.id
+	businessHour.enabled = b.enabled
 	return businessHour
 }
 
@@ -243,7 +246,7 @@ func (b *BusinessHour) Equals(other BusinessHour) bool {
 	return b.id == other.id
 }
 
-func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
+func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday, hourOffset uint) error {
 	nameVal, err := NewName(name, BusinessHourNameMaxLength)
 	if err != nil {
 		return err
@@ -262,9 +265,15 @@ func (b *BusinessHour) Set(name, start, end string, weekdays []Weekday) error {
 		return common.NewValidationError("weekdays", "duplicated value exists")
 	}
 
+	hOffset, err := NewHourOffset(hourOffset)
+	if err != nil {
+		return err
+	}
+
 	b.name = *nameVal
 	b.shift = *shift
 	b.weekdays = weekdays
+	b.hourOffset = *hOffset
 
 	return nil
 }
@@ -348,6 +357,10 @@ func (b *BusinessHour) GetWeekdays() []Weekday {
 
 func (b *BusinessHour) GetEnabled() bool {
 	return b.enabled
+}
+
+func (b *BusinessHour) GetHourOffset() uint {
+	return b.hourOffset.GetValue()
 }
 
 func (b *BusinessHour) HasWeekday(weekday Weekday) bool {

@@ -6,6 +6,17 @@ Takeout api and web site of Chico Spice.
 # Server side
 Go, Gin
 
+## test db (docker)
+
+### launch
+cd ./test_env
+docker-compose up -d
+
+### stop
+cd ./test_env
+docker-compose stop
+
+
 ## how to run
 ```sh
 go run main.go
@@ -20,4 +31,3 @@ React
 cd frontend
 yarn start
 ```
-

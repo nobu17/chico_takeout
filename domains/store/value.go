@@ -129,3 +129,16 @@ func NewName(value string, maxLength int) (*Name, error) {
 
 	return &Name{StringValue: shared.NewStringValue(value)}, nil
 }
+
+type HourOffset struct {
+	shared.UintValue
+}
+
+func NewHourOffset(value uint) (*HourOffset, error) {
+	validator := validator.NewRangeInteger("HourOffset", 1, 12) // // 1-12 hours allowed
+	err := validator.Validate(int(value))
+	if err != nil {
+		return nil, err
+	}
+	return &HourOffset{UintValue: shared.NewUintValue(value)}, nil
+}

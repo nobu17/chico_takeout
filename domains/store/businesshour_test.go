@@ -11,13 +11,14 @@ import (
 )
 
 type busHoursArgs struct {
-	id       string
-	idIndex  int
-	name     string
-	start    string
-	end      string
-	weekdays []store.Weekday
-	enabled  bool
+	id         string
+	idIndex    int
+	name       string
+	start      string
+	end        string
+	weekdays   []store.Weekday
+	enabled    bool
+	hourOffset uint
 }
 type busHoursInput struct {
 	name             string
@@ -58,6 +59,7 @@ func assertBusinessHour(t *testing.T, want busHoursArgs, got store.BusinessHour)
 	assert.Equal(t, want.end, got.GetEnd())
 	assert.ElementsMatch(t, want.weekdays, got.GetWeekdays())
 	assert.Equal(t, want.enabled, got.GetEnabled())
+	assert.Equal(t, want.hourOffset, got.GetHourOffset())
 }
 
 func TestNewDefaultBusinessHours(t *testing.T) {
@@ -65,9 +67,9 @@ func TestNewDefaultBusinessHours(t *testing.T) {
 		{name: "normal check",
 			args: []busHoursArgs{},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -86,9 +88,9 @@ func TestBusinessHours_FindById(t *testing.T) {
 		{name: "normal check",
 			args: []busHoursArgs{},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -128,7 +130,7 @@ func TestBusinessHours_FindById_NotFound(t *testing.T) {
 
 		upInfo := tt.args[0]
 
-		got, err := bus.Update(upInfo.id, upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays)
+		got, err := bus.Update(upInfo.id, upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays, upInfo.hourOffset)
 		assertBusinessHoursRoot(t, tt, got, err)
 	}
 }
@@ -137,43 +139,43 @@ func TestBusinessHours_Update(t *testing.T) {
 	inputs := []busHoursInput{
 		{name: "morning update",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning2", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday}},
+				{idIndex: 0, name: "morning2", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday}, hourOffset: 2},
 			},
 			want: []busHoursArgs{
-				{name: "morning2", start: "08:00", end: "09:00", enabled: true, weekdays: []store.Weekday{store.Tuesday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning2", start: "08:00", end: "09:00", enabled: true, weekdays: []store.Weekday{store.Tuesday}, hourOffset: 2},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "lunch update",
 			args: []busHoursArgs{
-				{idIndex: 1, name: "lunch2", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+				{idIndex: 1, name: "lunch2", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}, hourOffset: 12},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch2", start: "12:00", end: "14:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Friday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch2", start: "12:00", end: "14:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Friday}, hourOffset: 12},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "dinner update",
 			args: []busHoursArgs{
-				{idIndex: 2, name: "dinner2", start: "19:00", end: "23:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+				{idIndex: 2, name: "dinner2", start: "19:00", end: "23:00", weekdays: []store.Weekday{store.Wednesday, store.Friday}, hourOffset: 1},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner2", start: "19:00", end: "23:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Friday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner2", start: "19:00", end: "23:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Friday}, hourOffset: 1},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "duplicate weekdays",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+				{idIndex: 0, name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}, hourOffset: 2},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -181,7 +183,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "irregular time(start < end)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "07:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "07:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -189,7 +191,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "irregular time(start < end + 59)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "08:59", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "08:59", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Tuesday, store.Sunday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -197,19 +199,19 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "edge time(start < end + 60)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "09:00", weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 2},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "08:00", end: "09:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "08:00", end: "09:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 2},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "overlap time1(morning end is overlap lunch)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "10:00", end: "12:00", weekdays: []store.Weekday{store.Tuesday}},
+				{idIndex: 0, name: "morning", start: "10:00", end: "12:00", weekdays: []store.Weekday{store.Tuesday}, hourOffset: 4},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -217,7 +219,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "overlap time2(morning is include lunch)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "10:00", end: "16:00", weekdays: []store.Weekday{store.Tuesday}},
+				{idIndex: 0, name: "morning", start: "10:00", end: "16:00", weekdays: []store.Weekday{store.Tuesday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -225,7 +227,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "overlap time3(morning is inside lunch",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Tuesday}},
+				{idIndex: 0, name: "morning", start: "12:00", end: "14:00", weekdays: []store.Weekday{store.Tuesday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -233,7 +235,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "overlap time4(morning end is overlap lunch",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "10:00", end: "17:00", weekdays: []store.Weekday{store.Tuesday}},
+				{idIndex: 0, name: "morning", start: "10:00", end: "17:00", weekdays: []store.Weekday{store.Tuesday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -241,19 +243,19 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "time is overlap but weekday is not match",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{store.Monday}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{store.Monday}, hourOffset: 4},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "08:00", end: "13:00", enabled: true, weekdays: []store.Weekday{store.Monday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "08:00", end: "13:00", enabled: true, weekdays: []store.Weekday{store.Monday}, hourOffset: 4},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
 		},
 		{name: "irregular time format(start)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "0800", end: "13:00", weekdays: []store.Weekday{store.Monday}},
+				{idIndex: 0, name: "morning", start: "0800", end: "13:00", weekdays: []store.Weekday{store.Monday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -261,7 +263,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "irregular time format(end)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "13:a0", weekdays: []store.Weekday{store.Monday}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:a0", weekdays: []store.Weekday{store.Monday}, hourOffset: 3},
 			},
 			want:             []busHoursArgs{},
 			hasValidationErr: true,
@@ -269,14 +271,30 @@ func TestBusinessHours_Update(t *testing.T) {
 		},
 		{name: "no weekdays (allowed)",
 			args: []busHoursArgs{
-				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{}},
+				{idIndex: 0, name: "morning", start: "08:00", end: "13:00", weekdays: []store.Weekday{}, hourOffset: 4},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "08:00", end: "13:00", enabled: true, weekdays: []store.Weekday{}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "08:00", end: "13:00", enabled: true, weekdays: []store.Weekday{}, hourOffset: 4},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "0 offset hour",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Sunday}, hourOffset: 0},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "13 offset hour(over limit)",
+			args: []busHoursArgs{
+				{idIndex: 0, name: "morning", start: "08:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Sunday}, hourOffset: 13},
+			},
+			want:             []busHoursArgs{},
+			hasValidationErr: true,
 			hasNotFoundErr:   false,
 		},
 	}
@@ -290,7 +308,7 @@ func TestBusinessHours_Update(t *testing.T) {
 		schedules := bus.GetSchedules()
 		upInfo := tt.args[0]
 
-		got, err := bus.Update(schedules[upInfo.idIndex].GetId(), upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays)
+		got, err := bus.Update(schedules[upInfo.idIndex].GetId(), upInfo.name, upInfo.start, upInfo.end, upInfo.weekdays, upInfo.hourOffset)
 		assertBusinessHoursRoot(t, tt, got, err)
 	}
 }
@@ -302,9 +320,9 @@ func TestBusinessHours_Update_Enabled(t *testing.T) {
 				{idIndex: 0, enabled: false},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: false, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: false, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -314,9 +332,9 @@ func TestBusinessHours_Update_Enabled(t *testing.T) {
 				{idIndex: 0, enabled: true},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -327,9 +345,9 @@ func TestBusinessHours_Update_Enabled(t *testing.T) {
 				{idIndex: 1, enabled: false},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: false, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: false, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -340,9 +358,9 @@ func TestBusinessHours_Update_Enabled(t *testing.T) {
 				{idIndex: 1, enabled: true},
 			},
 			want: []busHoursArgs{
-				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}},
-				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}},
+				{name: "morning", start: "07:00", end: "09:30", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "lunch", start: "11:30", end: "15:00", enabled: true, weekdays: []store.Weekday{store.Tuesday, store.Wednesday, store.Friday, store.Saturday, store.Sunday}, hourOffset: 3},
+				{name: "dinner", start: "18:00", end: "21:00", enabled: true, weekdays: []store.Weekday{store.Wednesday, store.Saturday}, hourOffset: 3},
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,

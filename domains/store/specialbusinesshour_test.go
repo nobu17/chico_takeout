@@ -16,6 +16,7 @@ type specialBusinessHourArgs struct {
 	start          string
 	end            string
 	businessHourId string
+	hourOffset     uint
 }
 
 type specialBusinessHourInput struct {
@@ -49,6 +50,7 @@ func assertSpecialHour(t *testing.T, want specialBusinessHourArgs, got *store.Sp
 	assert.Equal(t, want.start, got.GetStart())
 	assert.Equal(t, want.end, got.GetEnd())
 	assert.Equal(t, want.businessHourId, got.GetBusinessHourId())
+	assert.Equal(t, want.hourOffset, got.GetHourOffset())
 }
 
 func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
@@ -60,6 +62,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     1,
 			},
 			want: specialBusinessHourArgs{
 				name:           "special morning",
@@ -67,6 +70,27 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     1,
+			},
+			hasValidationErr: false,
+			hasNotFoundErr:   false,
+		},
+		{name: "normal case(12 offset hour)",
+			args: specialBusinessHourArgs{
+				name:           "special morning",
+				date:           "2022/01/04",
+				start:          "08:00",
+				end:            "09:00",
+				businessHourId: "123",
+				hourOffset:     12,
+			},
+			want: specialBusinessHourArgs{
+				name:           "special morning",
+				date:           "2022/01/04",
+				start:          "08:00",
+				end:            "09:00",
+				businessHourId: "123",
+				hourOffset:     12,
 			},
 			hasValidationErr: false,
 			hasNotFoundErr:   false,
@@ -78,6 +102,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -89,6 +114,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -100,6 +126,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -111,6 +138,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "0800",
 				end:            "09:00",
 				businessHourId: "123",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -122,6 +150,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "0900",
 				businessHourId: "123",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -133,6 +162,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "09:00",
 				businessHourId: "",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -144,6 +174,7 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "09:00",
 				end:            "08:00",
 				businessHourId: "124",
+				hourOffset:     3,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -155,6 +186,31 @@ func getSpecialBusinessHourInput() *[]specialBusinessHourInput {
 				start:          "08:00",
 				end:            "08:59",
 				businessHourId: "124",
+				hourOffset:     3,
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "error zero offset",
+			args: specialBusinessHourArgs{
+				name:           "special morning",
+				date:           "2022/01/04",
+				start:          "08:00",
+				end:            "09:00",
+				businessHourId: "123",
+				hourOffset:     0,
+			},
+			hasValidationErr: true,
+			hasNotFoundErr:   false,
+		},
+		{name: "error 13 offset",
+			args: specialBusinessHourArgs{
+				name:           "special morning",
+				date:           "2022/01/04",
+				start:          "08:00",
+				end:            "09:00",
+				businessHourId: "123",
+				hourOffset:     13,
 			},
 			hasValidationErr: true,
 			hasNotFoundErr:   false,
@@ -167,7 +223,7 @@ func TestNewSpecialHourInput(t *testing.T) {
 	inputs := getSpecialBusinessHourInput()
 	for _, tt := range *inputs {
 		fmt.Println("name:", tt.name)
-		got, err := store.NewSpecialBusinessHour(tt.args.name, tt.args.date, tt.args.start, tt.args.end, tt.args.businessHourId)
+		got, err := store.NewSpecialBusinessHour(tt.args.name, tt.args.date, tt.args.start, tt.args.end, tt.args.businessHourId, tt.args.hourOffset)
 		assertSpecialHourRoot(t, tt, got, err)
 	}
 }
@@ -176,11 +232,11 @@ func TestSpecialHourSet(t *testing.T) {
 	inputs := getSpecialBusinessHourInput()
 	for _, tt := range *inputs {
 		fmt.Println("name:", tt.name)
-		got, err := store.NewSpecialBusinessHour("init", "2022/10/10", "04:00", "05:00", "123")
+		got, err := store.NewSpecialBusinessHour("init", "2022/10/10", "04:00", "05:00", "123", 4)
 		if err != nil {
 			assert.Fail(t, "init is failed")
 		}
-		err = got.Set(tt.args.name, tt.args.date, tt.args.start, tt.args.end, tt.args.businessHourId)
+		err = got.Set(tt.args.name, tt.args.date, tt.args.start, tt.args.end, tt.args.businessHourId, tt.args.hourOffset)
 		assertSpecialHourRoot(t, tt, got, err)
 	}
 }

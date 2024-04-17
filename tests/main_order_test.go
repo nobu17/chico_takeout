@@ -44,7 +44,7 @@ func SetupOrderInfoRouter() *gin.Engine {
 	schedules := businessHoursRepo.GetMemory().GetSchedules()
 	spBusinessHourRepo := memory.NewSpecialBusinessHourMemoryRepository()
 	// create special lunch schedule
-	specialSchedule, _ := sdomains.NewSpecialBusinessHour("特別日程3", "2055/05/08", "11:00", "14:00", schedules[1].GetId())
+	specialSchedule, _ := sdomains.NewSpecialBusinessHour("特別日程3", "2055/05/08", "11:00", "14:00", schedules[1].GetId(), 3)
 	spBusinessHourRepo.Create(specialSchedule)
 
 	holidayRepo := memory.NewSpecialHolidayMemoryRepository()

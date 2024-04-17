@@ -37,3 +37,7 @@ temp_work/*
 
 # memo
 .memo
+
+# docker
+test_env/postgres/data
+test_env/postgres/sql

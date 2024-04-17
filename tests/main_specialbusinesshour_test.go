@@ -51,8 +51,8 @@ func TestSpecialBusinessHourHandler_GETALL(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0]},
-		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1]},
+		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0], "offsetHour": 1},
+		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1], "offsetHour": 12},
 	}
 
 	req, _ := http.NewRequest("GET", spBusUrl+"/", nil)
@@ -80,8 +80,8 @@ func TestSpecialBusinessHourHandler_GET(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0]},
-		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1]},
+		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0], "offsetHour": 1},
+		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1], "offsetHour": 12},
 	}
 
 	for id := range spBusHourMemory {
@@ -121,12 +121,12 @@ func TestSpecialBusinessHourHandler_POST_Create(t *testing.T) {
 	}
 
 	bodies := []map[string]interface{}{
-		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1]},
-		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2]},
+		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1], "offsetHour": 12},
+		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2], "offsetHour": 1},
 	}
 	wants := []map[string]interface{}{
-		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1]},
-		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2]},
+		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1], "offsetHour": 12},
+		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2], "offsetHour": 1},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -170,43 +170,55 @@ type specilaBusinessHourErrorData struct {
 func getSpecialBusinessHourCommonErrorData(busHourIds []string) []specilaBusinessHourErrorData {
 	var items = []specilaBusinessHourErrorData{
 		{name: "lack name", args: map[string]interface{}{
-			"date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+			"date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "empty name", args: map[string]interface{}{
-			"name": "", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+			"name": "", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "over limit name(31)", args: map[string]interface{}{
-			"name": "1234567890123456789012345678901", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+			"name": "1234567890123456789012345678901", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "lack date", args: map[string]interface{}{
-			"name": "1234", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+			"name": "1234", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "incorrect format date", args: map[string]interface{}{
-			"name": "1234", "date": "20241112", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+			"name": "1234", "date": "20241112", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "lack start", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "end": "10:30",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "incorrect format start", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "900", "end": "10:30",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "900", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "lack end", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "10:30",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "incorrect end start", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "1030",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "1030", "offsetHour": 4,
 		}, want: 2},
 		{name: "start > end", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "08:30",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "08:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "start > end(+59)", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "09:59",
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "09:00", "end": "09:59", "offsetHour": 4,
 		}, want: 2},
 		{name: "lack businessHourId", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "start": "9:00", "end": "10:30",
+			"name": "1234", "date": "2024/11/12", "start": "9:00", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "empty businessHourId", args: map[string]interface{}{
-			"name": "1234", "date": "2024/11/12", "businessHourId": "", "start": "9:00", "end": "10:30",
+			"name": "1234", "date": "2024/11/12", "businessHourId": "", "start": "9:00", "end": "10:30", "offsetHour": 4,
+		}, want: 2},
+		{name: "lack hour offset", args: map[string]interface{}{
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30",
+		}, want: 2},
+		{name: "zero hour offset", args: map[string]interface{}{
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 0,
+		}, want: 2},
+		{name: "13 hour offset", args: map[string]interface{}{
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": 13,
+		}, want: 2},
+		{name: "minus hour offset", args: map[string]interface{}{
+			"name": "1234", "date": "2024/11/12", "businessHourId": busHourIds[0], "start": "9:00", "end": "10:30", "offsetHour": -1,
 		}, want: 2},
 	}
 	return items
@@ -216,10 +228,10 @@ func getSpecialBusinessHourPostErrorData(busHourIds []string) []specilaBusinessH
 	var commonError = getSpecialBusinessHourCommonErrorData(busHourIds)
 	var items = []specilaBusinessHourErrorData{
 		{name: "overlap date and hourId", args: map[string]interface{}{
-			"name": "1234", "date": "2022/05/06", "businessHourId": busHourIds[0], "start": "9:10", "end": "10:30",
+			"name": "1234", "date": "2022/05/06", "businessHourId": busHourIds[0], "start": "9:10", "end": "10:30", "offsetHour": 4,
 		}, want: 2},
 		{name: "overlap time with other hourId", args: map[string]interface{}{
-			"name": "1234", "date": "2022/05/06", "businessHourId": busHourIds[1], "start": "10:30", "end": "14:30",
+			"name": "1234", "date": "2022/05/06", "businessHourId": busHourIds[1], "start": "10:30", "end": "14:30", "offsetHour": 4,
 		}, want: 2},
 	}
 	commonError = append(commonError, items...)
@@ -278,12 +290,12 @@ func TestSpecialBusinessHourHandler_Put(t *testing.T) {
 	}
 
 	bodies := []map[string]interface{}{
-		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1]},
-		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2]},
+		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1], "offsetHour": 12},
+		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2], "offsetHour": 1},
 	}
 	wants := []map[string]interface{}{
-		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1]},
-		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2]},
+		{"name": "特別日程3", "date": "2023/07/06", "start": "10:00", "end": "12:00", "businessHourId": schIds[1], "offsetHour": 12},
+		{"name": "特別日程4", "date": "2023/07/08", "start": "19:00", "end": "22:00", "businessHourId": schIds[2], "offsetHour": 1},
 	}
 	for index, body := range bodies {
 		jBytes, err := json.Marshal(body)
@@ -342,8 +354,8 @@ func TestSpecialBusinessHourHandler_PUT_BadRequest(t *testing.T) {
 	}
 
 	wants := []map[string]interface{}{
-		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0]},
-		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1]},
+		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0], "offsetHour": 1},
+		{"name": "特別日程2", "date": "2022/05/08", "start": "11:00", "end": "14:00", "businessHourId": schIds[1], "offsetHour": 12},
 	}
 
 	inputs := getSpecialBusinessHourPutErrorData(schIds)
@@ -385,7 +397,7 @@ func TestSpecialBusinessHourHandler_PUT_NotFound(t *testing.T) {
 	}
 
 	body := []map[string]interface{}{
-		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0]},
+		{"name": "特別日程1", "date": "2022/05/06", "start": "08:00", "end": "12:00", "businessHourId": schIds[0], "offsetHour": 3},
 	}
 
 	jBytes, err := json.Marshal(body[0])

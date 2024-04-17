@@ -22,50 +22,54 @@ func newBusinessHoursData(model usecases.BusinessHoursModel) *BusinessHoursData 
 }
 
 type BusinessHoursUpdateData struct {
-	Name     string             `json:"name" binding:"required"`
-	Start    string             `json:"start" binding:"required"`
-	End      string             `json:"end" binding:"required"`
-	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
+	Name       string             `json:"name" binding:"required"`
+	Start      string             `json:"start" binding:"required"`
+	End        string             `json:"end" binding:"required"`
+	Weekdays   []usecases.Weekday `json:"weekdays" binding:"required"`
+	OffsetHour uint               `json:"offsetHour" binding:"required"`
 }
 
 func (b *BusinessHoursUpdateData) toModel(id string) *usecases.BusinessHoursUpdateModel {
 	return &usecases.BusinessHoursUpdateModel{
-		Id:       id,
-		Name:     b.Name,
-		Start:    b.Start,
-		End:      b.End,
-		Weekdays: b.Weekdays,
+		Id:         id,
+		Name:       b.Name,
+		Start:      b.Start,
+		End:        b.End,
+		Weekdays:   b.Weekdays,
+		OffsetHour: b.OffsetHour,
 	}
 }
 
 type BusinessHourData struct {
-	Id       string             `json:"id" binding:"required"`
-	Name     string             `json:"name" binding:"required"`
-	Start    string             `json:"start" binding:"required"`
-	End      string             `json:"end" binding:"required"`
-	Weekdays []usecases.Weekday `json:"weekdays" binding:"required"`
-	Enabled  *bool              `json:"enabled" binding:"required"`
+	Id         string             `json:"id" binding:"required"`
+	Name       string             `json:"name" binding:"required"`
+	Start      string             `json:"start" binding:"required"`
+	End        string             `json:"end" binding:"required"`
+	Weekdays   []usecases.Weekday `json:"weekdays" binding:"required"`
+	Enabled    *bool              `json:"enabled" binding:"required"`
+	OffsetHour uint               `json:"offsetHour" binding:"required"`
 }
 
 func newBusinessHourData(model usecases.BusinessHourModel) *BusinessHourData {
 	return &BusinessHourData{
-		Id:       model.Id,
-		Name:     model.Name,
-		Start:    model.Start,
-		End:      model.End,
-		Weekdays: model.Weekdays,
-		Enabled:  &model.Enabled,
+		Id:         model.Id,
+		Name:       model.Name,
+		Start:      model.Start,
+		End:        model.End,
+		Weekdays:   model.Weekdays,
+		Enabled:    &model.Enabled,
+		OffsetHour: model.OffsetHour,
 	}
 }
 
 type BusinessHoursEnabledUpdateData struct {
-	Enabled *bool  `json:"enabled" binding:"required"`
+	Enabled *bool `json:"enabled" binding:"required"`
 }
 
 func (b *BusinessHoursEnabledUpdateData) toModel(id string) *usecases.BusinessHoursEnabledUpdateModel {
 	return &usecases.BusinessHoursEnabledUpdateModel{
-		Id:       id,
-		Enabled:  *b.Enabled,
+		Id:      id,
+		Enabled: *b.Enabled,
 	}
 }
 

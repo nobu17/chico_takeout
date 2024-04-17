@@ -14,6 +14,7 @@ type SpecialBusinessHourData struct {
 	Start          string `json:"start" binding:"required"`
 	End            string `json:"end" binding:"required"`
 	BusinessHourId string `json:"businessHourId" binding:"required"`
+	OffsetHour     uint   `json:"offsetHour" binding:"required"`
 }
 
 func newSpecialBusinessHourData(model usecases.SpecialBusinessHourModel) *SpecialBusinessHourData {
@@ -24,6 +25,7 @@ func newSpecialBusinessHourData(model usecases.SpecialBusinessHourModel) *Specia
 		Start:          model.Start,
 		End:            model.End,
 		BusinessHourId: model.BusinessHourId,
+		OffsetHour:     model.OffsetHour,
 	}
 }
 
@@ -33,6 +35,7 @@ type SpecialBusinessHourCreateRequest struct {
 	Start          string `json:"start" binding:"required"`
 	End            string `json:"end" binding:"required"`
 	BusinessHourId string `json:"businessHourId" binding:"required"`
+	OffsetHour     uint   `json:"offsetHour" binding:"required"`
 }
 
 func (b *SpecialBusinessHourCreateRequest) toModel() *usecases.SpecialBusinessHourCreateModel {
@@ -42,6 +45,7 @@ func (b *SpecialBusinessHourCreateRequest) toModel() *usecases.SpecialBusinessHo
 		Start:          b.Start,
 		End:            b.End,
 		BusinessHourId: b.BusinessHourId,
+		OffsetHour:     b.OffsetHour,
 	}
 }
 
@@ -55,6 +59,7 @@ type SpecialBusinessHourUpdateRequest struct {
 	Start          string `json:"start" binding:"required"`
 	End            string `json:"end" binding:"required"`
 	BusinessHourId string `json:"businessHourId" binding:"required"`
+	OffsetHour     uint   `json:"offsetHour" binding:"required"`
 }
 
 func (b *SpecialBusinessHourUpdateRequest) toModel(id string) *usecases.SpecialBusinessHourUpdateModel {
@@ -65,6 +70,7 @@ func (b *SpecialBusinessHourUpdateRequest) toModel(id string) *usecases.SpecialB
 		Start:          b.Start,
 		End:            b.End,
 		BusinessHourId: b.BusinessHourId,
+		OffsetHour:     b.OffsetHour,
 	}
 }
 

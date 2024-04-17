@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  postgres_db_chico:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
+    container_name: "postgres_db_chico"
+    environment:
+      POSTGRES_PASSWORD: postgres  #スーパーユーザ(postgres)のパスワード
+      POSTGRES_USER: test          #ユーザアカウント
+      POSTGRES_DB: chicoDB          #DB名
+      TZ: "Asia/Tokyo"
+    ports:
+      - 15432:5432
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data    # ※ホストOSで永続化
+      - ./postgres/sql:/docker-entrypoint-initdb.d
+
+
+      

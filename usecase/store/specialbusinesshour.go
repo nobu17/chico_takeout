@@ -13,6 +13,7 @@ type SpecialBusinessHourModel struct {
 	Start          string
 	End            string
 	BusinessHourId string
+	OffsetHour     uint
 }
 
 func newSpecialBusinessHourModel(item *domains.SpecialBusinessHour) *SpecialBusinessHourModel {
@@ -23,6 +24,7 @@ func newSpecialBusinessHourModel(item *domains.SpecialBusinessHour) *SpecialBusi
 		Start:          item.GetStart(),
 		End:            item.GetEnd(),
 		BusinessHourId: item.GetBusinessHourId(),
+		OffsetHour:     item.GetHourOffset(),
 	}
 }
 
@@ -32,6 +34,7 @@ type SpecialBusinessHourCreateModel struct {
 	Start          string
 	End            string
 	BusinessHourId string
+	OffsetHour     uint
 }
 
 type SpecialBusinessHourUpdateModel struct {
@@ -41,6 +44,7 @@ type SpecialBusinessHourUpdateModel struct {
 	Start          string
 	End            string
 	BusinessHourId string
+	OffsetHour     uint
 }
 
 type SpecialBusinessHoursUseCase interface {
@@ -94,7 +98,7 @@ func (s *specialBusinessHoursUseCase) FindAll() ([]SpecialBusinessHourModel, err
 }
 
 func (s *specialBusinessHoursUseCase) Create(model *SpecialBusinessHourCreateModel) (string, error) {
-	item, err := domains.NewSpecialBusinessHour(model.Name, model.Date, model.Start, model.End, model.BusinessHourId)
+	item, err := domains.NewSpecialBusinessHour(model.Name, model.Date, model.Start, model.End, model.BusinessHourId, model.OffsetHour)
 	if err != nil {
 		return "", err
 	}
@@ -116,7 +120,7 @@ func (s *specialBusinessHoursUseCase) Update(model *SpecialBusinessHourUpdateMod
 		return common.NewUpdateTargetNotFoundError("specialBusinessHour")
 	}
 
-	err = item.Set(model.Name, model.Date, model.Start, model.End, model.BusinessHourId)
+	err = item.Set(model.Name, model.Date, model.Start, model.End, model.BusinessHourId, model.OffsetHour)
 	if err != nil {
 		return err
 	}

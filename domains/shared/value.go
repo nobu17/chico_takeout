@@ -18,6 +18,18 @@ func (i *IntValue) GetValue() int {
 	return i.value
 }
 
+type UintValue struct {
+	value uint
+}
+
+func NewUintValue(value uint) UintValue {
+	return UintValue{value: value}
+}
+
+func (i *UintValue) GetValue() uint {
+	return i.value
+}
+
 type StringValue struct {
 	value string
 }
@@ -43,15 +55,15 @@ func NewDate(value string) (*Date, error) {
 }
 
 func (d *Date) IsSameDate(datetime time.Time) bool {
-    dateStr := common.ConvertTimeToDateStr(datetime)
+	dateStr := common.ConvertTimeToDateStr(datetime)
 	return d.StringValue.GetValue() == dateStr
 }
 
 func (d *Date) GetAsDate() time.Time {
-    v, err := common.ConvertStrToDate(d.value);
+	v, err := common.ConvertStrToDate(d.value)
 	if err != nil {
 		fmt.Println(err)
-		panic("should not be allowed failed convert");
+		panic("should not be allowed failed convert")
 	}
 	return *v
 }

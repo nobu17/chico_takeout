@@ -5,4 +5,5 @@ export type SpecialBusinessHour = {
   start: string;
   end: string;
   businessHourId: string;
+  offsetHour: number;
 };

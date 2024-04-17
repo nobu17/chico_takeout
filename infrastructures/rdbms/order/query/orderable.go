@@ -33,7 +33,7 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	}
 	// get special business hour
 	specialHours := []store.SpecialBusinessHourModel{}
-	err = o.db.Debug().Preload("BusinessHourModel").Where("date <= ? and date >= ?", endDate, startDate).Find(&specialHours).Error
+	err = o.db.Preload("BusinessHourModel").Where("date <= ? and date >= ?", endDate, startDate).Find(&specialHours).Error
 	if err != nil {
 		return nil, err
 	}
@@ -127,21 +127,30 @@ func (o *OrderableInfoRdbmsQueryService) FetchByDate(startDate, endDate time.Tim
 	data.EndDate = common.ConvertTimeToDateStr(endDate)
 	data.PerDayInfo = infoLists
 
-	o.modifyTodayInfo(&data)
+	o.modifyTodayInfo(&data, hours, specialHours)
 
 	return &data, nil
 }
 
-func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableInfo) error {
+func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableInfo, hours []store.BusinessHourModel, specialHours []store.SpecialBusinessHourModel) error {
 	// add offset minutes (120min) and round as 30 minutes (ex:10:10 => 12:30)
-	now := common.GetRound(*common.GetNowDateWithOffset(common.OffsetMinutesOrderableBefore), 30)
-	today := common.ConvertTimeToDateStr(now)
-	currentTargetTime := common.ConvertTimeToTimeStr(now)
+	// now := common.GetRound(*common.GetNowDateWithOffset(common.OffsetMinutesOrderableBefore), 30)
+	// today := common.ConvertTimeToDateStr(now)
+	// currentTargetTime := common.ConvertTimeToTimeStr(now)
+
+	// after add offset
+	baseNow := *common.GetNowDateWithOffset(0)
 
 	modifiedOrder := []order.PerDayOrderableInfo{}
 	for _, perDay := range info.PerDayInfo {
+		// find offset hour
+		offsetHour := o.findOffsetHour(perDay, hours, specialHours)
+		limitNow := common.GetRound(*common.GetDateWithOffset(baseNow, int(offsetHour*60)), 30) // round as 30min (ex:12:10 => 12:30)
+		limitDate := common.ConvertTimeToDateStr(limitNow)
+		limitTime := common.ConvertTimeToTimeStr(limitNow)
+
 		// if date is before from current, skip
-		isBefore, err := common.StartIsBeforeEndDateStr(perDay.Date, today)
+		isBefore, err := common.StartIsBeforeEndDateStr(perDay.Date, limitDate)
 		if err != nil {
 			return err
 		}
@@ -149,9 +158,9 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 			continue
 		}
 		// if date is today. check start and end
-		if perDay.Date == today {
-			// only startTime is before current (actual is + 120min) is allowed
-			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.StartTime, currentTargetTime, 0)
+		if perDay.Date == limitDate {
+			// only startTime is before current (actual is + offset) is allowed
+			isOver, err := common.StartTimeIsBeforeEndTimeStr(perDay.StartTime, limitTime, 0)
 			if err != nil {
 				return err
 			}
@@ -165,6 +174,23 @@ func (o *OrderableInfoRdbmsQueryService) modifyTodayInfo(info *order.OrderableIn
 	// update
 	info.PerDayInfo = modifiedOrder
 	return nil
+}
+
+func (o *OrderableInfoRdbmsQueryService) findOffsetHour(info order.PerDayOrderableInfo, hours []store.BusinessHourModel, specialHours []store.SpecialBusinessHourModel) uint {
+	hourId := info.HourTypeId
+	// at first checking  special
+	for _, spHour := range specialHours {
+		if info.Date == common.ConvertTimeToDateStr(*spHour.Date) && spHour.BusinessHourModelID == hourId {
+			return spHour.OffsetHour
+		}
+	}
+	for _, hour := range hours {
+		if hour.ID == hourId {
+			return hour.OffsetHour
+		}
+	}
+
+	return 3
 }
 
 func (o *OrderableInfoRdbmsQueryService) getStockItems() ([]order.OrderableItemInfo, error) {

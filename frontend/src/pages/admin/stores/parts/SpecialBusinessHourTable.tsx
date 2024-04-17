@@ -64,6 +64,14 @@ export default function SpecialBusinessHourTable() {
     { field: "start", headerName: "開始時刻", width: 120 },
     { field: "end", headerName: "終了時刻", width: 120 },
     {
+      field: "offsetHour",
+      headerName: "最終受付",
+      width: 160,
+      valueGetter: (params) => {
+        return params.row.offsetHour + " 時間前(+1~30分)";
+      },
+    },
+    {
       field: "schedules",
       headerName: "販売時間",
       width: 190,
